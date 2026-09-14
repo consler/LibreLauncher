@@ -1,0 +1,24 @@
+.modern-dialog {
+    -fx-padding: 12;
+}
+
+.modern-dialog .header-panel {
+    -fx-padding: 0 0 8 0;
+}
+
+.modern-dialog .header-panel .label {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.modern-dialog .content.label {
+    -fx-padding: 4 0 0 0;
+}
+
+.modern-dialog .text-field {
+    -fx-padding: 6 10;
+}
+
+.modern-dialog .button-bar {
+    -fx-padding: 10 0 0 0;
+}

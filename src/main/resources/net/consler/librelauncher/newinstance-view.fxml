@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.RadioButton?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleGroup?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="net.consler.librelauncher.ui.instance.create.NewInstanceController"
+            prefHeight="450" prefWidth="800">
+    <children>
+        <VBox spacing="20" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+            <padding>
+                <Insets bottom="20" left="20" right="20" top="20" />
+            </padding>
+            <children>
+
+                <!-- Instance Name -->
+                <VBox spacing="5">
+                    <children>
+                        <Label text="Instance Name" />
+                        <TextField fx:id="nameField" promptText="Enter instance name..." />
+                    </children>
+                </VBox>
+                <VBox spacing="5">
+                    <children>
+                        <Label text="Minecraft Version" />
+                        <HBox spacing="15" alignment="CENTER_LEFT">
+                            <children>
+                                <ComboBox fx:id="versionChoice" prefWidth="200" promptText="Select Version..." />
+
+                                <HBox spacing="10" alignment="CENTER_LEFT">
+                                    <children>
+                                        <CheckBox fx:id="filterReleases" text="Releases" selected="true" />
+                                        <CheckBox fx:id="filterSnapshots" text="Snapshots" />
+                                        <CheckBox fx:id="filterBetas" text="Betas" />
+                                        <CheckBox fx:id="filterAlphas" text="Alphas" />
+                                    </children>
+                                </HBox>
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <VBox spacing="10">
+                    <children>
+                        <Label text="Mod Loader" />
+
+                        <HBox fx:id="loaderOptionsBox" spacing="20" alignment="CENTER_LEFT">
+                            <children>
+                                <RadioButton fx:id="loaderVanilla" text="Vanilla" selected="true">
+                                    <toggleGroup>
+                                        <ToggleGroup fx:id="modLoaderGroup" />
+                                    </toggleGroup>
+                                </RadioButton>
+                                <RadioButton fx:id="loaderFabric" text="Fabric" toggleGroup="$modLoaderGroup" />
+                                <RadioButton fx:id="loaderForge" text="Forge" toggleGroup="$modLoaderGroup" />
+                                <RadioButton fx:id="loaderNeoforge" text="NeoForge" toggleGroup="$modLoaderGroup" />
+                            </children>
+                        </HBox>
+
+                        <HBox fx:id="modLoaderVersionBox" spacing="10" alignment="CENTER_LEFT">
+                            <children>
+                                <Label text="Loader Version:" />
+                                <ComboBox fx:id="modLoaderVersionChoice" prefWidth="250" promptText="Select Loader Version..." disable="true" />
+                            </children>
+                        </HBox>
+                    </children>
+                </VBox>
+
+                <Region VBox.vgrow="ALWAYS" />
+
+                <HBox spacing="10" alignment="CENTER_LEFT">
+                    <children>
+                        <ProgressBar fx:id="progressBar" prefWidth="400" progress="0.0" visible="false" managed="false" />
+                        <Label fx:id="progressLabel" text="" visible="false" managed="false" />
+                    </children>
+                </HBox>
+
+                <HBox spacing="10" alignment="BOTTOM_RIGHT">
+                    <children>
+                        <Button fx:id="cancelButton" text="Cancel" onAction="#cancelButtonClicked"/>
+                        <Button fx:id="createButton" text="Create Instance" defaultButton="true" onAction="#createButtonClicked"/>
+                    </children>
+                </HBox>
+
+            </children>
+        </VBox>
+    </children>
+</AnchorPane>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.consler.librelauncher.ui.client.ClientController">
+    <bottom>
+        <HBox alignment="BOTTOM_LEFT" spacing="15" BorderPane.alignment="BOTTOM_LEFT">
+            <Button onMouseClicked="#launchButtonClicked" style="-fx-pref-width: 330; -fx-pref-height: 100; -fx-font-size: 30;" text="Launch"></Button>
+            <ChoiceBox fx:id="launchChoiceBox" style="-fx-pref-width: 300; -fx-pref-height: 100; -fx-font-size: 25;" />
+        </HBox>
+    </bottom>
+
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu text="Instances">
+            <items>
+              <MenuItem onAction="#newInstanceButtonClicked" text="New" />
+              <MenuItem onAction="#instanceManageButtonClicked" text="Manage" />
+            </items>
+          </Menu>
+          <Menu text="Settings">
+          <items>
+            <MenuItem text="Open Settings" onAction="#openSettingsButtonClicked"/>
+          </items>
+        </Menu>
+          <Menu text="Help">
+            <items>
+              <MenuItem text="GitHub Page" onAction="#githubPageButtonClicked"/>
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <opaqueInsets>
+      <Insets />
+   </opaqueInsets>
+</BorderPane>
