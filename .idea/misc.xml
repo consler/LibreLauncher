@@ -13,6 +13,11 @@
     </option>
     <option name="enabledProfiles">
       <list>
+        <option value="os-linux-aarch64" />
+      </list>
+    </option>
+    <option name="disabledProfiles">
+      <list>
         <option value="os-linux-x86" />
       </list>
     </option>
