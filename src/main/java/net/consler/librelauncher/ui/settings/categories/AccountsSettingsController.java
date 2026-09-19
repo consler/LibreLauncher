@@ -1,17 +1,17 @@
 package net.consler.librelauncher.ui.settings.categories;
 
-import fr.theshark34.openlauncherlib.minecraft.AuthInfos;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import net.consler.librelauncher.launcher.auth.AuthInfosSaver;
-import net.consler.librelauncher.launcher.auth.Authorization;
+import net.consler.librelauncher.ui.settings.AuthSaver;
 import net.consler.librelauncher.ui.theme.CustomDialog;
+import net.consler.librelauncherlib.auth.AuthProfile;
+import net.consler.librelauncherlib.auth.MicrosoftAuthenticator;
+import net.consler.librelauncherlib.auth.WebViewFrame;
 
 import java.util.Optional;
-import java.util.UUID;
 
 public class AccountsSettingsController
 {
@@ -27,9 +27,15 @@ public class AccountsSettingsController
         setupContextMenu();
         loadAccounts();
 
-        String currentActiveAccount = AuthInfosSaver.getActiveAccount();
-        if (currentActiveAccount != null && !currentActiveAccount.isBlank() && accounts.contains(currentActiveAccount)) accountList.getSelectionModel().select(currentActiveAccount);
-        else if (!accounts.isEmpty()) accountList.getSelectionModel().selectFirst();
+        String currentActiveAccount = AuthSaver.getActiveAccount();
+        if (currentActiveAccount != null && !currentActiveAccount.isBlank() && accounts.contains(currentActiveAccount))
+        {
+            accountList.getSelectionModel().select(currentActiveAccount);
+        }
+        else if (!accounts.isEmpty())
+        {
+            accountList.getSelectionModel().selectFirst();
+        }
     }
 
     @FXML
@@ -39,20 +45,20 @@ public class AccountsSettingsController
         {
             try
             {
-                AuthInfos authInfos = Authorization.authorizeWithWebView();
-                String username = authInfos.getUsername() == null || authInfos.getUsername().isBlank() ? authInfos.getUuid() : authInfos.getUsername();
+                AuthProfile authProfile = new MicrosoftAuthenticator().login(new WebViewFrame(600, 600)).join();
+                String username = authProfile.username() == null || authProfile.username().isBlank() ? authProfile.uuid() : authProfile.username();
 
                 Platform.runLater(() ->
                 {
-                    if (AuthInfosSaver.listAccountNames().contains(username))
+                    if (AuthSaver.listAccountNames().contains(username))
                     {
                         Alert alert = new Alert(Alert.AlertType.WARNING, "An account with this name already exists.");
                         alert.showAndWait();
                         return;
                     }
 
-                    AuthInfosSaver.saveAuthInfos(username, authInfos);
-                    AuthInfosSaver.setActiveAccount(username);
+                    AuthSaver.saveAuthProfile(username, authProfile);
+                    AuthSaver.setActiveAccount(username);
                     loadAccounts();
                     accountList.getSelectionModel().select(username);
                 });
@@ -71,7 +77,7 @@ public class AccountsSettingsController
     @FXML
     private void onAddOfflineAccount()
     {
-        TextInputDialog dialog = CustomDialog.make("Add Offline Account", "Create an offline Minecraft profile", "Username:", "Player");
+        TextInputDialog dialog = CustomDialog.textInputDialog("Add Offline Account", "Create an offline Minecraft profile", "Username:", "Player");
 
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(name ->
@@ -84,15 +90,15 @@ public class AccountsSettingsController
                 return;
             }
 
-            if (AuthInfosSaver.listAccountNames().contains(username))
+            if (AuthSaver.listAccountNames().contains(username))
             {
                 Alert alert = new Alert(Alert.AlertType.WARNING, "An account with this name already exists.");
                 alert.showAndWait();
                 return;
             }
 
-            AuthInfosSaver.saveAuthInfos(username, new AuthInfos(username, "0", UUID.nameUUIDFromBytes((username).getBytes()).toString()));
-            AuthInfosSaver.setActiveAccount(username);
+            AuthSaver.saveAuthProfile(username, AuthProfile.Offline(username));
+            AuthSaver.setActiveAccount(username);
             loadAccounts();
             accountList.getSelectionModel().select(username);
         });
@@ -100,7 +106,7 @@ public class AccountsSettingsController
 
     private void loadAccounts()
     {
-        accounts.setAll(AuthInfosSaver.listAccountNames());
+        accounts.setAll(AuthSaver.listAccountNames());
     }
 
     private void setupContextMenu()
@@ -116,7 +122,7 @@ public class AccountsSettingsController
                     String selected = getItem();
                     if (selected != null)
                     {
-                        AuthInfosSaver.setActiveAccount(selected);
+                        AuthSaver.setActiveAccount(selected);
                         accountList.refresh();
                     }
                 });
@@ -127,7 +133,7 @@ public class AccountsSettingsController
                     String selected = getItem();
                     if (selected != null)
                     {
-                        AuthInfosSaver.deleteAccount(selected);
+                        AuthSaver.deleteAccount(selected);
                         loadAccounts();
                     }
                 });
@@ -146,7 +152,7 @@ public class AccountsSettingsController
                     return;
                 }
 
-                String activeAccount = AuthInfosSaver.getActiveAccount();
+                String activeAccount = AuthSaver.getActiveAccount();
                 setText((item.equals(activeAccount) ? "● " : "  ") + item);
                 setContextMenu(contextMenu);
             }

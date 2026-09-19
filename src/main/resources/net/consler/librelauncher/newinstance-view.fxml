@@ -25,7 +25,6 @@
             </padding>
             <children>
 
-                <!-- Instance Name -->
                 <VBox spacing="5">
                     <children>
                         <Label text="Instance Name" />
@@ -66,6 +65,7 @@
                                 <RadioButton fx:id="loaderFabric" text="Fabric" toggleGroup="$modLoaderGroup" />
                                 <RadioButton fx:id="loaderForge" text="Forge" toggleGroup="$modLoaderGroup" />
                                 <RadioButton fx:id="loaderNeoforge" text="NeoForge" toggleGroup="$modLoaderGroup" />
+                                <RadioButton fx:id="loaderQuilt" text="Quilt" toggleGroup="$modLoaderGroup" />
                             </children>
                         </HBox>
 

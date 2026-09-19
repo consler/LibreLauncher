@@ -28,7 +28,7 @@
 
                 <Separator orientation="VERTICAL" />
 
-                <ListView fx:id="instanceList" HBox.hgrow="ALWAYS" />
+                <ListView fx:id="instanceList" HBox.hgrow="ALWAYS"/>
 
             </children>
         </HBox>

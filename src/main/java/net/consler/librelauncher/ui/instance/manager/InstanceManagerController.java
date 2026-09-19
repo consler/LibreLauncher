@@ -7,6 +7,7 @@ import javafx.application.HostServices;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import net.consler.librelauncher.ui.theme.CustomDialog;
 
 import java.io.File;
 import java.io.IOException;
@@ -60,47 +61,74 @@ public class InstanceManagerController implements Initializable
 
     private void setupContextMenu()
     {
-        instanceList.setCellFactory(lv ->
+        instanceList.setCellFactory(lv -> new ListCell<>()
         {
-            ListCell<String> cell = new ListCell<>();
-            ContextMenu contextMenu = new ContextMenu();
+            @Override
+            protected void updateItem(String item, boolean empty)
+            {
+                super.updateItem(item, empty);
 
-            MenuItem launchItem = new MenuItem("Launch");
-            launchItem.setOnAction(e -> Launcher.launch(cell.getItem()));
-
-            MenuItem renameItem = new MenuItem("Rename");
-            renameItem.setOnAction(e -> renameInstance(cell.getItem()));
-
-            MenuItem deleteItem = new MenuItem("Delete");
-            deleteItem.setOnAction(e -> deleteInstance(cell.getItem()));
-
-            MenuItem openFolderItem = new MenuItem("Open Folder");
-            openFolderItem.setOnAction(e -> openInstanceFolder(cell.getItem()));
-
-            contextMenu.getItems().addAll(launchItem, renameItem, deleteItem, openFolderItem);
-
-            cell.textProperty().bind(cell.itemProperty());
-            cell.emptyProperty().addListener((obs, wasEmpty, isNowEmpty) -> {
-                if (isNowEmpty)
+                if (empty || item == null)
                 {
-                    cell.setContextMenu(null);
+                    setText(null);
+                    setGraphic(null);
+                    setStyle("");
+                    setContextMenu(null);
                 }
                 else
                 {
-                    cell.setContextMenu(contextMenu);
-                }
-            });
+                    setText(item);
 
-            return cell;
+                    boolean isLast = getIndex() == getListView().getItems().size() - 1;
+                    setStyle(isLast
+                            ? ""
+                            : "-fx-border-color: transparent transparent #444444 transparent; -fx-border-width: 0 0 1 0;");
+
+                    ContextMenu contextMenu = new ContextMenu();
+
+                    MenuItem launchItem = new MenuItem("Launch");
+                    launchItem.setOnAction(e -> Launcher.launch(item));
+
+                    MenuItem renameItem = new MenuItem("Rename");
+                    renameItem.setOnAction(e -> renameInstance(item));
+
+                    MenuItem deleteItem = new MenuItem("Delete");
+                    deleteItem.setOnAction(e -> deleteInstance(item));
+
+                    MenuItem openFolderItem = new MenuItem("Open Folder");
+                    openFolderItem.setOnAction(e -> openInstanceFolder(item));
+
+                    contextMenu.getItems().addAll(launchItem, renameItem, deleteItem, openFolderItem);
+                    setContextMenu(contextMenu);
+                }
+            }
         });
     }
 
+    private ContextMenu contextMenuFor(String item)
+    {
+        ContextMenu contextMenu = new ContextMenu();
+
+        MenuItem launchItem = new MenuItem("Launch");
+        launchItem.setOnAction(e -> Launcher.launch(item));
+
+        MenuItem renameItem = new MenuItem("Rename");
+        renameItem.setOnAction(e -> renameInstance(item));
+
+        MenuItem deleteItem = new MenuItem("Delete");
+        deleteItem.setOnAction(e -> deleteInstance(item));
+
+        MenuItem openFolderItem = new MenuItem("Open Folder");
+        openFolderItem.setOnAction(e -> openInstanceFolder(item));
+
+        contextMenu.getItems().addAll(launchItem, renameItem, deleteItem, openFolderItem);
+        return contextMenu;
+    }
+
+
     private void renameInstance(String oldName)
     {
-        TextInputDialog dialog = new TextInputDialog(oldName);
-        dialog.setTitle("Rename Instance");
-        dialog.setHeaderText("Rename: " + oldName);
-        dialog.setContentText("Enter new name:");
+        TextInputDialog dialog = CustomDialog.textInputDialog("Rename Instance", "Rename: " + oldName, "New name: ", "");
 
         Optional<String> result = dialog.showAndWait();
         result.ifPresent(newName ->
@@ -114,10 +142,7 @@ public class InstanceManagerController implements Initializable
 
     private void deleteInstance(String name)
     {
-        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-        alert.setTitle("Delete Instance");
-        alert.setHeaderText("Delete: " + name);
-        alert.setContentText("Are you sure? This action cannot be undone.");
+        Alert alert = CustomDialog.alertDialog("Delete Instance", "Delete: " + name, "Are you sure? This action cannot be undone.");
 
         Optional<ButtonType> result = alert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK)

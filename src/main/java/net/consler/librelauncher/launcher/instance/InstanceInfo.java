@@ -1,6 +1,6 @@
 package net.consler.librelauncher.launcher.instance;
 
-import fr.theshark34.openlauncherlib.util.Saver;
+import net.consler.librelauncher.ui.settings.Saver;
 
 import java.io.File;
 import java.nio.file.Path;

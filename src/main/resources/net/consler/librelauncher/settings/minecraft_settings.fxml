@@ -26,7 +26,7 @@
                 <Label text="Allocated Memory (RAM):" />
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
                     <children>
-                        <Slider fx:id="ramSlider" blockIncrement="1" max="16000" min="256" value="256" HBox.hgrow="ALWAYS" />
+                        <Slider fx:id="ramSlider" blockIncrement="1" max="16000" min="256" value="2048" HBox.hgrow="ALWAYS" />
                         <Label fx:id="ramValueLabel" minWidth="45.0" text="2048 MB" />
                     </children>
                 </HBox>

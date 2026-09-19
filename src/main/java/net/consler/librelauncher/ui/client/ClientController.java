@@ -1,11 +1,9 @@
 package net.consler.librelauncher.ui.client;
 
 import net.consler.librelauncher.launcher.Launcher;
-import net.consler.librelauncher.launcher.auth.Authorization;
 import net.consler.librelauncher.ui.instance.create.NewInstanceApplication;
 import net.consler.librelauncher.ui.instance.manager.InstanceManagerApplication;
 import net.consler.librelauncher.ui.settings.SettingsApplication;
-import fr.litarvan.openauth.microsoft.MicrosoftAuthenticationException;
 import javafx.application.HostServices;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -100,7 +98,7 @@ public class ClientController implements Initializable
     {
         if (hostServices != null)
         {
-            hostServices.showDocument("https://github.com/consler/ConslerClient");
+            hostServices.showDocument("https://github.com/consler/LibreLauncher");
         }
     }
 

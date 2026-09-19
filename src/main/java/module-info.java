@@ -5,15 +5,13 @@ module net.consler.librelauncher
     requires org.controlsfx.controls;
     requires javafx.web;
     requires javafx.swing;
-    requires flowupdater;
-    requires openlauncherlib;
     requires org.jetbrains.annotations;
     requires atlantafx.base;
     requires com.google.gson;
-    requires openauth;
     requires dev.dirs;
     requires java.management;
     requires jdk.management;
+    requires librelauncherlib;
 
     opens net.consler.librelauncher to javafx.fxml;
     exports net.consler.librelauncher;

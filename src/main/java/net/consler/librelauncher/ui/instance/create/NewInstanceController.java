@@ -7,18 +7,16 @@ import net.consler.librelauncher.launcher.instance.Downloader;
 import net.consler.librelauncher.ui.client.ClientController;
 import net.consler.librelauncher.ui.instance.manager.InstanceManagerController;
 import net.consler.librelauncher.utils.ExceptionAlert;
-import net.consler.librelauncher.utils.ModLoaders;
-import net.consler.librelauncher.utils.Versions;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import net.consler.librelauncherlib.versions.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.URL;
 import java.util.Collections;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
@@ -55,6 +53,8 @@ public class NewInstanceController implements Initializable
 
     @FXML
     private RadioButton loaderNeoforge;
+    @FXML
+    private RadioButton loaderQuilt;
 
     @FXML
     private ComboBox<String> modLoaderVersionChoice;
@@ -113,21 +113,16 @@ public class NewInstanceController implements Initializable
         String selectedVersion = versionChoice.getValue();
         versionChoice.setPromptText("Loading versions...");
 
-        CompletableFuture.supplyAsync(() -> Versions.getFiltered(releases, snapshots, betas, alphas))
+        CompletableFuture.supplyAsync(() -> VanillaVersions.getVersionsFiltered(releases, snapshots, betas, alphas))
                 .thenAcceptAsync(versions ->
                 {
                     versionChoice.getItems().setAll(versions);
 
                     if (!versions.isEmpty())
                     {
-                        if (selectedVersion != null && versions.contains(selectedVersion))
-                        {
-                            versionChoice.getSelectionModel().select(selectedVersion);
-                        }
-                        else
-                        {
-                            versionChoice.getSelectionModel().selectFirst();
-                        }
+                        if (selectedVersion != null && versions.contains(selectedVersion)) versionChoice.getSelectionModel().select(selectedVersion);
+                        else versionChoice.getSelectionModel().selectFirst();
+
                         versionChoice.setPromptText("Select Version...");
                     }
                     else
@@ -165,9 +160,10 @@ public class NewInstanceController implements Initializable
 
         CompletableFuture.supplyAsync(() ->
         {
-            if (loaderFabric.isSelected()) return ModLoaders.listFabricVersions(minecraftVersion);
-            else if (loaderForge.isSelected()) return ModLoaders.listForgeVersions(minecraftVersion);
-            else if (loaderNeoforge.isSelected()) return ModLoaders.listNeoforgeVersions(minecraftVersion);
+            if (loaderFabric.isSelected()) return FabricVersions.getVersionsCompatibleWith(minecraftVersion);
+            else if (loaderForge.isSelected()) return ForgeVersions.getVersionsCompatibleWith(minecraftVersion);
+            else if (loaderNeoforge.isSelected()) return NeoforgeVersions.getVersionsCompatibleWith(minecraftVersion);
+            else if (loaderQuilt.isSelected()) return QuiltVersions.getVersionsCompatibleWith(minecraftVersion);
 
             return Collections.<String>emptyList();
         }).thenAcceptAsync(versions ->
@@ -217,7 +213,7 @@ public class NewInstanceController implements Initializable
         if (loaderFabric.isSelected()) return "Fabric";
         if (loaderForge.isSelected()) return "Forge";
         if (loaderNeoforge.isSelected()) return "Neoforge";
-
+        if (loaderQuilt.isSelected()) return "Quilt";
         return null;
     }
 
@@ -302,7 +298,8 @@ public class NewInstanceController implements Initializable
                     private final ByteArrayOutputStream buf = new ByteArrayOutputStream();
 
                     @Override
-                    public synchronized void write(int b) {
+                    public synchronized void write(int b)
+                    {
                         originalOut.write(b);
                         buf.write(b);
                         if (b == '\n')
@@ -381,7 +378,7 @@ public class NewInstanceController implements Initializable
                 System.setOut(teeOut);
                 System.setErr(teeErr);
 
-                Downloader.download(finalInstanceName, finalMinecraftVersion, Objects.requireNonNull(finalModLoader), finalLoaderVersion);
+                Downloader.download(finalInstanceName, finalMinecraftVersion, finalModLoader.toLowerCase(), finalLoaderVersion);
 
                 System.setOut(originalOut);
                 System.setErr(originalErr);

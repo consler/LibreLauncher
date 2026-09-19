@@ -1,7 +1,5 @@
 package net.consler.librelauncher.ui.settings;
 
-import fr.theshark34.openlauncherlib.util.Saver;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -37,7 +35,6 @@ public class SettingsSaver
 
         SAVER = new Saver(CONFIG_FILE);
 
-        // Ensure sensible defaults exist
         String uiTheme = SAVER.get("ui_theme");
         if (uiTheme == null || uiTheme.isBlank())
         {

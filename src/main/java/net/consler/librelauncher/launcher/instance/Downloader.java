@@ -1,53 +1,41 @@
 package net.consler.librelauncher.launcher.instance;
 
 import net.consler.librelauncher.launcher.Launcher;
-import fr.flowarg.flowupdater.FlowUpdater;
-import fr.flowarg.flowupdater.versions.VanillaVersion;
-import fr.flowarg.flowupdater.versions.fabric.FabricVersion;
-import fr.flowarg.flowupdater.versions.fabric.FabricVersionBuilder;
-import fr.flowarg.flowupdater.versions.forge.ForgeVersion;
-import fr.flowarg.flowupdater.versions.forge.ForgeVersionBuilder;
-import fr.flowarg.flowupdater.versions.neoforge.NeoForgeVersion;
-import fr.flowarg.flowupdater.versions.neoforge.NeoForgeVersionBuilder;
+import net.consler.librelauncher.ui.settings.Saver;
+import net.consler.librelauncherlib.install.MinecraftInstaller;
+import net.consler.librelauncherlib.modloader.ModloaderProfile;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Objects;
+
+import static net.consler.librelauncher.Main.APPDATA_DIR;
 
 public class Downloader
 {
-    public static void download(String name, String version, String modLoader, String loaderVersion) throws Exception
+    public static void download(String name, String version, String modLoader, String loaderVersion)
     {
         Path gameDirPath = new File(Launcher.instanceDir, name).toPath();
 
-        VanillaVersion vv = new VanillaVersion.VanillaVersionBuilder().withName(version).build();
-        FlowUpdater.FlowUpdaterBuilder fub = new FlowUpdater.FlowUpdaterBuilder().withVanillaVersion(vv);
+        MinecraftInstaller installer = new MinecraftInstaller();
 
-        switch(modLoader)
+        try
         {
-            case "Vanilla" ->
-            {
-            }
-            case "Fabric" ->
-            {
-                FabricVersion fv = new FabricVersionBuilder().withFabricVersion(loaderVersion).build();
-                fub.withModLoaderVersion(fv);
-            }
-            case "Forge" ->
-            {
-                ForgeVersion fv = new ForgeVersionBuilder().withForgeVersion(loaderVersion).build();
-                fub.withModLoaderVersion(fv);
-            }
-            case "Neoforge" ->
-            {
-                NeoForgeVersion nfv = new NeoForgeVersionBuilder().withNeoForgeVersion(loaderVersion).build();
-                fub.withModLoaderVersion(nfv);
-            }
-            default -> throw new IllegalArgumentException("Unsupported mod loader: " + modLoader);
+            File properties = new File(APPDATA_DIR, name + ".properties");
+            properties.createNewFile();
+
+            Saver saver = new Saver(properties.toPath());
+            saver.set("version", version);
+            saver.set("modLoader", modLoader);
+            saver.set("loaderVersion", Objects.requireNonNullElse(loaderVersion, "null"));
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException(e);
         }
 
-        InstanceInfo.save(name, version, modLoader, loaderVersion);
-
-        fub.build().update(gameDirPath);
-
+        System.out.println(modLoader + " " + loaderVersion);
+        installer.install(version, gameDirPath, new ModloaderProfile(modLoader, loaderVersion));
     }
 }
