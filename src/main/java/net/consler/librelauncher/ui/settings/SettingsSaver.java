@@ -58,6 +58,11 @@ public class SettingsSaver
         saveSetting(key, Integer.toString(value));
     }
 
+    public static void saveSetting(String key, boolean value)
+    {
+        saveSetting(key, Boolean.toString(value));
+    }
+
     public static String getSetting(String key)
     {
         return SAVER.get(key);
@@ -66,10 +71,7 @@ public class SettingsSaver
     public static int getIntSetting(String key, int defaultValue)
     {
         String rawValue = getSetting(key);
-        if (rawValue == null || rawValue.isBlank())
-        {
-            return defaultValue;
-        }
+        if (rawValue == null || rawValue.isBlank()) return defaultValue;
 
         try
         {
@@ -79,5 +81,10 @@ public class SettingsSaver
         {
             return defaultValue;
         }
+    }
+
+    public static boolean getBooleanSetting(String key)
+    {
+        return Boolean.parseBoolean(SAVER.get(key));
     }
 }

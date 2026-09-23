@@ -7,6 +7,7 @@ import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
 import net.consler.librelauncher.ui.settings.SettingsSaver;
+import net.consler.librelauncherlib.utill.SystemHelper;
 
 import java.lang.management.ManagementFactory;
 
@@ -38,6 +39,18 @@ public class MinecraftSettingsController
             ramValueLabel.setText(ramMb + " MB");
             SettingsSaver.saveSetting("allocated_ram", ramMb);
         });
+
+        String javaPath = SettingsSaver.getSetting("java_path");
+        if (javaPath == null || javaPath.isBlank())
+        {
+            javaPathField.setText(SystemHelper.getJavaBin().toString());
+        }
+        else
+        {
+            javaPathField.setText(javaPath);
+        }
+
+        javaPathField.setOnAction(event -> SettingsSaver.saveSetting("java_path", javaPathField.getText()));
     }
 
     @FXML

@@ -34,7 +34,6 @@ public class UISettingsController
         String savedTheme = SettingsSaver.getSetting("ui_theme");
         if (savedTheme == null || savedTheme.isBlank()) savedTheme = ThemeManager.DEFAULT_THEME;
 
-
         if (themeComboBox.getItems().contains(savedTheme)) themeComboBox.getSelectionModel().select(savedTheme);
         else themeComboBox.getSelectionModel().selectFirst();
 
@@ -47,9 +46,8 @@ public class UISettingsController
             ThemeManager.applyTheme(newValue);
         });
 
-        String closeOnLaunch = SettingsSaver.getSetting("close_on_launch");
+        String closeOnLaunch = SettingsSaver.getSetting("close-on-launch");
         chkCloseOnLaunch.setSelected(closeOnLaunch == null || closeOnLaunch.isBlank() || Boolean.parseBoolean(closeOnLaunch));
-
-        chkCloseOnLaunch.selectedProperty().addListener((obs, oldV, newV) -> SettingsSaver.saveSetting("close_on_launch", Boolean.toString(newV)));
+        chkCloseOnLaunch.selectedProperty().addListener((obs, oldV, newV) -> SettingsSaver.saveSetting("close-on-launch", newV));
     }
 }
