@@ -7,7 +7,9 @@ import javafx.application.HostServices;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import net.consler.librelauncher.ui.instance.manager.specific.InstanceSpecificManagerApplication;
 import net.consler.librelauncher.ui.theme.CustomDialog;
+import net.consler.librelauncher.utils.ExceptionAlert;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,11 +100,27 @@ public class InstanceManagerController implements Initializable
                     MenuItem openFolderItem = new MenuItem("Open Folder");
                     openFolderItem.setOnAction(e -> openInstanceFolder(item));
 
-                    contextMenu.getItems().addAll(launchItem, renameItem, deleteItem, openFolderItem);
+                    MenuItem manageInstance = new MenuItem("Manage Instance");
+                    manageInstance.setOnAction(e -> manageInstance());
+
+                    contextMenu.getItems().addAll(launchItem, renameItem, deleteItem, openFolderItem, manageInstance);
                     setContextMenu(contextMenu);
                 }
             }
         });
+    }
+
+    private static void manageInstance()
+    {
+        try
+        {
+            InstanceSpecificManagerApplication.open();
+        }
+        catch (IOException ex)
+        {
+            ExceptionAlert.show(ex);
+            throw new RuntimeException(ex);
+        }
     }
 
     private ContextMenu contextMenuFor(String item)

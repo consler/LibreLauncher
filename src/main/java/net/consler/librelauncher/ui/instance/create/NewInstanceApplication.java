@@ -4,6 +4,7 @@ import net.consler.librelauncher.Main;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import net.consler.librelauncher.ui.theme.ThemeManager;
 
 import java.io.IOException;
 
@@ -15,6 +16,7 @@ public class NewInstanceApplication
     {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("newinstance-view.fxml"));
         Scene scene = new Scene(loader.load());
+        ThemeManager.styleScene(scene);
 
         stage.setTitle("New Instance");
         stage.setScene(scene);

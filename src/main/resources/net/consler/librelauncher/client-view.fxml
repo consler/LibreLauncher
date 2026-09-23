@@ -4,11 +4,11 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.consler.librelauncher.ui.client.ClientController">
+<BorderPane styleClass="app-root" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.consler.librelauncher.ui.client.ClientController">
     <bottom>
-        <HBox alignment="BOTTOM_LEFT" spacing="15" BorderPane.alignment="BOTTOM_LEFT">
-            <Button onMouseClicked="#launchButtonClicked" style="-fx-pref-width: 330; -fx-pref-height: 100; -fx-font-size: 30;" text="Launch"></Button>
-            <ChoiceBox fx:id="launchChoiceBox" style="-fx-pref-width: 300; -fx-pref-height: 100; -fx-font-size: 25;" />
+        <HBox styleClass="launch-bar" spacing="12" BorderPane.alignment="BOTTOM_LEFT">
+            <Button styleClass="launch-button" onMouseClicked="#launchButtonClicked" text="Launch"/>
+            <ChoiceBox styleClass="launch-choice" fx:id="launchChoiceBox"/>
         </HBox>
     </bottom>
 

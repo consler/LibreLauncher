@@ -12,7 +12,7 @@
 <AnchorPane styleClass="app-root" prefHeight="450.0" prefWidth="700.0"
             xmlns="http://javafx.com/javafx"
             xmlns:fx="http://javafx.com/fxml"
-            fx:controller="net.consler.librelauncher.ui.settings.SettingsController">
+            fx:controller="net.consler.librelauncher.ui.instance.manager.specific.InstanceSpecificManagerController">
     <children>
         <HBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
@@ -21,11 +21,16 @@
                         <Insets bottom="15.0" left="15.0" right="15.0" top="15.0" />
                     </padding>
                     <children>
-                        <Label styleClass="sidebar-title" text="Settings" />
+                        <Label styleClass="sidebar-title" text="Manage Instance" />
                         <Separator />
-                        <Button maxWidth="Infinity" onAction="#onMinecraftSelected" text="Minecraft settings" />
-                        <Button maxWidth="Infinity" onAction="#onAccountsSelected" text="Accounts" />
-                        <Button maxWidth="Infinity" onAction="#onUISelected" text="UI" />
+                        <Button maxWidth="Infinity" onAction="#onLogsSelected" text="Logs" />
+                        <Button maxWidth="Infinity" onAction="#onWorldsSelected" text="Worlds" />
+                        <Button maxWidth="Infinity" onAction="#onServersSelected" text="Servers" />
+                        <Button maxWidth="Infinity" onAction="#onModsSelected" text="Mods" />
+                        <Button maxWidth="Infinity" onAction="#onResourcePacksSelected" text="Resource Packs" />
+                        <Button maxWidth="Infinity" onAction="#onDatapacksSelected" text="Datapacks" />
+                        <Button maxWidth="Infinity" onAction="#onShadersSelected" text="Shaders" />
+                        <Button maxWidth="Infinity" onAction="#onScreenshotsSelected" text="Screenshots" />
                     </children>
                 </VBox>
 

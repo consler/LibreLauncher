@@ -1,0 +1,71 @@
+.app-root {
+    -fx-font-size: 13px;
+}
+
+.app-root .page-content {
+    -fx-padding: 24px;
+}
+
+.app-root .page-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.app-root .section-title {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+
+.app-root .sidebar {
+    -fx-padding: 20px;
+    -fx-spacing: 10px;
+    -fx-min-width: 220px;
+    -fx-background-color: -fx-control-inner-background;
+}
+
+.app-root .sidebar-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+}
+
+.app-root .sidebar .button {
+    -fx-alignment: CENTER_LEFT;
+    -fx-padding: 9px 12px;
+}
+
+.app-root .content-panel {
+    -fx-padding: 24px;
+}
+
+.app-root .launch-bar {
+    -fx-padding: 18px 24px 24px 24px;
+    -fx-alignment: CENTER_LEFT;
+}
+
+.app-root .launch-button {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-pref-height: 52px;
+    -fx-pref-width: 220px;
+}
+
+.app-root .launch-choice {
+    -fx-pref-height: 52px;
+    -fx-pref-width: 280px;
+}
+
+.app-root .form-label {
+    -fx-font-weight: bold;
+}
+
+.app-root .form-section {
+    -fx-padding: 16px;
+    -fx-background-color: -fx-control-inner-background;
+    -fx-background-radius: 8px;
+    -fx-border-color: -fx-box-border;
+    -fx-border-radius: 8px;
+}
+
+.app-root .dialog-actions {
+    -fx-padding: 10px 0 0 0;
+}

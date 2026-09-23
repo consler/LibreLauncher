@@ -41,6 +41,7 @@ public class ExceptionAlert
             alert.setTitle(title);
             alert.setHeaderText(header);
             alert.setContentText(content);
+            alert.resizableProperty().setValue(true);
 
             ButtonType copyButton = new ButtonType("Copy Error");
             alert.getButtonTypes().add(copyButton);

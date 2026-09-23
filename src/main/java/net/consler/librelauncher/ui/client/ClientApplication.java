@@ -24,9 +24,10 @@ public class ClientApplication extends Application
         FXMLLoader fxmlLoader = new FXMLLoader(Main.class.getResource("client-view.fxml"));
 
         Scene scene = new Scene(fxmlLoader.load());
+        ThemeManager.styleScene(scene);
         stage.setMaximized(true);
         stage.setTitle("LibreLauncher");
-        stage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("conslerpfp.jpg"))));
+        stage.getIcons().add(new Image(Objects.requireNonNull(Main.class.getResourceAsStream("icon.png"))));
 
         ClientController.hostServices = getHostServices();
         InstanceManagerController.hostServices = getHostServices();

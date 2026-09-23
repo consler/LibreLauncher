@@ -6,6 +6,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import net.consler.librelauncher.utils.ExceptionAlert;
+import net.consler.librelauncher.ui.theme.ThemeManager;
 
 import java.io.IOException;
 
@@ -16,6 +17,7 @@ public abstract class SettingsApplication extends Application
         try {
             FXMLLoader loader = new FXMLLoader(Main.class.getResource("settings/settings-view.fxml"));
             Scene scene = new Scene(loader.load());
+            ThemeManager.styleScene(scene);
 
             Stage stage = new Stage();
             stage.setTitle("Settings");

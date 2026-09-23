@@ -1,23 +1,25 @@
-package net.consler.librelauncher.ui.instance.manager;
+package net.consler.librelauncher.ui.instance.manager.specific;
 
-import net.consler.librelauncher.Main;
+import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import net.consler.librelauncher.Main;
 
 import java.io.IOException;
 import net.consler.librelauncher.ui.theme.ThemeManager;
 
-public class InstanceManagerApplication
+public class InstanceSpecificManagerApplication
 {
+
     public static void open() throws IOException
     {
-        FXMLLoader loader = new FXMLLoader(Main.class.getResource("instancemanager-view.fxml"));
+        FXMLLoader loader = new FXMLLoader(Main.class.getResource("instancespecificmanager-view.fxml"));
         Scene scene = new Scene(loader.load());
         ThemeManager.styleScene(scene);
 
         Stage stage = new Stage();
-        stage.setTitle("Instance Manager");
+        stage.setTitle("Manage Instance");
         stage.setMaximized(true);
         stage.setScene(scene);
         stage.show();

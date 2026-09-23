@@ -6,6 +6,7 @@ import atlantafx.base.theme.Dracula;
 import atlantafx.base.theme.NordDark;
 import atlantafx.base.theme.NordLight;
 import javafx.application.Application;
+import javafx.scene.Scene;
 import net.consler.librelauncher.Main;
 
 import java.util.Objects;
@@ -24,9 +25,16 @@ public final class ThemeManager
         Application.setUserAgentStylesheet(getStylesheet(resolvedTheme));
     }
 
+    public static void styleScene(Scene scene)
+    {
+        String stylesheet = Objects.requireNonNull(Main.class.getResource("themes/ui.css")).toExternalForm();
+        if (!scene.getStylesheets().contains(stylesheet)) scene.getStylesheets().add(stylesheet);
+    }
+
     public static String getStylesheet(String themeName)
     {
-        return switch (themeName)
+        String resolvedTheme = themeName == null || themeName.isBlank() ? DEFAULT_THEME : themeName;
+        return switch (resolvedTheme)
         {
             case "Cupertino Light" -> new CupertinoLight().getUserAgentStylesheet();
             case "Nord Dark" -> new NordDark().getUserAgentStylesheet();
