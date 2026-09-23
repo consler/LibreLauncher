@@ -6,7 +6,7 @@
       <option name="myIgnoreVendorSpecificProperties" value="false" />
       <option name="myCustomPropertiesList">
         <value>
-          <list size="7">
+          <list size="17">
             <item index="0" class="java.lang.String" itemvalue="-fx-base" />
             <item index="1" class="java.lang.String" itemvalue="-fx-focus-color" />
             <item index="2" class="java.lang.String" itemvalue="-fx-background-color" />
@@ -14,6 +14,16 @@
             <item index="4" class="java.lang.String" itemvalue="-fx-background-radius" />
             <item index="5" class="java.lang.String" itemvalue="-fx-cursor" />
             <item index="6" class="java.lang.String" itemvalue="-fx-mark-color" />
+            <item index="7" class="java.lang.String" itemvalue="-fx-padding" />
+            <item index="8" class="java.lang.String" itemvalue="-fx-font-size" />
+            <item index="9" class="java.lang.String" itemvalue="-fx-font-weight" />
+            <item index="10" class="java.lang.String" itemvalue="-fx-alignment" />
+            <item index="11" class="java.lang.String" itemvalue="-fx-spacing" />
+            <item index="12" class="java.lang.String" itemvalue="-fx-pref-height" />
+            <item index="13" class="java.lang.String" itemvalue="-fx-pref-width" />
+            <item index="14" class="java.lang.String" itemvalue="-fx-border-color" />
+            <item index="15" class="java.lang.String" itemvalue="-fx-min-width" />
+            <item index="16" class="java.lang.String" itemvalue="-fx-border-radius" />
           </list>
         </value>
       </option>

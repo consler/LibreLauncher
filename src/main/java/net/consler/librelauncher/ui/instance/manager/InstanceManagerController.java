@@ -82,9 +82,7 @@ public class InstanceManagerController implements Initializable
                     setText(item);
 
                     boolean isLast = getIndex() == getListView().getItems().size() - 1;
-                    setStyle(isLast
-                            ? ""
-                            : "-fx-border-color: transparent transparent #444444 transparent; -fx-border-width: 0 0 1 0;");
+                    setStyle(isLast ? "" : "-fx-border-color: transparent transparent #444444 transparent; -fx-border-width: 0 0 1 0;");
 
                     ContextMenu contextMenu = new ContextMenu();
 
@@ -101,7 +99,7 @@ public class InstanceManagerController implements Initializable
                     openFolderItem.setOnAction(e -> openInstanceFolder(item));
 
                     MenuItem manageInstance = new MenuItem("Manage Instance");
-                    manageInstance.setOnAction(e -> manageInstance());
+                    manageInstance.setOnAction(e -> manageInstance(item));
 
                     contextMenu.getItems().addAll(launchItem, renameItem, deleteItem, openFolderItem, manageInstance);
                     setContextMenu(contextMenu);
@@ -110,11 +108,11 @@ public class InstanceManagerController implements Initializable
         });
     }
 
-    private static void manageInstance()
+    private void manageInstance(String item)
     {
         try
         {
-            InstanceSpecificManagerApplication.open();
+            new InstanceSpecificManagerApplication(item).open();
         }
         catch (IOException ex)
         {

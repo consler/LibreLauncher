@@ -1,6 +1,5 @@
 package net.consler.librelauncher.launcher;
 
-import javafx.application.Platform;
 import net.consler.librelauncher.exceptions.FailedToLaunchMinecraftException;
 import net.consler.librelauncher.launcher.instance.InstanceInfo;
 import dev.dirs.BaseDirectories;
@@ -15,7 +14,6 @@ import net.consler.librelauncherlib.utill.SystemHelper;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Map;
 
 public class Launcher
@@ -52,8 +50,8 @@ public class Launcher
             }
             catch (Exception e)
             {
-                Platform.runLater(() -> ExceptionAlert.show(new FailedToLaunchMinecraftException(Arrays.toString(e.getStackTrace()))));
+                ExceptionAlert.show(new FailedToLaunchMinecraftException("Failed to launch instance '" + name + "'", e));
             }
-        }).start();
+        }, "Minecraft-Launcher-Thread").start();
     }
 }

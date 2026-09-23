@@ -1,6 +1,5 @@
 package net.consler.librelauncher.ui.instance.manager.specific;
 
-import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -11,8 +10,14 @@ import net.consler.librelauncher.ui.theme.ThemeManager;
 
 public class InstanceSpecificManagerApplication
 {
+    public String instanceName;
 
-    public static void open() throws IOException
+    public InstanceSpecificManagerApplication(String name)
+    {
+        this.instanceName = name;
+    }
+
+    public void open() throws IOException
     {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("instancespecificmanager-view.fxml"));
         Scene scene = new Scene(loader.load());
