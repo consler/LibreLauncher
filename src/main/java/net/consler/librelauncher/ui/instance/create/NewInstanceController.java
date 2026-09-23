@@ -233,13 +233,6 @@ public class NewInstanceController implements Initializable
             nameField.setText(instanceName);
         }
 
-        if (!instanceName.matches("[A-Za-z0-9_ -]+") || instanceName.length() > 64)
-        {
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Instance name must be 1-64 characters and may only contain letters, numbers, spaces, underscores, or hyphens.");
-            alert.showAndWait();
-            return;
-        }
-
         if (new File(Main.APPDATA_DIR, instanceName + ".properties").exists() || new File(Launcher.instanceDir, instanceName).exists())
         {
             Alert alert = new Alert(Alert.AlertType.ERROR, "An instance with this name already exists.");

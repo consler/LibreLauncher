@@ -1,5 +1,6 @@
 package net.consler.librelauncher.launcher;
 
+import net.consler.librelauncher.exceptions.AuthException;
 import net.consler.librelauncher.exceptions.FailedToLaunchMinecraftException;
 import net.consler.librelauncher.launcher.instance.InstanceInfo;
 import dev.dirs.BaseDirectories;
@@ -29,9 +30,7 @@ public class Launcher
             try
             {
                 String savedJavaPath = SettingsSaver.getSetting("java_path");
-                Path javaPath = (savedJavaPath != null && !savedJavaPath.isBlank())
-                        ? new File(savedJavaPath).toPath()
-                        : SystemHelper.getJavaBin();
+                Path javaPath = (savedJavaPath != null && !savedJavaPath.isBlank()) ? new File(savedJavaPath).toPath() : SystemHelper.getJavaBin();
 
                 LaunchProfile launchProfile = new LaunchProfile.Builder(instanceInfo.get("version"), new File(instanceDir, name).toPath())
                         .withLauncherName("LibreLauncher")
@@ -40,7 +39,16 @@ public class Launcher
                         .build();
 
                 ModloaderProfile modloaderProfile = new ModloaderProfile(instanceInfo.get("modLoader"), instanceInfo.get("loaderVersion"));
-                AuthProfile authProfile = AuthSaver.getActiveAuthProfile();
+
+                AuthProfile authProfile;
+                if (AuthSaver.getActiveAuthProfile() != null)
+                {
+                    authProfile = AuthSaver.getActiveAuthProfile();
+                }
+                else
+                {
+                    throw new AuthException("No account chosen!");
+                }
 
                 MinecraftLauncher launcher = new MinecraftLauncher();
                 launcher.launch(launchProfile, authProfile, modloaderProfile);
@@ -50,7 +58,8 @@ public class Launcher
             }
             catch (Exception e)
             {
-                ExceptionAlert.show(new FailedToLaunchMinecraftException("Failed to launch instance '" + name + "'", e));
+                if(e instanceof AuthException) ExceptionAlert.show(e);
+                else ExceptionAlert.show(new FailedToLaunchMinecraftException("Failed to launch instance '" + name + "'", e));
             }
         }, "Minecraft-Launcher-Thread").start();
     }
