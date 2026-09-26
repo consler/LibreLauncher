@@ -46,18 +46,16 @@ public class InstanceManagerController implements Initializable
 
         instanceList.getItems().clear();
 
-        if (APPDATA_DIR.exists() && APPDATA_DIR.isDirectory())
-        {
-            File[] files = APPDATA_DIR.listFiles((dir, name) -> name.endsWith(".properties"));
+        if ( !(APPDATA_DIR.exists() && APPDATA_DIR.isDirectory())) return;
 
-            if (files != null)
-            {
-                for (File file : files)
-                {
-                    String fileName = file.getName();
-                    instanceList.getItems().add(fileName.substring(0, fileName.length() - 11));
-                }
-            }
+        File[] files = APPDATA_DIR.listFiles((dir, name) -> name.endsWith(".properties"));
+
+        if (files == null) return;
+
+        for (File file : files)
+        {
+            String fileName = file.getName();
+            instanceList.getItems().add(fileName.substring(0, fileName.length() - 11));
         }
     }
 
@@ -76,34 +74,35 @@ public class InstanceManagerController implements Initializable
                     setGraphic(null);
                     setStyle("");
                     setContextMenu(null);
+
+                    return;
                 }
-                else
-                {
-                    setText(item);
 
-                    boolean isLast = getIndex() == getListView().getItems().size() - 1;
-                    setStyle(isLast ? "" : "-fx-border-color: transparent transparent #444444 transparent; -fx-border-width: 0 0 1 0;");
+                setText(item);
 
-                    ContextMenu contextMenu = new ContextMenu();
+                boolean isLast = getIndex() == getListView().getItems().size() - 1;
+                setStyle(isLast ? "" : "-fx-border-color: transparent transparent #444444 transparent; -fx-border-width: 0 0 1 0;");
 
-                    MenuItem launchItem = new MenuItem("Launch");
-                    launchItem.setOnAction(e -> Launcher.launch(item));
+                ContextMenu contextMenu = new ContextMenu();
 
-                    MenuItem renameItem = new MenuItem("Rename");
-                    renameItem.setOnAction(e -> renameInstance(item));
+                MenuItem launchItem = new MenuItem("Launch");
+                launchItem.setOnAction(e -> Launcher.launch(item));
 
-                    MenuItem deleteItem = new MenuItem("Delete");
-                    deleteItem.setOnAction(e -> deleteInstance(item));
+                MenuItem renameItem = new MenuItem("Rename");
+                renameItem.setOnAction(e -> renameInstance(item));
 
-                    MenuItem openFolderItem = new MenuItem("Open Folder");
-                    openFolderItem.setOnAction(e -> openInstanceFolder(item));
+                MenuItem deleteItem = new MenuItem("Delete");
+                deleteItem.setOnAction(e -> deleteInstance(item));
 
-                    MenuItem manageInstance = new MenuItem("Manage Instance");
-                    manageInstance.setOnAction(e -> manageInstance(item));
+                MenuItem openFolderItem = new MenuItem("Open Folder");
+                openFolderItem.setOnAction(e -> openInstanceFolder(item));
 
-                    contextMenu.getItems().addAll(launchItem, renameItem, deleteItem, openFolderItem, manageInstance);
-                    setContextMenu(contextMenu);
-                }
+                MenuItem manageInstance = new MenuItem("Manage Instance");
+                manageInstance.setOnAction(e -> manageInstance(item));
+
+                contextMenu.getItems().addAll(launchItem, renameItem, deleteItem, openFolderItem, manageInstance);
+                setContextMenu(contextMenu);
+
             }
         });
     }
@@ -120,27 +119,6 @@ public class InstanceManagerController implements Initializable
             throw new RuntimeException(ex);
         }
     }
-
-    private ContextMenu contextMenuFor(String item)
-    {
-        ContextMenu contextMenu = new ContextMenu();
-
-        MenuItem launchItem = new MenuItem("Launch");
-        launchItem.setOnAction(e -> Launcher.launch(item));
-
-        MenuItem renameItem = new MenuItem("Rename");
-        renameItem.setOnAction(e -> renameInstance(item));
-
-        MenuItem deleteItem = new MenuItem("Delete");
-        deleteItem.setOnAction(e -> deleteInstance(item));
-
-        MenuItem openFolderItem = new MenuItem("Open Folder");
-        openFolderItem.setOnAction(e -> openInstanceFolder(item));
-
-        contextMenu.getItems().addAll(launchItem, renameItem, deleteItem, openFolderItem);
-        return contextMenu;
-    }
-
 
     private void renameInstance(String oldName)
     {

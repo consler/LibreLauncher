@@ -6,7 +6,7 @@
 
     <groupId>net.consler.librelauncher</groupId>
     <artifactId>librelauncher</artifactId>
-    <version>1.1.1</version>
+    <version>1.2</version>
     <name>LibreLauncher</name>
 
     <properties>
@@ -21,6 +21,10 @@
             <id>central</id>
             <url>https://repo.maven.apache.org/maven2</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -33,8 +37,9 @@
         <dependency>
             <groupId>net.consler</groupId>
             <artifactId>librelauncherlib</artifactId>
-            <version>1.2.1</version>
+            <version>main-b5f1ae2fb5-1</version>
         </dependency>
+
 
         <dependency>
             <groupId>org.jetbrains</groupId>

@@ -21,10 +21,12 @@ public class InstanceSpecificManagerApplication
     {
         FXMLLoader loader = new FXMLLoader(Main.class.getResource("instancespecificmanager-view.fxml"));
         Scene scene = new Scene(loader.load());
+        InstanceSpecificManagerController controller = loader.getController();
+        controller.setInstanceName(instanceName);
         ThemeManager.styleScene(scene);
 
         Stage stage = new Stage();
-        stage.setTitle("Manage Instance");
+        stage.setTitle("Manage Instance - " + instanceName);
         stage.setMaximized(true);
         stage.setScene(scene);
         stage.show();

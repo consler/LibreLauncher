@@ -11,6 +11,7 @@ module net.consler.librelauncher
     requires dev.dirs;
     requires java.management;
     requires jdk.management;
+    requires java.desktop;
     requires librelauncherlib;
 
     opens net.consler.librelauncher to javafx.fxml;

@@ -29,7 +29,6 @@
                         <Button maxWidth="Infinity" onAction="#onModsSelected" text="Mods" />
                         <Button maxWidth="Infinity" onAction="#onResourcePacksSelected" text="Resource Packs" />
                         <Button maxWidth="Infinity" onAction="#onDatapacksSelected" text="Datapacks" />
-                        <Button maxWidth="Infinity" onAction="#onShadersSelected" text="Shaders" />
                         <Button maxWidth="Infinity" onAction="#onScreenshotsSelected" text="Screenshots" />
                     </children>
                 </VBox>

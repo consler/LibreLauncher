@@ -37,6 +37,63 @@
     -fx-padding: 24px;
 }
 
+.app-root .manager-page {
+    -fx-spacing: 12px;
+}
+
+.app-root .manager-location {
+    -fx-text-fill: -fx-text-inner-color;
+    -fx-opacity: 0.7;
+}
+
+.app-root .manager-list {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+}
+
+.app-root .manager-list .viewport {
+    -fx-background-color: transparent;
+}
+
+.app-root .manager-item {
+    -fx-background-color: -fx-control-inner-background;
+    -fx-border-color: transparent transparent #444444 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-alignment: CENTER_LEFT;
+    -fx-cursor: hand;
+}
+
+.app-root .manager-item-selected {
+    -fx-background-color: -fx-selection-bar;
+    -fx-border-color: -fx-selection-bar transparent -fx-selection-bar transparent;
+    -fx-border-width: 1 0 1 0;
+}
+
+.app-root .manager-item:hover,
+.app-root .manager-item:focused {
+    -fx-background-color: -fx-selection-bar;
+}
+
+.app-root .manager-item-selected .manager-item-name,
+.app-root .manager-item-selected .manager-item-description {
+    -fx-text-fill: -fx-selection-bar-text;
+}
+
+.app-root .manager-item-icon {
+    -fx-font-size: 24px;
+    -fx-min-width: 34px;
+    -fx-alignment: CENTER;
+}
+
+.app-root .manager-item-name {
+    -fx-font-weight: bold;
+}
+
+.app-root .manager-item-description,
+.app-root .manager-empty {
+    -fx-opacity: 0.75;
+}
+
 .app-root .launch-bar {
     -fx-padding: 18px 24px 24px 24px;
     -fx-alignment: CENTER_LEFT;
