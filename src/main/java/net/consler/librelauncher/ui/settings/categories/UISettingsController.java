@@ -48,6 +48,6 @@ public class UISettingsController
 
         String closeOnLaunch = SettingsSaver.getSetting("close-on-launch");
         chkCloseOnLaunch.setSelected(closeOnLaunch == null || closeOnLaunch.isBlank() || Boolean.parseBoolean(closeOnLaunch));
-        chkCloseOnLaunch.selectedProperty().addListener((obs, oldV, newV) -> SettingsSaver.saveSetting("close-on-launch", newV));
+        chkCloseOnLaunch.setOnAction(e-> SettingsSaver.saveSetting("close-on-launch", String.valueOf(chkCloseOnLaunch.isSelected())));
     }
 }

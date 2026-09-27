@@ -45,6 +45,6 @@ public class LogCategory extends InstanceCategory
     @Override
     protected String defaultIcon()
     {
-        return "\u2261";
+        return "≡";
     }
 }

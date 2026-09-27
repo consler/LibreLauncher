@@ -83,8 +83,7 @@ public class DatapackCategory extends InstanceCategory
         Datapack pack = load(file);
         if (pack == null)
         {
-            return ManagerFormat.joinNonBlank(" • ", worldLabel,
-                    file.isDirectory() ? "Datapack folder" : "Datapack - unable to read metadata");
+            return ManagerFormat.joinNonBlank(" • ", worldLabel, file.isDirectory() ? "Datapack folder" : "Datapack - unable to read metadata");
         }
 
         String description = pack.getDescriptionAsString();
@@ -120,6 +119,6 @@ public class DatapackCategory extends InstanceCategory
     @Override
     protected String defaultIcon()
     {
-        return "\u25c6";
+        return "◆";
     }
 }

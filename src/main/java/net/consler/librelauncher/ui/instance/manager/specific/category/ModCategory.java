@@ -38,10 +38,8 @@ public class ModCategory extends InstanceCategory
     public Node icon(File file)
     {
         Mod mod = load(file);
-        if (mod != null && mod.hasIcon())
-        {
-            return ManagerFormat.imageIcon(mod.getIcon(), true, defaultIcon());
-        }
+        if (mod != null && mod.hasIcon()) return ManagerFormat.imageIcon(mod.getIcon(), true, defaultIcon());
+
         return super.icon(file);
     }
 
@@ -49,20 +47,11 @@ public class ModCategory extends InstanceCategory
     public String description(File file)
     {
         Mod mod = load(file);
-        if (mod == null)
-        {
-            return file.getName().toLowerCase().endsWith(".jar")
-                    ? "Mod jar - unable to read metadata"
-                    : "Disabled or unrecognized mod file";
-        }
+        if (mod == null) return file.getName().toLowerCase().endsWith(".jar") ? "Mod jar - unable to read metadata" : "Disabled or unrecognized mod file";
 
-        String authors = (mod.getAuthors() == null || mod.getAuthors().isEmpty())
-                ? null : String.join(", ", mod.getAuthors());
+        String authors = (mod.getAuthors() == null || mod.getAuthors().isEmpty()) ? null : String.join(", ", mod.getAuthors());
 
-        return ManagerFormat.joinNonBlank(" • ",
-                mod.getVersion() == null ? null : "v" + mod.getVersion(),
-                mod.getLoaderType(),
-                authors);
+        return ManagerFormat.joinNonBlank(" • ", mod.getVersion() == null ? null : "v" + mod.getVersion(), mod.getLoaderType(), authors);
     }
 
     private Mod load(File file)
@@ -85,6 +74,6 @@ public class ModCategory extends InstanceCategory
     @Override
     protected String defaultIcon()
     {
-        return "\u2699";
+        return "⚙";
     }
 }

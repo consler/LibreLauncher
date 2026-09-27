@@ -93,6 +93,6 @@ public class WorldCategory extends InstanceCategory
     @Override
     protected String defaultIcon()
     {
-        return "\u25c9";
+        return "◉";
     }
 }

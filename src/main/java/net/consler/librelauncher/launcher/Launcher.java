@@ -41,20 +41,16 @@ public class Launcher
                 ModloaderProfile modloaderProfile = new ModloaderProfile(instanceInfo.get("modLoader"), instanceInfo.get("loaderVersion"));
 
                 AuthProfile authProfile;
-                if (AuthSaver.getActiveAuthProfile() != null)
+                if (AuthSaver.getActiveAuthProfile() != null) authProfile = AuthSaver.getActiveAuthProfile();
+                else throw new AuthException("No account chosen!");
+
+                new Thread(() ->
                 {
-                    authProfile = AuthSaver.getActiveAuthProfile();
-                }
-                else
-                {
-                    throw new AuthException("No account chosen!");
-                }
+                   new MinecraftLauncher().launch(launchProfile, authProfile, modloaderProfile);
 
-                MinecraftLauncher launcher = new MinecraftLauncher();
-                launcher.launch(launchProfile, authProfile, modloaderProfile);
+                }).start();
 
-                if (System.getProperty("close-on-launch") != null) System.exit(0);
-
+                //if (Boolean.parseBoolean(SettingsSaver.getSetting("close-on-launch")) || SettingsSaver.getSetting("close-on-launch") == null) System.exit(0);
             }
             catch (Exception e)
             {

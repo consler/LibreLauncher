@@ -59,6 +59,6 @@ public class ScreenshotCategory extends InstanceCategory
     @Override
     protected String defaultIcon()
     {
-        return "\u25a1";
+        return "□";
     }
 }

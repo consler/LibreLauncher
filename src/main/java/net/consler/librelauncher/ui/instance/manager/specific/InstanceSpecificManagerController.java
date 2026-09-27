@@ -26,7 +26,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.ui.instance.manager.InstanceManagerController;
-import net.consler.librelauncher.ui.instance.manager.specific.category.DatapackCategory;
 import net.consler.librelauncher.ui.instance.manager.specific.category.InstanceCategory;
 import net.consler.librelauncher.ui.instance.manager.specific.category.LogCategory;
 import net.consler.librelauncher.ui.instance.manager.specific.category.ModCategory;
@@ -38,6 +37,7 @@ import net.consler.librelauncher.utils.ExceptionAlert;
 import net.consler.librelauncherlib.instance.InstanceProfile;
 import net.consler.librelauncherlib.instance.Servers;
 
+import java.awt.Desktop;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -66,12 +66,7 @@ public class InstanceSpecificManagerController implements Initializable
     @FXML
     private StackPane contentArea;
 
-    private String instanceName;
     private InstanceProfile profile;
-
-    // Tracks which page is showing so the Refresh action (and the context-menu
-    // Refresh item) knows how to redraw it. currentCategory is only meaningful
-    // when showingServers is false.
     private InstanceCategory currentCategory;
     private boolean showingServers;
 
@@ -82,9 +77,8 @@ public class InstanceSpecificManagerController implements Initializable
 
     public void setInstanceName(String instanceName)
     {
-        this.instanceName = instanceName;
         this.profile = new InstanceProfile(new File(Launcher.instanceDir, instanceName).toPath());
-        onWorldsSelected();
+        onLogsSelected();
     }
 
     @FXML
@@ -118,20 +112,10 @@ public class InstanceSpecificManagerController implements Initializable
     }
 
     @FXML
-    private void onDatapacksSelected()
-    {
-        showItems(new DatapackCategory());
-    }
-
-    @FXML
     private void onScreenshotsSelected()
     {
         showItems(new ScreenshotCategory());
     }
-
-    // ------------------------------------------------------------------
-    // File-backed categories (Worlds, Mods, Resource Packs, Datapacks, Logs, Screenshots)
-    // ------------------------------------------------------------------
 
     private void showItems(InstanceCategory category)
     {
@@ -152,16 +136,19 @@ public class InstanceSpecificManagerController implements Initializable
 
         page.getChildren().add(buildHeader(category.title(), category.locationLabel(profile), countLabel));
 
-        TextField searchField = new TextField();
-        searchField.setPromptText("Filter " + category.title().toLowerCase() + "...");
-        searchField.getStyleClass().add("manager-search");
-        searchField.textProperty().addListener((obs, oldValue, newValue) ->
+        if (!(category instanceof LogCategory))
         {
-            query[0] = newValue == null ? "" : newValue.trim().toLowerCase();
-            filteredItems.setPredicate(file -> matchesSearch(file, itemDetails, query[0]));
-            countLabel.setText(countText(filteredItems.size()));
-        });
-        page.getChildren().add(searchField);
+            TextField searchField = new TextField();
+            searchField.setPromptText("Filter " + category.title().toLowerCase() + "...");
+            searchField.getStyleClass().add("manager-search");
+            searchField.textProperty().addListener((obs, oldValue, newValue) ->
+            {
+                query[0] = newValue == null ? "" : newValue.trim().toLowerCase();
+                filteredItems.setPredicate(file -> matchesSearch(file, itemDetails, query[0]));
+                countLabel.setText(countText(filteredItems.size()));
+            });
+            page.getChildren().add(searchField);
+        }
 
         ListView<File> itemList = new ListView<>(filteredItems);
         itemList.getStyleClass().add("manager-list");
@@ -179,9 +166,7 @@ public class InstanceSpecificManagerController implements Initializable
             List<File> visibleFiles;
             try
             {
-                visibleFiles = Arrays.stream(category.items(profile))
-                        .filter(file -> !file.isHidden())
-                        .toList();
+                visibleFiles = Arrays.stream(category.items(profile)).filter(file -> !file.isHidden()).toList();
             }
             catch (RuntimeException e)
             {
@@ -208,9 +193,7 @@ public class InstanceSpecificManagerController implements Initializable
         });
     }
 
-    private void setupItemContextMenu(ListView<File> itemList, InstanceCategory category,
-                                      Map<File, ItemDetails> itemDetails, Set<File> loadingItems,
-                                      FilteredList<File> filteredItems, Label countLabel, String[] query)
+    private void setupItemContextMenu(ListView<File> itemList, InstanceCategory category, Map<File, ItemDetails> itemDetails, Set<File> loadingItems, FilteredList<File> filteredItems, Label countLabel, String[] query)
     {
         itemList.setCellFactory(lv -> new ListCell<>()
         {
@@ -241,16 +224,13 @@ public class InstanceSpecificManagerController implements Initializable
                 setContextMenu(null);
                 if (loadingItems.add(file))
                 {
-                    loadItemDetails(file, category, this, itemDetails, loadingItems,
-                            filteredItems, countLabel, query);
+                    loadItemDetails(file, category, this, itemDetails, loadingItems, filteredItems, countLabel, query);
                 }
             }
         });
     }
 
-    private void loadItemDetails(File file, InstanceCategory category, ListCell<File> cell,
-                                 Map<File, ItemDetails> itemDetails, Set<File> loadingItems,
-                                 FilteredList<File> filteredItems, Label countLabel, String[] query)
+    private void loadItemDetails(File file, InstanceCategory category, ListCell<File> cell, Map<File, ItemDetails> itemDetails, Set<File> loadingItems, FilteredList<File> filteredItems, Label countLabel, String[] query)
     {
         Task<ItemDetails> task = new Task<>()
         {
@@ -325,8 +305,7 @@ public class InstanceSpecificManagerController implements Initializable
     {
         if (query.isEmpty()) return true;
         ItemDetails details = itemDetails.get(file);
-        return file.getName().toLowerCase().contains(query)
-                || (details != null && details.name().toLowerCase().contains(query));
+        return file.getName().toLowerCase().contains(query) || (details != null && details.name().toLowerCase().contains(query));
     }
 
     private record ItemDetails(String name, String description)
@@ -365,10 +344,6 @@ public class InstanceSpecificManagerController implements Initializable
             ExceptionAlert.show(new IOException("Unable to delete " + file.getAbsolutePath()));
         }
     }
-
-    // ------------------------------------------------------------------
-    // Servers - backed by a single servers.dat, not a folder of files
-    // ------------------------------------------------------------------
 
     private void showServers()
     {
@@ -435,7 +410,7 @@ public class InstanceSpecificManagerController implements Initializable
                 row.setPadding(new Insets(10));
 
                 BufferedImage iconImage = entry.getIconImage();
-                Node icon = ManagerFormat.imageIcon(iconImage, iconImage != null, "\u2302");
+                Node icon = ManagerFormat.imageIcon(iconImage, iconImage != null, "⌂");
 
                 VBox details = new VBox(3);
                 HBox.setHgrow(details, Priority.ALWAYS);
@@ -498,10 +473,6 @@ public class InstanceSpecificManagerController implements Initializable
         }
     }
 
-    // ------------------------------------------------------------------
-    // Shared helpers
-    // ------------------------------------------------------------------
-
     private HBox buildHeader(String title, String location, Label countLabel)
     {
         VBox titleBox = new VBox(2);
@@ -535,5 +506,29 @@ public class InstanceSpecificManagerController implements Initializable
     {
         if (file == null || !file.exists()) return;
         InstanceManagerController.hostServices.showDocument(file.getAbsolutePath());
+    }
+
+    private void openDocument(File file)
+    {
+        if (!file.isFile())
+        {
+            ExceptionAlert.show(new IOException("Unable to open " + file.getAbsolutePath() + ": not a file"));
+            return;
+        }
+
+        if (!Desktop.isDesktopSupported() || !Desktop.getDesktop().isSupported(Desktop.Action.OPEN))
+        {
+            ExceptionAlert.show(new IOException("Opening files is not supported on this system"));
+            return;
+        }
+
+        try
+        {
+            Desktop.getDesktop().open(file);
+        }
+        catch (IOException | UnsupportedOperationException e)
+        {
+            ExceptionAlert.show(new IOException("Unable to open " + file.getAbsolutePath(), e));
+        }
     }
 }

@@ -13,7 +13,7 @@
     </option>
     <option name="enabledProfiles">
       <list>
-        <option value="os-linux-aarch64" />
+        <option value="universal" />
       </list>
     </option>
     <option name="disabledProfiles">

@@ -80,6 +80,6 @@ public class ResourcePackCategory extends InstanceCategory
     @Override
     protected String defaultIcon()
     {
-        return "\u25a3";
+        return "▣";
     }
 }
