@@ -1,18 +1,37 @@
 package net.consler.librelauncher;
 
-import net.consler.librelauncher.ui.client.ClientApplication;
-import dev.dirs.BaseDirectories;
-import javafx.application.Application;
+import com.formdev.flatlaf.FlatDarkLaf;
+import net.consler.librelauncher.ui.Home;
+import net.consler.librelauncher.ui.Sidebar;
+import net.consler.librelauncher.ui.Titlebar;
 
-import java.io.File;
+import javax.swing.*;
+import java.awt.*;
 
 public class Main
 {
-
-    public static final File APPDATA_DIR = new File(BaseDirectories.get().configDir, "LibreLauncher");
+    public static JFrame client;
 
     static void main(String[] args)
     {
-        Application.launch(ClientApplication.class, args);
+        FlatDarkLaf.setup();
+
+        SwingUtilities.invokeLater(() ->
+        {
+            client = new JFrame("LibreLauncher");
+            client.setIconImage(Toolkit.getDefaultToolkit().getImage(Main.class.getResource("icon.png")));
+            client.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            client.setSize(800, 500);
+            client.setLocationRelativeTo(null);
+            client.setLayout(new BorderLayout());
+            client.setUndecorated(true);
+
+            Titlebar.show();
+            Sidebar.show();
+
+            Home.show();
+
+            client.setVisible(true);
+        });
     }
 }
