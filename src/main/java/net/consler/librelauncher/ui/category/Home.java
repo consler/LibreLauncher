@@ -1,4 +1,4 @@
-package net.consler.librelauncher.ui;
+package net.consler.librelauncher.ui.category;
 
 import net.consler.librelauncher.Main;
 
@@ -8,19 +8,20 @@ import java.awt.*;
 public class Home
 {
     public static JButton playButton;
-    public static JPanel homePanel;
+    public static JPanel panel;
     public static JComboBox<String> instances;
 
     public static void show()
     {
-        homePanel = new JPanel();
-        homePanel.setLayout(new BoxLayout(homePanel, BoxLayout.Y_AXIS));
+        panel = new UICategory();
+
+        panel.setOpaque(false);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
         playButton = new JButton("Play");
         playButton.setPreferredSize(new Dimension(200, 60));
         playButton.setMaximumSize(new Dimension(200, 60));
         playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        playButton.setOpaque(true);
         playButton.setBackground(Main.client.getBackground().darker());
         playButton.setForeground(Color.WHITE);
         playButton.setFocusable(false);
@@ -31,7 +32,6 @@ public class Home
         instances.setPreferredSize(new Dimension(200, 40));
         instances.setMaximumSize(new Dimension(180, 40));
         instances.setAlignmentX(Component.CENTER_ALIGNMENT);
-        instances.setOpaque(true);
         instances.setBackground(Main.client.getBackground().darker());
         instances.setForeground(Color.WHITE);
         instances.setFocusable(false);
@@ -44,17 +44,17 @@ public class Home
             "buttonPressedArrowColor: #00000000;"
         );
 
-        homePanel.add(Box.createVerticalGlue());
-        homePanel.add(playButton);
-        homePanel.add(Box.createRigidArea(new Dimension(0, 5)));
-        homePanel.add(instances);
-        homePanel.add(Box.createVerticalGlue());
+        panel.add(Box.createVerticalGlue());
+        panel.add(playButton);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
+        panel.add(instances);
+        panel.add(Box.createVerticalGlue());
 
-        Main.client.getContentPane().add(homePanel);
+        Main.client.add(panel);
     }
 
     public static void hide()
     {
-        if (homePanel != null) Main.client.getContentPane().remove(homePanel);
+        if (panel != null) Main.client.remove(panel);
     }
 }

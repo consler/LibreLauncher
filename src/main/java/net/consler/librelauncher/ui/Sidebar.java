@@ -2,39 +2,52 @@ package net.consler.librelauncher.ui;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.ui.category.Home;
+import net.consler.librelauncher.ui.category.InstanceManager;
+import net.consler.librelauncher.ui.category.Settings;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class Sidebar
 {
+    public static String currentCategory = "home";
+
+    public static JPanel sidebar;
+    public static JButton homeButton;
+    public static JButton instanceManagerButton;
+    public static JButton settingsButton;
+
     public static void show()
     {
-        JPanel sidebar = new JPanel();
-        sidebar.setPreferredSize(new Dimension(40, 0));
+        sidebar = new JPanel();
+        sidebar.setPreferredSize(new Dimension(32, 0));
         sidebar.setLayout(new BoxLayout(sidebar, BoxLayout.Y_AXIS));
-        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
         sidebar.setBackground(Main.client.getBackground().darker());
+        sidebar.add(Box.createVerticalGlue());
 
-        JButton homeButton = createButton("client/home.svg");
+        homeButton = createButton("client/home.svg");
+        homeButton.addActionListener(e -> setUICategory("home"));
         sidebar.add(homeButton);
 
-        JButton instanceMangerButton = createButton("client/instance.svg");
-        sidebar.add(instanceMangerButton);
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        instanceManagerButton = createButton("client/instance.svg");
+        instanceManagerButton.addActionListener(e -> setUICategory("instancemanager"));
+        sidebar.add(instanceManagerButton);
+
+        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        settingsButton = createButton("client/settings.svg");
+        settingsButton.addActionListener(e -> setUICategory("settings"));
+        sidebar.add(settingsButton);
 
         sidebar.add(Box.createVerticalGlue());
 
-        JButton settingsButton = createButton("client/settings.svg");
-        sidebar.add(settingsButton);
-
-        JButton foldersButton = createButton("client/folder.svg");
-        sidebar.add(foldersButton);
-
-        sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
+        sidebar.add(Box.createRigidArea(new Dimension(0, 32)));
 
         Main.client.add(sidebar, BorderLayout.WEST);
     }
-
     private static JButton createButton(String path)
     {
         FlatSVGIcon icon = new FlatSVGIcon(Main.class.getResource(path)).derive(24, 24);
@@ -53,5 +66,37 @@ public class Sidebar
         button.setHorizontalTextPosition(AbstractButton.CENTER);
 
         return button;
+    }
+
+    public static void setUICategory(String category)
+    {
+        if(category.equals(currentCategory)) return;
+
+        switch (category)
+        {
+            case "home" ->
+            {
+                Settings.hide();
+                InstanceManager.hide();
+                Home.show();
+            }
+            case "instancemanager" ->
+            {
+                Settings.hide();
+                Home.hide();
+                InstanceManager.show();
+            }
+            case "settings" ->
+            {
+                Home.hide();
+                InstanceManager.hide();
+                Settings.show();
+            }
+        }
+
+        Main.client.revalidate();
+        Main.client.repaint();
+
+        currentCategory = category;
     }
 }
