@@ -18,6 +18,11 @@ public class InstancePanel
 
         populate();
 
+        instancePanel.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(255, 255, 255, 20)),
+            BorderFactory.createEmptyBorder(20, 15, 20, 15)
+        ));
+
         InstanceManager.panel.add(instancePanel, BorderLayout.CENTER);
     }
 

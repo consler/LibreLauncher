@@ -1,6 +1,5 @@
 package net.consler.librelauncher;
 
-import com.formdev.flatlaf.FlatDarkLaf;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.home.Home;
 import net.consler.librelauncher.ui.Sidebar;
@@ -19,7 +18,6 @@ public class Main
     static void main(String[] args)
     {
         ThemeManager.init();
-        FlatDarkLaf.setup();
 
         SwingUtilities.invokeLater(() ->
         {

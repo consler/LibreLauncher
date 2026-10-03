@@ -13,6 +13,8 @@ public class Titlebar
 {
     private static Point initialClick;
 
+    public static JPanel titlebar;
+
     public static void show(JFrame frame)
     {
         frame.add(create(frame, "LibreLauncher", true, () -> System.exit(0)), BorderLayout.NORTH);
@@ -20,7 +22,7 @@ public class Titlebar
 
     public static JPanel create(Window window, String title, boolean minimizable, Runnable onClose)
     {
-        JPanel titlebar = new JPanel(new BorderLayout());
+        titlebar = new JPanel(new BorderLayout());
         titlebar.setPreferredSize(new Dimension(window.getWidth(), 32));
         titlebar.setBackground(window.getBackground().darker());
 

@@ -1,7 +1,8 @@
 package net.consler.librelauncher.ui;
 
-import com.formdev.flatlaf.FlatLaf;
+import com.formdev.flatlaf.*;
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.config.settings.SettingsSaver;
 
 import javax.swing.*;
 import java.awt.*;
@@ -42,15 +43,33 @@ public class ThemeManager
             Map.entry("ComboBox.buttonEditableBackground", fill),
             Map.entry("ComboBox.buttonSeparatorColor", fill),
 
-            // More breathing room
             Map.entry("TextField.margin", "6,12,6,12"),
             Map.entry("ComboBox.padding", "6,10,6,10"),
 
-            // Rounded progress bar and slim scrollbars
             Map.entry("ProgressBar.arc", "999"),
             Map.entry("ScrollBar.thumbArc", "999"),
             Map.entry("ScrollBar.thumbInsets", "2,2,2,2")
         ));
+
+        setTheme();
+    }
+
+    public static void setTheme()
+    {
+        String theme = new SettingsSaver().get("theme", "Dark");
+        switch (theme)
+        {
+            case "Dark" -> FlatDarkLaf.setup();
+            case "Light" -> FlatLightLaf.setup();
+            case "Darcula" -> FlatDarculaLaf.setup();
+            case "Intellij" -> FlatIntelliJLaf.setup();
+        }
+
+        if(Main.client == null) return;
+
+        SwingUtilities.updateComponentTreeUI(Sidebar.sidebar);
+        SwingUtilities.updateComponentTreeUI(Titlebar.titlebar);
+        SwingUtilities.updateComponentTreeUI(Main.client);
     }
 
     private static void loadFonts()

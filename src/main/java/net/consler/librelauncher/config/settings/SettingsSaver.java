@@ -9,14 +9,14 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Properties;
 
-public class Settings
+public class SettingsSaver
 {
     public static final Path configDir = Path.of(BaseDirectories.get().configDir, "LibreLauncher");
     public static final File settingsFile = new File(configDir.toFile(), "settings.properties");
 
     public final Properties properties = new Properties();
 
-    public Settings()
+    public SettingsSaver()
     {
         if (!configDir.toFile().exists()) configDir.toFile().mkdirs();
 
@@ -55,9 +55,24 @@ public class Settings
         return properties.getProperty(key, defaultValue);
     }
 
+    public int getInt(String key)
+    {
+        return Integer.parseInt(properties.getProperty(key));
+    }
+
+    public int getInt(String key, int defaultValue)
+    {
+        return Integer.parseInt(properties.getProperty(key, String.valueOf(defaultValue)));
+    }
+
     public void set(String key, String value)
     {
         properties.setProperty(key, value);
+    }
+
+    public void set(String key, int value)
+    {
+        properties.setProperty(key, String.valueOf(value));
     }
 
     public void save()

@@ -10,7 +10,7 @@ import java.util.Properties;
 
 public class InstancesConfig
 {
-    public static final File instancesConfigFile = new File(Settings.configDir.toFile(), "instances.properties");
+    public static final File instancesConfigFile = new File(SettingsSaver.configDir.toFile(), "instances.properties");
 
     public final Map<String, Map<String, String>> instanceCache = new HashMap<>();
     public final Properties properties = new Properties();
