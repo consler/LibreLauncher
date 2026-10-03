@@ -5,9 +5,9 @@ import net.consler.librelauncher.Main;
 import javax.swing.*;
 import java.awt.*;
 
-public class UICategory extends JPanel
+public class RoundCornerPanel extends JPanel
 {
-    public UICategory()
+    public RoundCornerPanel()
     {
         this.setOpaque(false);
     }

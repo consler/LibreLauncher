@@ -1,6 +1,7 @@
-package net.consler.librelauncher.ui.category;
+package net.consler.librelauncher.ui.category.settings;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
 
@@ -10,7 +11,7 @@ public class Settings
 
     public static void show()
     {
-        panel = new UICategory();
+        panel = new RoundCornerPanel();
 
         JButton test = new JButton("Test");
         panel.add(test);

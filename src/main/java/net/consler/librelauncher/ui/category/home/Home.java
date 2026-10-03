@@ -1,6 +1,7 @@
-package net.consler.librelauncher.ui.category;
+package net.consler.librelauncher.ui.category.home;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -13,7 +14,7 @@ public class Home
 
     public static void show()
     {
-        panel = new UICategory();
+        panel = new RoundCornerPanel();
 
         panel.setOpaque(false);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));

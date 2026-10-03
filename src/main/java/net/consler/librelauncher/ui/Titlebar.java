@@ -13,11 +13,16 @@ public class Titlebar
 {
     private static Point initialClick;
 
-    public static void show()
+    public static void show(JFrame frame)
+    {
+        frame.add(create(frame, "LibreLauncher", true, () -> System.exit(0)), BorderLayout.NORTH);
+    }
+
+    public static JPanel create(Window window, String title, boolean minimizable, Runnable onClose)
     {
         JPanel titlebar = new JPanel(new BorderLayout());
-        titlebar.setPreferredSize(new Dimension(Main.client.getWidth(), 32));
-        titlebar.setBackground(Main.client.getBackground().darker());
+        titlebar.setPreferredSize(new Dimension(window.getWidth(), 32));
+        titlebar.setBackground(window.getBackground().darker());
 
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         leftPanel.setOpaque(false);
@@ -28,20 +33,20 @@ public class Titlebar
         iconLabel.setBorder(BorderFactory.createEmptyBorder(8, 2, 8, 0));
         leftPanel.add(iconLabel);
 
-        JLabel titleLabel = new JLabel("LibreLauncher");
+        JLabel titleLabel = new JLabel(title);
         titleLabel.setForeground(new Color(220, 220, 220));
-        titleLabel.setFont(new Font("SansSerif", Font.PLAIN, 12));
+        titleLabel.setFont(ThemeManager.comfortaaBold);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
         leftPanel.add(titleLabel);
 
         JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         rightPanel.setOpaque(false);
 
-        JButton minimizeButton = createControlButton("—", e -> Main.client.setState(Frame.ICONIFIED));
-        JButton closeButton = createControlButton("✕", e -> System.exit(0));
-
-        rightPanel.add(minimizeButton);
-        rightPanel.add(closeButton);
+        if (minimizable && window instanceof Frame frame)
+        {
+            rightPanel.add(createControlButton("—", e -> frame.setState(Frame.ICONIFIED), window));
+        }
+        rightPanel.add(createControlButton("✕", e -> onClose.run(), window));
 
         titlebar.add(leftPanel, BorderLayout.WEST);
         titlebar.add(rightPanel, BorderLayout.EAST);
@@ -57,28 +62,28 @@ public class Titlebar
             @Override
             public void mouseDragged(MouseEvent e)
             {
-                int thisX = Main.client.getLocation().x;
-                int thisY = Main.client.getLocation().y;
+                int thisX = window.getLocation().x;
+                int thisY = window.getLocation().y;
 
                 int xMoved = e.getX() - initialClick.x;
                 int yMoved = e.getY() - initialClick.y;
 
-                Main.client.setLocation(thisX + xMoved, thisY + yMoved);
+                window.setLocation(thisX + xMoved, thisY + yMoved);
             }
         };
 
         titlebar.addMouseListener(dragAdapter);
         titlebar.addMouseMotionListener(dragAdapter);
 
-        Main.client.add(titlebar, BorderLayout.NORTH);
+        return titlebar;
     }
 
-    private static JButton createControlButton(String text, ActionListener action)
+    private static JButton createControlButton(String text, ActionListener action, Window window)
     {
         JButton button = new JButton(text);
         button.setPreferredSize(new Dimension(46, 32));
         button.setBorderPainted(false);
-        button.setBackground(Main.client.getBackground().darker());
+        button.setBackground(window.getBackground().darker());
         button.setFocusable(false);
         button.setFont(new Font("SansSerif", Font.PLAIN, 12));
         button.addActionListener(action);

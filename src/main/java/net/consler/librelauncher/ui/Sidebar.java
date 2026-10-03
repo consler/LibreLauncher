@@ -2,9 +2,9 @@ package net.consler.librelauncher.ui;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.consler.librelauncher.Main;
-import net.consler.librelauncher.ui.category.Home;
-import net.consler.librelauncher.ui.category.InstanceManager;
-import net.consler.librelauncher.ui.category.Settings;
+import net.consler.librelauncher.ui.category.home.Home;
+import net.consler.librelauncher.ui.category.instancemanager.InstanceManager;
+import net.consler.librelauncher.ui.category.settings.Settings;
 
 import javax.swing.*;
 import java.awt.*;
@@ -56,7 +56,6 @@ public class Sidebar
 
         JButton button = new JButton();
         button.setIcon(icon);
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
         button.setPreferredSize(new Dimension(40, 40));
         button.setMaximumSize(new Dimension(40, 40));
         button.setBackground(Main.client.getBackground().darker());

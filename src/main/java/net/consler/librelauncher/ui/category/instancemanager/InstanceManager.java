@@ -1,17 +1,21 @@
-package net.consler.librelauncher.ui.category;
+package net.consler.librelauncher.ui.category.instancemanager;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class InstanceManager
 {
     public static JPanel panel;
     public static void show()
     {
-        panel = new UICategory();
+        panel = new RoundCornerPanel();
+        panel.setLayout(new BorderLayout());
 
-        panel.add(new JButton("test2"));
+        SidePanel.show();
+        InstancePanel.show();
 
         Main.client.add(panel);
     }

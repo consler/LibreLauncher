@@ -1,7 +1,8 @@
 package net.consler.librelauncher;
 
 import com.formdev.flatlaf.FlatDarkLaf;
-import net.consler.librelauncher.ui.category.Home;
+import net.consler.librelauncher.ui.ThemeManager;
+import net.consler.librelauncher.ui.category.home.Home;
 import net.consler.librelauncher.ui.Sidebar;
 import net.consler.librelauncher.ui.Titlebar;
 
@@ -17,8 +18,8 @@ public class Main
 
     static void main(String[] args)
     {
+        ThemeManager.init();
         FlatDarkLaf.setup();
-        UIManager.put("Button.arc", 25);
 
         SwingUtilities.invokeLater(() ->
         {
@@ -42,7 +43,7 @@ public class Main
                 }
             });
 
-            Titlebar.show();
+            Titlebar.show(client);
             Sidebar.show();
 
             Home.show();
