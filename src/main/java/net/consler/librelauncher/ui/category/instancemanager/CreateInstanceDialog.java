@@ -107,6 +107,11 @@ public class CreateInstanceDialog
         dialog.setVisible(true);
     }
 
+    public static void close()
+    {
+        dialog.dispose();
+    }
+
     private static void addRow(JPanel panel, String text, JComponent comp)
     {
         GridBagConstraints c = new GridBagConstraints();
@@ -228,7 +233,7 @@ public class CreateInstanceDialog
         }
     }
 
-    private static String getActiveLoader()
+    public static String getActiveLoader()
     {
         if(loaderVanilla.isSelected()) return "Vanilla";
         if(loaderFabric.isSelected()) return "Fabric";

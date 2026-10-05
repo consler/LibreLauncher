@@ -1,9 +1,12 @@
 package net.consler.librelauncher.config.settings;
 
+import dev.dirs.BaseDirectories;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -11,6 +14,7 @@ import java.util.Properties;
 public class InstancesConfig
 {
     public static final File instancesConfigFile = new File(SettingsSaver.configDir.toFile(), "instances.properties");
+    public static final Path instancesDir = Path.of(BaseDirectories.get().dataLocalDir).resolve("LibreLauncher");
 
     public final Map<String, Map<String, String>> instanceCache = new HashMap<>();
     public final Properties properties = new Properties();
