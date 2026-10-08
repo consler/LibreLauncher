@@ -17,7 +17,9 @@ public class Launch
         InstancesConfig instancesConfig = new InstancesConfig();
         AuthManager authManager = new AuthManager();
 
-        LaunchProfile launchProfile = new LaunchProfile.Builder(instancesConfig.getProperty(instanceId, "version"), InstancesConfig.instancesDir.resolve(instanceId))
+        LaunchProfile launchProfile = new LaunchProfile.Builder(
+                instancesConfig.getProperty(instanceId, "version"),
+                InstancesConfig.instancesDir.resolve(instanceId))
                 .withRamMb(new SettingsSaver().getInt("ram", 2048))
                 .build();
         ModloaderProfile modloaderProfile = new ModloaderProfile(
