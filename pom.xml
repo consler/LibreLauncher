@@ -87,6 +87,17 @@
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <shadedClassifierName>universal</shadedClassifierName>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>module-info.class</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>${main.class}</mainClass>
@@ -118,6 +129,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
+                                    <input>${project.build.directory}</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>APP_IMAGE</type>
@@ -147,6 +159,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
+                                    <input>${project.build.directory}</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>EXE</type>
@@ -179,6 +192,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
+                                    <input>${project.build.directory}</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>MSI</type>
@@ -211,6 +225,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
+                                    <input>${project.build.directory}</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>DMG</type>
@@ -241,6 +256,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
+                                    <input>${project.build.directory}</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>PKG</type>
@@ -271,6 +287,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
+                                    <input>${project.build.directory}</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>DEB</type>
@@ -301,6 +318,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
+                                    <input>${project.build.directory}</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>RPM</type>
