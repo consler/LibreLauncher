@@ -179,7 +179,7 @@ public class CreateInstanceDialog
 
         switch(loader)
         {
-            case "Fabric" ->
+            case "fabric" ->
             {
                 List<String> versions = FabricVersions.getVersionsCompatibleWith(Objects.requireNonNull(versionChoice.getSelectedItem()).toString());
 
@@ -188,7 +188,7 @@ public class CreateInstanceDialog
                     SwingUtilities.invokeLater(() -> modLoaderVersionChoice.addItem(version));
                 }
             }
-            case "Forge" ->
+            case "forge" ->
             {
                 List<String> versions = ForgeVersions.getVersionsCompatibleWith(Objects.requireNonNull(versionChoice.getSelectedItem()).toString());
                 for(String version : versions)
@@ -196,7 +196,7 @@ public class CreateInstanceDialog
                     SwingUtilities.invokeLater(() -> modLoaderVersionChoice.addItem(version));
                 }
             }
-            case "NeoForge" ->
+            case "neoforge" ->
             {
                 List<String> versions = NeoforgeVersions.getVersionsCompatibleWith(Objects.requireNonNull(versionChoice.getSelectedItem()).toString());
                 for(String version : versions)
@@ -204,7 +204,7 @@ public class CreateInstanceDialog
                     SwingUtilities.invokeLater(() -> modLoaderVersionChoice.addItem(version));
                 }
             }
-            case "Quilt" ->
+            case "quilt" ->
             {
                 List<String> versions = QuiltVersions.getVersionsCompatibleWith(Objects.requireNonNull(versionChoice.getSelectedItem()).toString());
                 for(String version : versions)
@@ -235,11 +235,11 @@ public class CreateInstanceDialog
 
     public static String getActiveLoader()
     {
-        if(loaderVanilla.isSelected()) return "Vanilla";
-        if(loaderFabric.isSelected()) return "Fabric";
-        if(loaderForge.isSelected()) return "Forge";
-        if(loaderNeoforge.isSelected()) return "NeoForge";
-        if(loaderQuilt.isSelected()) return "Quilt";
+        if(loaderVanilla.isSelected()) return "vanilla";
+        if(loaderFabric.isSelected()) return "fabric";
+        if(loaderForge.isSelected()) return "forge";
+        if(loaderNeoforge.isSelected()) return "neoforge";
+        if(loaderQuilt.isSelected()) return "quilt";
         throw new RuntimeException("Couldn't find an active mod loader button");
     }
 }

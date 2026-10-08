@@ -1,10 +1,14 @@
 package net.consler.librelauncher.ui.category.home;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.launcher.Launch;
+import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class Home
 {
@@ -28,6 +32,14 @@ public class Home
         playButton.setFocusable(false);
         playButton.setBorderPainted(false);
         playButton.setFont(new Font("Arial", Font.BOLD, 16));
+        playButton.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mouseClicked(MouseEvent e)
+            {
+                Launch.launch((String) instances.getSelectedItem());
+            }
+        });
 
         instances = new JComboBox<>();
         instances.setPreferredSize(new Dimension(200, 40));
@@ -44,6 +56,8 @@ public class Home
             "buttonHoverArrowColor: #00000000; " +
             "buttonPressedArrowColor: #00000000;"
         );
+
+        new InstancesConfig().getInstanceList().forEach(instances::addItem);
 
         panel.add(Box.createVerticalGlue());
         panel.add(playButton);

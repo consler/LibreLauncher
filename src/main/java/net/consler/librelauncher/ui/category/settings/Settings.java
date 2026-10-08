@@ -1,7 +1,7 @@
 package net.consler.librelauncher.ui.category.settings;
 
 import net.consler.librelauncher.Main;
-import net.consler.librelauncher.config.settings.SettingsSaver;
+import net.consler.librelauncher.settings.SettingsSaver;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
@@ -16,9 +16,10 @@ public class Settings
     public static CardLayout cardLayout;
 
     public static List<JButton> categoryButtons;
-    public static JButton btnGeneral;
-    public static JButton btnAppearance;
-    public static JButton btnAdvanced;
+    public static JButton generalButton;
+    public static JButton appearanceButton;
+    public static JButton behaviourButton;
+    public static JButton accountsButton;
 
     public static SettingsSaver settingsSaver;
 
@@ -46,15 +47,17 @@ public class Settings
         contentPanel.setOpaque(false);
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
 
-        btnGeneral = new JButton("Minecraft");
-        btnAppearance = new JButton("Appearance");
-        btnAdvanced = new JButton("Behaviour");
+        generalButton = new JButton("Minecraft");
+        appearanceButton = new JButton("Appearance");
+        behaviourButton = new JButton("Behaviour");
+        accountsButton = new JButton("Accounts");
 
-        addCategory(btnGeneral, "Minecraft", MinecraftSettings.createPanel(), categoryPanel);
-        addCategory(btnAppearance, "Appearance", AppearanceSettings.createPanel(), categoryPanel);
-        addCategory(btnAdvanced, "Behaviour", BehaviourSettings.createPanel(), categoryPanel);
+        addCategory(generalButton, "Minecraft", MinecraftSettings.createPanel(), categoryPanel);
+        addCategory(appearanceButton, "Appearance", AppearanceSettings.createPanel(), categoryPanel);
+        addCategory(behaviourButton, "Behaviour", BehaviourSettings.createPanel(), categoryPanel);
+        addCategory(accountsButton, "Accounts", AccountsSettings.createPanel(), categoryPanel);
 
-        if (!categoryButtons.isEmpty()) selectCategory(btnGeneral, "Minecraft");
+        if (!categoryButtons.isEmpty()) selectCategory(generalButton, "Minecraft");
 
         panel.add(categoryPanel, BorderLayout.WEST);
         panel.add(contentPanel, BorderLayout.CENTER);
@@ -72,7 +75,6 @@ public class Settings
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.putClientProperty("JButton.buttonType", "borderless");
 
         button.addActionListener(e -> selectCategory(button, name));
 
@@ -87,16 +89,8 @@ public class Settings
 
         for (JButton button : categoryButtons)
         {
-            if (button == selectedButton)
-            {
-                button.putClientProperty("JButton.buttonType", "square");
-                button.setBackground(new Color(255, 255, 255, 30));
-            }
-            else
-            {
-                button.putClientProperty("JButton.buttonType", "borderless");
-                button.setBackground(null);
-            }
+            if (button == selectedButton) button.setBackground(new Color(255, 255, 255, 30));
+            else button.setBackground(null);
         }
     }
 

@@ -2,7 +2,7 @@ package net.consler.librelauncher.ui;
 
 import com.formdev.flatlaf.*;
 import net.consler.librelauncher.Main;
-import net.consler.librelauncher.config.settings.SettingsSaver;
+import net.consler.librelauncher.settings.SettingsSaver;
 
 import javax.swing.*;
 import java.awt.*;

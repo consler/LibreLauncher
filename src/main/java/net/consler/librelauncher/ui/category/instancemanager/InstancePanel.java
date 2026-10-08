@@ -1,6 +1,8 @@
 package net.consler.librelauncher.ui.category.instancemanager;
 
-import net.consler.librelauncher.config.settings.InstancesConfig;
+import com.formdev.flatlaf.extras.FlatSVGIcon;
+import net.consler.librelauncher.Main;
+import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
@@ -30,16 +32,30 @@ public class InstancePanel
     {
         InstancesConfig instancesConfig = new InstancesConfig();
 
+        instancePanel.removeAll();
+
+        FlatSVGIcon icon = new FlatSVGIcon(Main.class.getResource("icons/play.svg")).derive(12, 12);
+        FlatSVGIcon.ColorFilter filter = new FlatSVGIcon.ColorFilter(color ->  new Color(42, 106, 59));
+        icon.setColorFilter(filter);
+
+
         for(String instanceName : instancesConfig.instanceCache.keySet())
         {
-            JButton instanceButton = new JButton(instanceName);
+            JButton instanceButton = new JButton("  " + instanceName);
 
             instanceButton.setBorderPainted(false);
             instanceButton.setPreferredSize(new Dimension(700, 30));
             instanceButton.setMaximumSize(new Dimension(700, 30));
             instanceButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+            instanceButton.setBackground(instancePanel.getBackground().darker());
+            instanceButton.setHorizontalAlignment(SwingConstants.LEFT);
+            instanceButton.setIcon(icon);
 
+            instancePanel.add(Box.createVerticalStrut(5), BorderLayout.NORTH);
             instancePanel.add(instanceButton);
         }
+
+        instancePanel.revalidate();
+        instancePanel.repaint();
     }
 }

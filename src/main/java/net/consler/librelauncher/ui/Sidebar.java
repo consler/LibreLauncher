@@ -26,19 +26,19 @@ public class Sidebar
         sidebar.setBackground(Main.client.getBackground().darker());
         sidebar.add(Box.createVerticalGlue());
 
-        homeButton = createButton("client/home.svg");
+        homeButton = createButton("icons/home.svg");
         homeButton.addActionListener(e -> setUICategory("home"));
         sidebar.add(homeButton);
 
         sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        instanceManagerButton = createButton("client/instance.svg");
+        instanceManagerButton = createButton("icons/instance.svg");
         instanceManagerButton.addActionListener(e -> setUICategory("instancemanager"));
         sidebar.add(instanceManagerButton);
 
         sidebar.add(Box.createRigidArea(new Dimension(0, 10)));
 
-        settingsButton = createButton("client/settings.svg");
+        settingsButton = createButton("icons/settings.svg");
         settingsButton.addActionListener(e -> setUICategory("settings"));
         sidebar.add(settingsButton);
 

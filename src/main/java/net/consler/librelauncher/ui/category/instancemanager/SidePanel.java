@@ -22,12 +22,14 @@ public class SidePanel
         panel.add(Box.createVerticalStrut(10));
 
         addInstanceButton = createButton("Add Instance");
+        addInstanceButton.setFont(ThemeManager.comfortaaBold);
         addInstanceButton.addActionListener(e -> CreateInstanceDialog.open());
         panel.add(addInstanceButton);
 
         panel.add(Box.createVerticalStrut(10));
 
         instanceFolderButton = createButton("Folder");
+        instanceFolderButton.setFont(ThemeManager.comfortaaBold);
         panel.add(instanceFolderButton);
 
         InstanceManager.panel.add(panel, BorderLayout.EAST);
