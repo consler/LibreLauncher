@@ -1,0 +1,83 @@
+name: Build Native Installers
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch: 
+
+jobs:
+  build-packages:
+    name: Build ${{ matrix.profile }} on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows
+          - os: windows-latest
+            profile: exe
+            artifact-name: LibreLauncher-Windows-EXE
+            artifact-path: target/dist/*.exe
+          - os: windows-latest
+            profile: msi
+            artifact-name: LibreLauncher-Windows-MSI
+            artifact-path: target/dist/*.msi
+          - os: windows-latest
+            profile: app-image
+            artifact-name: LibreLauncher-Windows-AppImage
+            artifact-path: target/dist/LibreLauncher/
+
+          # macOS
+          - os: macos-latest
+            profile: dmg
+            artifact-name: LibreLauncher-macOS-DMG
+            artifact-path: target/dist/*.dmg
+          - os: macos-latest
+            profile: pkg
+            artifact-name: LibreLauncher-macOS-PKG
+            artifact-path: target/dist/*.pkg
+          - os: macos-latest
+            profile: app-image
+            artifact-name: LibreLauncher-macOS-AppImage
+            artifact-path: target/dist/LibreLauncher.app/
+
+          # Linux
+          - os: ubuntu-latest
+            profile: deb
+            artifact-name: LibreLauncher-Linux-DEB
+            artifact-path: target/dist/*.deb
+          - os: ubuntu-latest
+            profile: rpm
+            artifact-name: LibreLauncher-Linux-RPM
+            artifact-path: target/dist/*.rpm
+          - os: ubuntu-latest
+            profile: app-image
+            artifact-name: LibreLauncher-Linux-AppImage
+            artifact-path: target/dist/LibreLauncher/
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Install rpm packaging tools (Linux RPM only)
+        if: matrix.profile == 'rpm'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
+      - name: Build and Package
+        run: mvn clean package -P${{ matrix.profile }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact-name }}
+          path: ${{ matrix.artifact-path }}
+          if-no-files-found: error
