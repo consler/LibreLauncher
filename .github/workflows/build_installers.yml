@@ -1,11 +1,13 @@
-name: Build Native Installers
+name: Build and Release Installers
 
 on:
   push:
     branches: [ "main" ]
+    tags:
+      - '*'
   pull_request:
     branches: [ "main" ]
-  workflow_dispatch: 
+  workflow_dispatch:
 
 jobs:
   build-packages:
@@ -28,6 +30,7 @@ jobs:
             profile: app-image
             artifact-name: LibreLauncher-Windows-AppImage
             artifact-path: target/dist/LibreLauncher/
+            is-folder: true
 
           # macOS
           - os: macos-latest
@@ -42,6 +45,7 @@ jobs:
             profile: app-image
             artifact-name: LibreLauncher-macOS-AppImage
             artifact-path: target/dist/LibreLauncher.app/
+            is-folder: true
 
           # Linux
           - os: ubuntu-latest
@@ -56,6 +60,7 @@ jobs:
             profile: app-image
             artifact-name: LibreLauncher-Linux-AppImage
             artifact-path: target/dist/LibreLauncher/
+            is-folder: true
 
     steps:
       - name: Checkout Code
@@ -75,9 +80,49 @@ jobs:
       - name: Build and Package
         run: mvn clean package -P${{ matrix.profile }}
 
+      - name: Compress AppImage Folder (Windows/Linux)
+        if: matrix.is-folder == true && matrix.os != 'macos-latest'
+        run: |
+          cd target/dist
+          tar -czf LibreLauncher-${{ matrix.profile }}-${{ matrix.os }}.tar.gz LibreLauncher
+
+      - name: Compress AppImage Folder (macOS)
+        if: matrix.is-folder == true && matrix.os == 'macos-latest'
+        run: |
+          cd target/dist
+          zip -r LibreLauncher-${{ matrix.profile }}-macos.zip LibreLauncher.app
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
-          path: ${{ matrix.artifact-path }}
+          path: |
+            ${{ matrix.artifact-path }}
+            target/dist/*.tar.gz
+            target/dist/*.zip
           if-no-files-found: error
+
+  publish-release:
+    needs: build-packages
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-artifacts
+          merge-eliminate: true
+
+      - name: Release and Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            all-artifacts/*
+          draft: false
+          prerelease: false
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
+          name: "LibreLauncher ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}"
+          body: |
+            Automated build containing all native installers and app images for LibreLauncher.
