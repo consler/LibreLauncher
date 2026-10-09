@@ -109,13 +109,19 @@ jobs:
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
         with:
-          path: all-artifacts
+          path: final-release-assets
+          pattern: LibreLauncher-*
           merge-multiple: true
+
+      - name: Verify Files (Debug)
+        run: |
+          echo "Here is exactly what was downloaded:"
+          ls -R final-release-assets
 
       - name: Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
-          files: all-artifacts/**/*
+          files: final-release-assets/**
           draft: false
           prerelease: false
           tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
