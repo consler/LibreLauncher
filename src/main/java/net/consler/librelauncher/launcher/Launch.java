@@ -17,6 +17,9 @@ public class Launch
         InstancesConfig instancesConfig = new InstancesConfig();
         AuthManager authManager = new AuthManager();
 
+        if(authManager.getActiveAccount() == null) return;
+        if (instancesConfig.getProperty(instanceId, "version") == null) return;
+
         LaunchProfile launchProfile = new LaunchProfile.Builder(
                 instancesConfig.getProperty(instanceId, "version"),
                 InstancesConfig.instancesDir.resolve(instanceId))
@@ -28,5 +31,10 @@ public class Launch
         AuthProfile authProfile = authManager.getActiveAccount().getAuthProfile();
 
          Process p = launcher.launch(launchProfile, authProfile, modloaderProfile);
+
+         if(new SettingsSaver().get("close_after_launch").equals("true"))
+         {
+             System.exit(0);
+         }
     }
 }

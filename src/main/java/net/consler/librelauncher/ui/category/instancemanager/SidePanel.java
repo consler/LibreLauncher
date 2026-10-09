@@ -1,10 +1,14 @@
 package net.consler.librelauncher.ui.category.instancemanager;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.settings.InstancesConfig;
+import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.ThemeManager;
+import net.consler.librelauncher.util.SystemUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class SidePanel
 {
@@ -30,6 +34,17 @@ public class SidePanel
 
         instanceFolderButton = createButton("Folder");
         instanceFolderButton.setFont(ThemeManager.comfortaaBold);
+        instanceFolderButton.addActionListener(e ->
+        {
+            try
+            {
+                SystemUtils.openDirectory(InstancesConfig.instancesDir.toFile());
+            }
+            catch (IOException ex)
+            {
+                new ErrorDialog(Main.client, ex, "opening folder");
+            }
+        });
         panel.add(instanceFolderButton);
 
         InstanceManager.panel.add(panel, BorderLayout.EAST);
