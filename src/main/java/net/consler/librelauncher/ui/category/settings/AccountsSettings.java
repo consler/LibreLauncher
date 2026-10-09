@@ -1,6 +1,8 @@
 package net.consler.librelauncher.ui.category.settings;
 
+import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.AuthManager;
+import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncherlib.auth.AuthProfile;
 import net.consler.librelauncherlib.auth.MicrosoftAuthenticator;
 
@@ -48,7 +50,17 @@ public class AccountsSettings
         JButton addOnlineBtn = new JButton("Add Online Account");
         JButton addOfflineBtn = new JButton("Add Offline Account");
 
-        addOnlineBtn.addActionListener(e -> addOnlineAccount());
+        addOnlineBtn.addActionListener(e ->
+        {
+            try
+            {
+                addOnlineAccount();
+            }
+            catch (Exception ex)
+            {
+                new ErrorDialog(Main.client, ex, "logging into account");
+            }
+        });
         addOfflineBtn.addActionListener(e -> addOfflineAccount());
 
         bottomPanel.add(addOnlineBtn);

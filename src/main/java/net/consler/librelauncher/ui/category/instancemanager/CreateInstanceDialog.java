@@ -235,11 +235,10 @@ public class CreateInstanceDialog
 
     public static String getActiveLoader()
     {
-        if(loaderVanilla.isSelected()) return "vanilla";
         if(loaderFabric.isSelected()) return "fabric";
         if(loaderForge.isSelected()) return "forge";
         if(loaderNeoforge.isSelected()) return "neoforge";
         if(loaderQuilt.isSelected()) return "quilt";
-        throw new RuntimeException("Couldn't find an active mod loader button");
+        return "vanilla";
     }
 }
