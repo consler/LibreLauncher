@@ -5,6 +5,7 @@ import net.consler.librelauncher.settings.AuthManager;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncherlib.auth.AuthProfile;
 import net.consler.librelauncherlib.auth.MicrosoftAuthenticator;
+import net.consler.librelauncherlib.exception.UserCancelledException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -181,7 +182,7 @@ public class AccountsSettings
     private static void addOfflineAccount()
     {
         String username = JOptionPane.showInputDialog(
-                panel,
+                Main.client,
                 "Enter offline username:",
                 "Add Offline Account",
                 JOptionPane.PLAIN_MESSAGE
@@ -206,14 +207,9 @@ public class AccountsSettings
                 }))
                 .exceptionally(e ->
                 {
-                    SwingUtilities.invokeLater(() ->
-                            JOptionPane.showMessageDialog(
-                                panel,
-                                "Failed to authenticate online account:\n" + e.getLocalizedMessage(),
-                                "Authentication Error",
-                                JOptionPane.ERROR_MESSAGE
-                        ));
-                    return null;
+                    if (e instanceof UserCancelledException)
+                        return null;
+                    throw new RuntimeException("Failed to authenticate online account", e);
                 });
     }
 }

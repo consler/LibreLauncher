@@ -1,7 +1,7 @@
 package net.consler.librelauncher.ui.category.home;
 
 import net.consler.librelauncher.Main;
-import net.consler.librelauncher.launcher.Launch;
+import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
@@ -40,7 +40,7 @@ public class Home
             {
                 try
                 {
-                    Launch.launch((String) instances.getSelectedItem());
+                    Launcher.launch((String) instances.getSelectedItem());
                 }
                 catch (Exception ex)
                 {

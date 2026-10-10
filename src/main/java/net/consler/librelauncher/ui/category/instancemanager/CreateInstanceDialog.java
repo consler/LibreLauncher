@@ -101,6 +101,8 @@ public class CreateInstanceDialog
         dialog.getRootPane().setDefaultButton(createButton);
         dialog.getRootPane().registerKeyboardAction(e -> dialog.dispose(), KeyStroke.getKeyStroke("ESCAPE"), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
+        ThemeManager.silentField(nameField);
+
         dialog.pack();
         dialog.setShape(new RoundRectangle2D.Double(0, 0, dialog.getWidth(), dialog.getHeight(), 20, 20));
         dialog.setLocationRelativeTo(Main.client);

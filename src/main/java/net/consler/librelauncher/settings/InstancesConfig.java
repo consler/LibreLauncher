@@ -86,4 +86,11 @@ public class InstancesConfig
     {
         return new ArrayList<>(instanceCache.keySet());
     }
+
+    public void deleteInstance(String instanceName)
+    {
+        instancesDir.resolve(instanceName).toFile().delete();
+        instanceCache.remove(instanceName);
+        save();
+    }
 }

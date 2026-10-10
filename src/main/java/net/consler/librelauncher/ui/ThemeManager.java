@@ -5,7 +5,9 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.SettingsSaver;
 
 import javax.swing.*;
+import javax.swing.text.DefaultEditorKit;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
@@ -88,6 +90,31 @@ public class ThemeManager
         catch (FontFormatException | IOException e)
         {
             throw new RuntimeException(e);
+        }
+    }
+
+    public static void silentField(JTextField textField)
+    {
+        textField.getActionMap().put(DefaultEditorKit.beepAction, new AbstractAction()
+        {
+            @Override
+            public void actionPerformed(ActionEvent e) {}
+        });
+
+        Action deleteAction = textField.getActionMap().get(DefaultEditorKit.deletePrevCharAction);
+        if (deleteAction != null)
+        {
+            textField.getActionMap().put(DefaultEditorKit.deletePrevCharAction, new AbstractAction()
+            {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    if (textField.getDocument().getLength() > 0)
+                    {
+                        deleteAction.actionPerformed(e);
+                    }
+                }
+            });
         }
     }
 }
