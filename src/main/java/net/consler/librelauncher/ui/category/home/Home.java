@@ -19,8 +19,13 @@ public class Home
 
     public static void show()
     {
-        panel = new RoundCornerPanel();
+        if (panel != null)
+        {
+            Main.showPage("home");
+            return;
+        }
 
+        panel = new RoundCornerPanel();
         panel.setOpaque(false);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
@@ -73,11 +78,7 @@ public class Home
         panel.add(instances);
         panel.add(Box.createVerticalGlue());
 
-        Main.client.add(panel);
-    }
-
-    public static void hide()
-    {
-        if (panel != null) Main.client.remove(panel);
+        Main.pageContainer.add(panel, "home");
+        Main.showPage("home");
     }
 }

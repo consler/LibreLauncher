@@ -73,28 +73,13 @@ public class Sidebar
 
         switch (category)
         {
-            case "home" ->
-            {
-                Settings.hide();
-                InstanceManager.hide();
-                Home.show();
-            }
-            case "instancemanager" ->
-            {
-                Settings.hide();
-                Home.hide();
-                InstanceManager.show();
-            }
-            case "settings" ->
-            {
-                Home.hide();
-                InstanceManager.hide();
-                Settings.show();
+            case "home" -> Home.show();
+            case "instancemanager" -> InstanceManager.show();
+            case "settings" -> Settings.show();
+            default -> {
+                return;
             }
         }
-
-        Main.client.revalidate();
-        Main.client.repaint();
 
         currentCategory = category;
     }

@@ -25,6 +25,12 @@ public class Settings
 
     public static void show()
     {
+        if (panel != null)
+        {
+            Main.showPage("settings");
+            return;
+        }
+
         settingsSaver = new SettingsSaver();
 
         panel = new RoundCornerPanel();
@@ -62,7 +68,8 @@ public class Settings
         panel.add(categoryPanel, BorderLayout.WEST);
         panel.add(contentPanel, BorderLayout.CENTER);
 
-        Main.client.add(panel, BorderLayout.CENTER);
+        Main.pageContainer.add(panel, "settings");
+        Main.showPage("settings");
     }
 
     private static void addCategory(JButton button, String name, JPanel content, JPanel categoryPanel)
@@ -103,8 +110,4 @@ public class Settings
         return label;
     }
 
-    public static void hide()
-    {
-        if (panel != null) Main.client.remove(panel);
-    }
 }

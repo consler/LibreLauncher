@@ -14,6 +14,8 @@ import java.awt.geom.RoundRectangle2D;
 public class Main
 {
     public static JFrame client;
+    public static JPanel pageContainer;
+    public static CardLayout pageLayout;
 
     static void main(String[] args)
     {
@@ -30,6 +32,11 @@ public class Main
             client.setUndecorated(true);
 
             client.getContentPane().setBackground(client.getBackground().darker());
+
+            pageLayout = new CardLayout();
+            pageContainer = new JPanel(pageLayout);
+            pageContainer.setOpaque(false);
+            client.add(pageContainer, BorderLayout.CENTER);
 
             client.setShape(new RoundRectangle2D.Double(0, 0, 800, 500, 20, 20));
             client.addComponentListener(new ComponentAdapter()
@@ -48,5 +55,10 @@ public class Main
 
             client.setVisible(true);
         });
+    }
+
+    public static void showPage(String name)
+    {
+        pageLayout.show(pageContainer, name);
     }
 }

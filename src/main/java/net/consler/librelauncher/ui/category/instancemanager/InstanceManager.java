@@ -11,17 +11,19 @@ public class InstanceManager
     public static JPanel panel;
     public static void show()
     {
+        if (panel != null)
+        {
+            Main.showPage("instancemanager");
+            return;
+        }
+
         panel = new RoundCornerPanel();
         panel.setLayout(new BorderLayout());
 
         SidePanel.show();
         InstancePanel.show();
 
-        Main.client.add(panel);
-    }
-
-    public static void hide()
-    {
-        if (panel != null) Main.client.remove(panel);
+        Main.pageContainer.add(panel, "instancemanager");
+        Main.showPage("instancemanager");
     }
 }
