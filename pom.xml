@@ -11,9 +11,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <junit.version>5.12.1</junit.version>
-        <javafx.version>25.0.4</javafx.version>
         <main.class>net.consler.librelauncher.Main</main.class>
+        <app.name>LibreLauncher</app.name>
     </properties>
 
     <repositories>
@@ -42,7 +41,6 @@
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf-extras</artifactId>
             <version>3.7.2</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
@@ -62,21 +60,48 @@
     </dependencies>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.panteleyev</groupId>
+                    <artifactId>jpackage-maven-plugin</artifactId>
+                    <version>1.6.0</version>
+                    <executions>
+                        <execution>
+                            <id>jpackage</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>jpackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <name>${app.name}</name>
+                        <appVersion>${project.version}</appVersion>
+                        <vendor>net.consler</vendor>
+                        <destination>${project.build.directory}/dist</destination>
+                        <input>${project.build.directory}/jpackage-input</input>
+                        <mainJar>${project.build.finalName}-universal.jar</mainJar>
+                        <mainClass>${main.class}</mainClass>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <source>25</source>
-                    <target>25</target>
+                    <release>25</release>
                 </configuration>
             </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.2</version>
+                <version>3.6.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -95,12 +120,17 @@
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
                                         <exclude>module-info.class</exclude>
+                                        <exclude>META-INF/versions/*/module-info.class</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
                             <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>${main.class}</mainClass>
+                                    <manifestEntries>
+                                        <Multi-Release>true</Multi-Release>
+                                    </manifestEntries>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -111,7 +141,7 @@
     </build>
 
     <profiles>
-        <!--APP-IMAGE-->
+        <!-- APP IMAGE -->
         <profile>
             <id>app-image</id>
             <build>
@@ -119,29 +149,15 @@
                     <plugin>
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>1.6.0</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals><goal>jpackage</goal></goals>
-                                <configuration>
-                                    <name>LibreLauncher</name>
-                                    <appVersion>2.1</appVersion>
-                                    <vendor>net.consler</vendor>
-                                    <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}/jpackage-input</input>
-                                    <mainJar>${project.build.finalName}-universal.jar</mainJar>
-                                    <mainClass>${main.class}</mainClass>
-                                    <type>APP_IMAGE</type>
-                                </configuration>
-                            </execution>
-                        </executions>
+                        <configuration>
+                            <type>APP_IMAGE</type>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
 
-        <!--WINDOWS EXE-->
+        <!-- WINDOWS EXE -->
         <profile>
             <id>exe</id>
             <build>
@@ -149,32 +165,18 @@
                     <plugin>
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>1.6.0</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals><goal>jpackage</goal></goals>
-                                <configuration>
-                                    <name>LibreLauncher</name>
-                                    <appVersion>2.1</appVersion>
-                                    <vendor>net.consler</vendor>
-                                    <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}/jpackage-input</input>
-                                    <mainJar>${project.build.finalName}-universal.jar</mainJar>
-                                    <mainClass>${main.class}</mainClass>
-                                    <type>EXE</type>
-                                    <winDirChooser>true</winDirChooser>
-                                    <winShortcut>true</winShortcut>
-                                    <winMenu>true</winMenu>
-                                </configuration>
-                            </execution>
-                        </executions>
+                        <configuration>
+                            <type>EXE</type>
+                            <winDirChooser>true</winDirChooser>
+                            <winShortcut>true</winShortcut>
+                            <winMenu>true</winMenu>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
 
-        <!--WINDOWS MSI-->
+        <!-- WINDOWS MSI -->
         <profile>
             <id>msi</id>
             <build>
@@ -182,32 +184,18 @@
                     <plugin>
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>1.6.0</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals><goal>jpackage</goal></goals>
-                                <configuration>
-                                    <name>LibreLauncher</name>
-                                    <appVersion>2.1</appVersion>
-                                    <vendor>net.consler</vendor>
-                                    <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}/jpackage-input</input>
-                                    <mainJar>${project.build.finalName}-universal.jar</mainJar>
-                                    <mainClass>${main.class}</mainClass>
-                                    <type>MSI</type>
-                                    <winDirChooser>true</winDirChooser>
-                                    <winShortcut>true</winShortcut>
-                                    <winMenu>true</winMenu>
-                                </configuration>
-                            </execution>
-                        </executions>
+                        <configuration>
+                            <type>MSI</type>
+                            <winDirChooser>true</winDirChooser>
+                            <winShortcut>true</winShortcut>
+                            <winMenu>true</winMenu>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
 
-        <!--MACOS DMG-->
+        <!-- MACOS DMG -->
         <profile>
             <id>dmg</id>
             <build>
@@ -215,30 +203,16 @@
                     <plugin>
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>1.6.0</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals><goal>jpackage</goal></goals>
-                                <configuration>
-                                    <name>LibreLauncher</name>
-                                    <appVersion>2.1</appVersion>
-                                    <vendor>net.consler</vendor>
-                                    <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}/jpackage-input</input>
-                                    <mainJar>${project.build.finalName}-universal.jar</mainJar>
-                                    <mainClass>${main.class}</mainClass>
-                                    <type>DMG</type>
-                                    <macPackageName>LibreLauncher</macPackageName>
-                                </configuration>
-                            </execution>
-                        </executions>
+                        <configuration>
+                            <type>DMG</type>
+                            <macPackageName>${app.name}</macPackageName>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
 
-        <!--MACOS PKG-->
+        <!-- MACOS PKG -->
         <profile>
             <id>pkg</id>
             <build>
@@ -246,30 +220,16 @@
                     <plugin>
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>1.6.0</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals><goal>jpackage</goal></goals>
-                                <configuration>
-                                    <name>LibreLauncher</name>
-                                    <appVersion>2.1</appVersion>
-                                    <vendor>net.consler</vendor>
-                                    <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}/jpackage-input</input>
-                                    <mainJar>${project.build.finalName}-universal.jar</mainJar>
-                                    <mainClass>${main.class}</mainClass>
-                                    <type>PKG</type>
-                                    <macPackageName>LibreLauncher</macPackageName>
-                                </configuration>
-                            </execution>
-                        </executions>
+                        <configuration>
+                            <type>PKG</type>
+                            <macPackageName>${app.name}</macPackageName>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
 
-        <!--LINUX DEB-->
+        <!-- LINUX DEB -->
         <profile>
             <id>deb</id>
             <build>
@@ -277,30 +237,16 @@
                     <plugin>
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>1.6.0</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals><goal>jpackage</goal></goals>
-                                <configuration>
-                                    <name>LibreLauncher</name>
-                                    <appVersion>2.1</appVersion>
-                                    <vendor>net.consler</vendor>
-                                    <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}/jpackage-input</input>
-                                    <mainJar>${project.build.finalName}-universal.jar</mainJar>
-                                    <mainClass>${main.class}</mainClass>
-                                    <type>DEB</type>
-                                    <linuxShortcut>true</linuxShortcut>
-                                </configuration>
-                            </execution>
-                        </executions>
+                        <configuration>
+                            <type>DEB</type>
+                            <linuxShortcut>true</linuxShortcut>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
         </profile>
 
-        <!--LINUX RPM-->
+        <!-- LINUX RPM -->
         <profile>
             <id>rpm</id>
             <build>
@@ -308,24 +254,10 @@
                     <plugin>
                         <groupId>org.panteleyev</groupId>
                         <artifactId>jpackage-maven-plugin</artifactId>
-                        <version>1.6.0</version>
-                        <executions>
-                            <execution>
-                                <phase>package</phase>
-                                <goals><goal>jpackage</goal></goals>
-                                <configuration>
-                                    <name>LibreLauncher</name>
-                                    <appVersion>2.1</appVersion>
-                                    <vendor>net.consler</vendor>
-                                    <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}/jpackage-input</input>
-                                    <mainJar>${project.build.finalName}-universal.jar</mainJar>
-                                    <mainClass>${main.class}</mainClass>
-                                    <type>RPM</type>
-                                    <linuxShortcut>true</linuxShortcut>
-                                </configuration>
-                            </execution>
-                        </executions>
+                        <configuration>
+                            <type>RPM</type>
+                            <linuxShortcut>true</linuxShortcut>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>
