@@ -25,7 +25,6 @@ public class AccountsSettings
         panel = new JPanel();
         panel.setOpaque(false);
         panel.setLayout(new BorderLayout(0, 12));
-        panel.setBorder(new EmptyBorder(12, 16, 12, 16));
 
         JPanel headerPanel = new JPanel();
         headerPanel.setOpaque(false);

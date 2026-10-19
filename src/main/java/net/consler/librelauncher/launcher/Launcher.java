@@ -4,6 +4,8 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.AuthManager;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.settings.SettingsSaver;
+import net.consler.librelauncher.ui.ErrorDialog;
+import net.consler.librelauncher.ui.category.instancemanager.InstancePanel;
 import net.consler.librelauncherlib.auth.AuthProfile;
 import net.consler.librelauncherlib.launch.LaunchProfile;
 import net.consler.librelauncherlib.launch.MinecraftLauncher;
@@ -11,6 +13,7 @@ import net.consler.librelauncherlib.modloader.ModloaderProfile;
 import net.consler.librelauncherlib.util.SystemHelper;
 
 import javax.swing.*;
+import java.io.IOException;
 import java.nio.file.Path;
 
 public class Launcher
@@ -18,8 +21,6 @@ public class Launcher
     public static void launch(String instanceId)
     {
         SettingsSaver settingsSaver = new SettingsSaver();
-
-        MinecraftLauncher launcher = new MinecraftLauncher();
 
         InstancesConfig instancesConfig = new InstancesConfig();
         AuthManager authManager = new AuthManager();
@@ -52,17 +53,50 @@ public class Launcher
                 InstancesConfig.instancesDir.resolve(instanceId))
                 .withJavaPath(javaPath)
                 .withRamMb(settingsSaver.getInt("ram", 2048))
+                .linkProcess(false)
                 .build();
         ModloaderProfile modloaderProfile = new ModloaderProfile(
                 instancesConfig.getProperty(instanceId, "modloader"),
                 instancesConfig.getProperty(instanceId, "modloader_version"));
         AuthProfile authProfile = authManager.getActiveAccount().getAuthProfile();
 
-         Process p = launcher.launch(launchProfile, authProfile, modloaderProfile);
+        MinecraftLauncher launcher;
+        try
+        {
+            launcher = new MinecraftLauncher(launchProfile, authProfile, modloaderProfile);
+        }
+        catch (IOException e)
+        {
+            new ErrorDialog(Main.client, e, "launching");
+            throw new RuntimeException(e);
+        }
+
+        Process gameProcess;
+        try
+        {
+            gameProcess = launcher.launch();
+        }
+        catch (IOException e)
+        {
+            new ErrorDialog(Main.client, e, "launching");
+            throw new RuntimeException(e);
+        }
+
+        instancesConfig.saveProperty(instanceId, "pid", String.valueOf(gameProcess.pid()));
+        instancesConfig.save();
+
+        InstancePanel.populate();
 
          if(settingsSaver.get("close_after_launch").equals("true"))
          {
              System.exit(0);
          }
+
+         gameProcess.onExit().thenAccept(action ->
+         {
+             instancesConfig.saveProperty(instanceId, "pid", null);
+             instancesConfig.save();
+             InstancePanel.populate();
+         });
     }
 }

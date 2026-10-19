@@ -5,11 +5,15 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
+import net.consler.librelauncher.ui.category.home.Home;
+import net.consler.librelauncher.util.SystemUtils;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import static net.consler.librelauncher.util.SystemUtils.isRunningAndClean;
 
 public class InstancePanel
 {
@@ -37,9 +41,13 @@ public class InstancePanel
 
         instancePanel.removeAll();
 
-        FlatSVGIcon icon = new FlatSVGIcon(Main.class.getResource("icons/play.svg")).derive(12, 12);
+        FlatSVGIcon playIcon = new FlatSVGIcon(Main.class.getResource("icons/play.svg")).derive(16, 16);
         FlatSVGIcon.ColorFilter filter = new FlatSVGIcon.ColorFilter(color -> new Color(63, 151, 86));
-        icon.setColorFilter(filter);
+        playIcon.setColorFilter(filter);
+
+        FlatSVGIcon stopIcon = new FlatSVGIcon(Main.class.getResource("icons/pause.svg")).derive(16, 16);
+        FlatSVGIcon.ColorFilter filter2 = new FlatSVGIcon.ColorFilter(color -> new Color(255, 50, 50, 100));
+        stopIcon.setColorFilter(filter2);
 
         for (String instanceName : instancesConfig.instanceCache.keySet())
         {
@@ -59,15 +67,27 @@ public class InstancePanel
                     {
                         JPopupMenu contextMenu = new JPopupMenu();
 
-                        JMenuItem launch = new JMenuItem("Launcher");
-                        launch.addActionListener(ev -> Launcher.launch(instanceName));
+                        if(isRunningAndClean(instanceName))
+                        {
+                            JMenuItem launch = new JMenuItem("Stop");
+                            launch.addActionListener(ev -> SystemUtils.killInstance(instanceName));
+                            contextMenu.add(launch);
+                            populate();
+                        }
+                        else
+                        {
+                            JMenuItem launch = new JMenuItem("Launch");
+                            launch.addActionListener(ev -> Launcher.launch(instanceName));
+                            contextMenu.add(launch);
+                            populate();
+                        }
                         JMenuItem delete = new JMenuItem("Delete");
                         delete.addActionListener(ev ->
                         {
+                            SystemUtils.killInstance(instanceName);
                             instancesConfig.deleteInstance(instanceName);
                             populate();
                         });
-                        contextMenu.add(launch);
                         contextMenu.add(delete);
 
                         contextMenu.show(e.getComponent(), e.getX(), e.getY());
@@ -75,15 +95,28 @@ public class InstancePanel
                 }
             });
 
-            JButton playButton = new JButton(icon);
+            JButton playButton = new JButton();
+            playButton.setIcon(isRunningAndClean(instanceName) ? stopIcon : playIcon);
             playButton.setBorderPainted(false);
             playButton.setFocusPainted(false);
             playButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
             playButton.setContentAreaFilled(true);
             playButton.setBackground(rowPanel.getBackground());
-            playButton.setPreferredSize(new Dimension(28, 22));
+            playButton.setPreferredSize(new Dimension(20, 20));
+            playButton.setHorizontalTextPosition(AbstractButton.CENTER);
+            playButton.setVerticalTextPosition(AbstractButton.CENTER);
 
-            playButton.addActionListener(e -> Launcher.launch(instanceName));
+            playButton.addActionListener(e ->
+                    {
+                        if(isRunningAndClean(instanceName))
+                        {
+                            SystemUtils.killInstance(instanceName);
+                        }
+                        else
+                        {
+                            Launcher.launch(instanceName);
+                        }
+                    });
 
             JLabel nameLabel = new JLabel(instanceName);
 
@@ -96,5 +129,7 @@ public class InstancePanel
 
         instancePanel.revalidate();
         instancePanel.repaint();
+
+        Home.populate();
     }
 }

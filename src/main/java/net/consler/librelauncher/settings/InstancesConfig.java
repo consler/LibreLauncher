@@ -4,16 +4,21 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import dev.dirs.BaseDirectories;
+import net.consler.librelauncher.Main;
+import net.consler.librelauncher.ui.ErrorDialog;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class InstancesConfig
 {
@@ -89,7 +94,32 @@ public class InstancesConfig
 
     public void deleteInstance(String instanceName)
     {
-        instancesDir.resolve(instanceName).toFile().delete();
+        Path instancePath = instancesDir.resolve(instanceName);
+
+        if (Files.exists(instancePath))
+        {
+            try (Stream<Path> walk = Files.walk(instancePath))
+            {
+                walk.sorted(Comparator.reverseOrder())
+                        .forEach(path ->
+                        {
+                            try
+                            {
+                                Files.delete(path);
+                            } catch (IOException e)
+                            {
+                                new ErrorDialog(Main.client, e, "deleting instance");
+                                throw new RuntimeException(e);
+                            }
+                        });
+            }
+            catch (IOException e)
+            {
+                new ErrorDialog(Main.client, e, "deleting instance");
+                throw new RuntimeException(e);
+            }
+        }
+
         instanceCache.remove(instanceName);
         save();
     }

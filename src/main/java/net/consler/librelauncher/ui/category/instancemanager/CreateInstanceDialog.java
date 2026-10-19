@@ -76,9 +76,6 @@ public class CreateInstanceDialog
         createButton.putClientProperty("JComponent.minimumWidth", 150);
         progressBar.setPreferredSize(new Dimension(100, 8));
 
-        cancelButton.addActionListener(e -> dialog.dispose());
-        createButton.addActionListener(e -> Download.createInstance());
-
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttons.add(cancelButton);
         buttons.add(createButton);
@@ -102,6 +99,26 @@ public class CreateInstanceDialog
         dialog.getRootPane().registerKeyboardAction(e -> dialog.dispose(), KeyStroke.getKeyStroke("ESCAPE"), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
         ThemeManager.silentField(nameField);
+
+        cancelButton.addActionListener(e -> dialog.dispose());
+        createButton.addActionListener(e ->
+        {
+            if(nameField.getText().trim().isEmpty()) return;
+
+            nameField.setEnabled(false);
+            versionChoice.setEnabled(false);
+            modLoaderVersionChoice.setEnabled(false);
+            modLoaderVersionChoice.setEnabled(false);
+            loaderVanilla.setEnabled(false);
+            loaderFabric.setEnabled(false);
+            loaderForge.setEnabled(false);
+            loaderQuilt.setSelected(false);
+            loaderNeoforge.setSelected(false);
+            progressBar.setEnabled(false);
+            progressBar.setEnabled(false);
+
+            Download.createInstance();
+        });
 
         dialog.pack();
         dialog.setShape(new RoundRectangle2D.Double(0, 0, dialog.getWidth(), dialog.getHeight(), 20, 20));

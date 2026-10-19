@@ -4,12 +4,15 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import static net.consler.librelauncher.util.SystemUtils.isRunningAndClean;
 
 public class Home
 {
@@ -37,22 +40,7 @@ public class Home
         playButton.setForeground(Color.WHITE);
         playButton.setFocusable(false);
         playButton.setBorderPainted(false);
-        playButton.setFont(new Font("Arial", Font.BOLD, 16));
-        playButton.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mouseClicked(MouseEvent e)
-            {
-                try
-                {
-                    Launcher.launch((String) instances.getSelectedItem());
-                }
-                catch (Exception ex)
-                {
-                    new ErrorDialog(Main.client, ex, "launching");
-                }
-            }
-        });
+        playButton.setFont(ThemeManager.comfortaaBold.deriveFont(18f));
 
         instances = new JComboBox<>();
         instances.setPreferredSize(new Dimension(200, 40));
@@ -69,8 +57,28 @@ public class Home
             "buttonHoverArrowColor: #00000000; " +
             "buttonPressedArrowColor: #00000000;"
         );
+        instances.addActionListener(l ->
+        {
+            playButton.setEnabled(!isRunningAndClean(String.valueOf(instances.getSelectedItem())));
+        });
 
         new InstancesConfig().getInstanceList().forEach(instances::addItem);
+
+        playButton.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mouseClicked(MouseEvent e)
+            {
+                try
+                {
+                    Launcher.launch((String) instances.getSelectedItem());
+                }
+                catch (Exception ex)
+                {
+                    new ErrorDialog(Main.client, ex, "launching");
+                }
+            }
+        });
 
         panel.add(Box.createVerticalGlue());
         panel.add(playButton);
@@ -80,5 +88,11 @@ public class Home
 
         Main.pageContainer.add(panel, "home");
         Main.showPage("home");
+    }
+
+    public static void populate()
+    {
+        instances.removeAllItems();
+        new InstancesConfig().getInstanceList().forEach(instances::addItem);
     }
 }

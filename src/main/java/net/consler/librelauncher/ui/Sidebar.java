@@ -76,9 +76,6 @@ public class Sidebar
             case "home" -> Home.show();
             case "instancemanager" -> InstanceManager.show();
             case "settings" -> Settings.show();
-            default -> {
-                return;
-            }
         }
 
         currentCategory = category;
