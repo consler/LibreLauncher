@@ -13,13 +13,19 @@ import javax.swing.*;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class Download
+public class Downloader
 {
-    public static void createInstance()
+    private volatile MinecraftInstaller installer;
+    private Thread t;
+    public Downloader()
     {
-        MinecraftInstaller installer = new MinecraftInstaller();
+    }
 
-        new Thread(()->
+    public void createInstance()
+    {
+        installer = new MinecraftInstaller();
+
+        t = new Thread(()->
         {
             installer.setListener(new InstallerListener()
             {
@@ -71,7 +77,12 @@ public class Download
                     new ModloaderProfile(CreateInstanceDialog.getActiveLoader(), Objects.requireNonNullElse(CreateInstanceDialog.modLoaderVersionChoice.getSelectedItem(), "").toString()),
                     Path.of(new SettingsSaver().get("java_path", SystemHelper.getJavaBin().toString())));
 
-        }).start();
+        });
+        t.start();
+    }
 
+    public void cancelInstanceCreation()
+    {
+        if (t != null) t.interrupt();
     }
 }

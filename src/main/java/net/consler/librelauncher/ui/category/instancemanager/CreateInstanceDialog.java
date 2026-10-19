@@ -1,7 +1,7 @@
 package net.consler.librelauncher.ui.category.instancemanager;
 
 import net.consler.librelauncher.Main;
-import net.consler.librelauncher.launcher.Download;
+import net.consler.librelauncher.launcher.Downloader;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.Titlebar;
 import net.consler.librelauncherlib.versions.*;
@@ -100,7 +100,13 @@ public class CreateInstanceDialog
 
         ThemeManager.silentField(nameField);
 
-        cancelButton.addActionListener(e -> dialog.dispose());
+        Downloader downloader = new Downloader();
+
+        cancelButton.addActionListener(e ->
+        {
+            downloader.cancelInstanceCreation();
+            dialog.dispose();
+        });
         createButton.addActionListener(e ->
         {
             if(nameField.getText().trim().isEmpty()) return;
@@ -117,7 +123,7 @@ public class CreateInstanceDialog
             progressBar.setEnabled(false);
             progressBar.setEnabled(false);
 
-            Download.createInstance();
+            downloader.createInstance();
         });
 
         dialog.pack();

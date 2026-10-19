@@ -6,7 +6,9 @@ import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.settings.SettingsSaver;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.category.instancemanager.InstancePanel;
+import net.consler.librelauncher.ui.category.settings.Account;
 import net.consler.librelauncherlib.auth.AuthProfile;
+import net.consler.librelauncherlib.exception.TokenRefreshException;
 import net.consler.librelauncherlib.launch.LaunchProfile;
 import net.consler.librelauncherlib.launch.MinecraftLauncher;
 import net.consler.librelauncherlib.modloader.ModloaderProfile;
@@ -20,30 +22,37 @@ public class Launcher
 {
     public static void launch(String instanceId)
     {
-        SettingsSaver settingsSaver = new SettingsSaver();
-
-        InstancesConfig instancesConfig = new InstancesConfig();
-        AuthManager authManager = new AuthManager();
-
-        if(authManager.getActiveAccount() == null)
+        SwingUtilities.invokeLater(() ->
         {
-            JDialog noActiveAccount = new JDialog(Main.client, "No account", true);
-            noActiveAccount.add(new JLabel("Please add an account before launching the game"));
-            noActiveAccount.pack();
-            noActiveAccount.setLocationRelativeTo(Main.client);
-            noActiveAccount.setVisible(true);
-            return;
-        }
-        if (instancesConfig.getProperty(instanceId, "version") == null)
-        {
-            JDialog noVersion = new JDialog(Main.client, "Corrupted instance", true);
-            noVersion.add(new JLabel("The selected instance is corrupted. Please reinstall it"));
-            noVersion.pack();
-            noVersion.setLocationRelativeTo(Main.client);
-            noVersion.setVisible(true);
-            return;
-        }
+            SettingsSaver settingsSaver = new SettingsSaver();
+            InstancesConfig instancesConfig = new InstancesConfig();
+            AuthManager authManager = new AuthManager();
+            Account activeAccount = authManager.getActiveAccount();
 
+            if (activeAccount == null)
+            {
+                JOptionPane.showMessageDialog(Main.client,
+                        "Please add an account before launching the game",
+                        "No account",
+                        JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+
+            if (instancesConfig.getProperty(instanceId, "version") == null)
+            {
+                JOptionPane.showMessageDialog(Main.client,
+                        "The selected instance is corrupted. Please reinstall it",
+                        "Corrupted instance",
+                        JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            new Thread(() -> launchInBackground(instanceId, settingsSaver, instancesConfig, activeAccount), "Game-Launcher-Thread").start();
+        });
+    }
+
+    private static void launchInBackground(String instanceId, SettingsSaver settingsSaver, InstancesConfig instancesConfig, Account activeAccount)
+    {
         Path javaPath = settingsSaver.get("java_path") == null ?
                 SystemHelper.getJavaBin() :
                 Path.of(settingsSaver.get("java_path"));
@@ -55,21 +64,14 @@ public class Launcher
                 .withRamMb(settingsSaver.getInt("ram", 2048))
                 .linkProcess(false)
                 .build();
+
         ModloaderProfile modloaderProfile = new ModloaderProfile(
                 instancesConfig.getProperty(instanceId, "modloader"),
                 instancesConfig.getProperty(instanceId, "modloader_version"));
-        AuthProfile authProfile = authManager.getActiveAccount().getAuthProfile();
 
-        MinecraftLauncher launcher;
-        try
-        {
-            launcher = new MinecraftLauncher(launchProfile, authProfile, modloaderProfile);
-        }
-        catch (IOException e)
-        {
-            new ErrorDialog(Main.client, e, "launching");
-            throw new RuntimeException(e);
-        }
+        AuthProfile authProfile = activeAccount.getAuthProfile();
+
+        MinecraftLauncher launcher = start(launchProfile, authProfile, modloaderProfile, 3);
 
         Process gameProcess;
         try
@@ -78,25 +80,57 @@ public class Launcher
         }
         catch (IOException e)
         {
-            new ErrorDialog(Main.client, e, "launching");
+            SwingUtilities.invokeLater(() -> new ErrorDialog(Main.client, e, "launching"));
             throw new RuntimeException(e);
         }
 
         instancesConfig.saveProperty(instanceId, "pid", String.valueOf(gameProcess.pid()));
         instancesConfig.save();
 
-        InstancePanel.populate();
+        SwingUtilities.invokeLater(InstancePanel::populate);
 
-         if(settingsSaver.get("close_after_launch").equals("true"))
-         {
-             System.exit(0);
-         }
+        if ("true".equals(settingsSaver.get("close_after_launch")))
+        {
+            System.exit(0);
+        }
 
-         gameProcess.onExit().thenAccept(action ->
-         {
-             instancesConfig.saveProperty(instanceId, "pid", null);
-             instancesConfig.save();
-             InstancePanel.populate();
-         });
+        gameProcess.onExit().thenAccept(action ->
+        {
+            instancesConfig.saveProperty(instanceId, "pid", null);
+            instancesConfig.save();
+
+            SwingUtilities.invokeLater(InstancePanel::populate);
+        });
+    }
+
+    private static MinecraftLauncher start(LaunchProfile launchProfile, AuthProfile authProfile, ModloaderProfile modloaderProfile, int retriesLeft)
+    {
+        try
+        {
+            return new MinecraftLauncher(launchProfile, authProfile, modloaderProfile);
+        }
+        catch (TokenRefreshException e)
+        {
+            if (retriesLeft <= 0)
+            {
+                SwingUtilities.invokeLater(() -> new ErrorDialog(Main.client, e, "refreshing auth token"));
+                throw new RuntimeException("Failed to refresh authentication token.", e);
+            }
+            try
+            {
+                Thread.sleep(1000);
+            }
+            catch (InterruptedException ex)
+            {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(ex);
+            }
+            return start(launchProfile, authProfile, modloaderProfile, retriesLeft - 1);
+        }
+        catch (IOException e)
+        {
+            SwingUtilities.invokeLater(() -> new ErrorDialog(Main.client, e, "launching"));
+            throw new RuntimeException(e);
+        }
     }
 }
