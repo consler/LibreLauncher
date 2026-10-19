@@ -129,7 +129,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}</input>
+                                    <input>${project.build.directory}/jpackage-input</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>APP_IMAGE</type>
@@ -159,7 +159,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}</input>
+                                    <input>${project.build.directory}/jpackage-input</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>EXE</type>
@@ -192,7 +192,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}</input>
+                                    <input>${project.build.directory}/jpackage-input</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>MSI</type>
@@ -225,7 +225,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}</input>
+                                    <input>${project.build.directory}/jpackage-input</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>DMG</type>
@@ -256,7 +256,7 @@
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}</input>
+                                    <input>${project.build.directory}/jpackage-input</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>PKG</type>
@@ -283,11 +283,11 @@
                                 <phase>package</phase>
                                 <goals><goal>jpackage</goal></goals>
                                 <configuration>
-                                    <name>librelauncher</name>
+                                    <name>LibreLauncher</name>
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}</input>
+                                    <input>${project.build.directory}/jpackage-input</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>DEB</type>
@@ -314,11 +314,11 @@
                                 <phase>package</phase>
                                 <goals><goal>jpackage</goal></goals>
                                 <configuration>
-                                    <name>librelauncher</name>
+                                    <name>LibreLauncher</name>
                                     <appVersion>2.0</appVersion>
                                     <vendor>net.consler</vendor>
                                     <destination>${project.build.directory}/dist</destination>
-                                    <input>${project.build.directory}</input>
+                                    <input>${project.build.directory}/jpackage-input</input>
                                     <mainJar>${project.build.finalName}-universal.jar</mainJar>
                                     <mainClass>${main.class}</mainClass>
                                     <type>RPM</type>

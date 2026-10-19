@@ -19,45 +19,54 @@ jobs:
             profile: exe
             artifact-name: LibreLauncher-Windows-EXE
             artifact-path: target/dist/*.exe
+
           - os: windows-latest
             profile: msi
             artifact-name: LibreLauncher-Windows-MSI
             artifact-path: target/dist/*.msi
+
           - os: windows-latest
             profile: app-image
             artifact-name: LibreLauncher-Windows-AppImage
-            artifact-path: target/dist/LibreLauncher/
+            artifact-path: target/dist/LibreLauncher-app-image-windows-latest.tar.gz
             is-folder: true
+            app-image-dir: LibreLauncher
 
           # macOS
           - os: macos-latest
             profile: dmg
             artifact-name: LibreLauncher-macOS-DMG
             artifact-path: target/dist/*.dmg
+
           - os: macos-latest
             profile: pkg
             artifact-name: LibreLauncher-macOS-PKG
             artifact-path: target/dist/*.pkg
+
           - os: macos-latest
             profile: app-image
             artifact-name: LibreLauncher-macOS-AppImage
-            artifact-path: target/dist/LibreLauncher.app/
+            artifact-path: target/dist/LibreLauncher-app-image-macos.zip
             is-folder: true
+            app-image-dir: LibreLauncher.app
 
           # Linux
           - os: ubuntu-latest
             profile: deb
             artifact-name: LibreLauncher-Linux-DEB
             artifact-path: target/dist/*.deb
+
           - os: ubuntu-latest
             profile: rpm
             artifact-name: LibreLauncher-Linux-RPM
             artifact-path: target/dist/*.rpm
+
           - os: ubuntu-latest
             profile: app-image
             artifact-name: LibreLauncher-Linux-AppImage
-            artifact-path: target/dist/LibreLauncher/
+            artifact-path: target/dist/LibreLauncher-app-image-ubuntu-latest.tar.gz
             is-folder: true
+            app-image-dir: librelauncher
 
     steps:
       - name: Checkout Code
@@ -70,41 +79,60 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Install rpm packaging tools (Linux RPM only)
+      - name: Install rpm packaging tools
         if: matrix.profile == 'rpm'
-        run: sudo apt-get update && sudo apt-get install -y rpm
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y rpm
 
-      - name: Build and Package
-        run: mvn clean package -P${{ matrix.profile }}
+      - name: Build shaded jar
+        run: mvn clean package -DskipTests
 
-      - name: Compress AppImage Folder (Windows/Linux)
+      - name: Prepare jpackage input
+        shell: bash
+        run: |
+          mkdir -p target/jpackage-input
+          cp target/*-universal.jar target/jpackage-input/
+          ls -lah target/jpackage-input
+
+      - name: Build native package
+        run: mvn package -P${{ matrix.profile }}
+
+      - name: Compress App Image folder
         if: matrix.is-folder == true && matrix.os != 'macos-latest'
+        shell: bash
         run: |
           cd target/dist
-          tar -czf LibreLauncher-${{ matrix.profile }}-${{ matrix.os }}.tar.gz LibreLauncher
+          tar -czf "LibreLauncher-app-image-${{ matrix.os }}.tar.gz" "${{ matrix.app-image-dir }}"
 
-      - name: Compress AppImage Folder (macOS)
+      - name: Compress macOS App Image folder
         if: matrix.is-folder == true && matrix.os == 'macos-latest'
+        shell: bash
         run: |
           cd target/dist
-          zip -r LibreLauncher-${{ matrix.profile }}-macos.zip LibreLauncher.app
+          zip -r LibreLauncher-app-image-macos.zip "${{ matrix.app-image-dir }}"
+
+      - name: Verify package output
+        shell: bash
+        run: |
+          echo "Contents of target/dist:"
+          ls -lah target/dist
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
-          path: |
-            ${{ matrix.artifact-path }}
-            target/dist/*.tar.gz
-            target/dist/*.zip
+          path: ${{ matrix.artifact-path }}
           if-no-files-found: error
 
   publish-release:
+    name: Publish GitHub Release
     needs: build-packages
-    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     permissions:
       contents: write
+
     steps:
       - name: Download All Artifacts
         uses: actions/download-artifact@v4
@@ -113,18 +141,18 @@ jobs:
           pattern: LibreLauncher-*
           merge-multiple: true
 
-      - name: Verify Files (Debug)
+      - name: Verify downloaded release assets
         run: |
-          echo "Here is exactly what was downloaded:"
-          ls -R final-release-assets
+          echo "Release assets:"
+          ls -lahR final-release-assets
 
-      - name: Release and Upload Assets
+      - name: Create GitHub Release and Upload Assets
         uses: softprops/action-gh-release@v2
         with:
           files: final-release-assets/**
           draft: false
           prerelease: false
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}
-          name: "LibreLauncher ${{ github.ref_type == 'tag' && github.ref_name || 'latest' }}"
+          tag_name: ${{ github.ref_name }}
+          name: "LibreLauncher ${{ github.ref_name }}"
           body: |
-            Automated build containing all native installers and app images for LibreLauncher.
+            Automated build containing native installers and application images for LibreLauncher.
