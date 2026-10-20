@@ -70,16 +70,22 @@ public class InstancePanel
                         if(isRunningAndClean(instanceName))
                         {
                             JMenuItem launch = new JMenuItem("Stop");
-                            launch.addActionListener(ev -> SystemUtils.killInstance(instanceName));
+                            launch.addActionListener(ev ->
+                            {
+                                SystemUtils.killInstance(instanceName);
+                                populate();
+                            });
                             contextMenu.add(launch);
-                            populate();
                         }
                         else
                         {
                             JMenuItem launch = new JMenuItem("Launch");
-                            launch.addActionListener(ev -> Launcher.launch(instanceName));
+                            launch.addActionListener(ev ->
+                            {
+                                Launcher.launch(instanceName);
+                                populate();
+                            });
                             contextMenu.add(launch);
-                            populate();
                         }
                         JMenuItem delete = new JMenuItem("Delete");
                         delete.addActionListener(ev ->
@@ -107,16 +113,16 @@ public class InstancePanel
             playButton.setVerticalTextPosition(AbstractButton.CENTER);
 
             playButton.addActionListener(e ->
-                    {
-                        if(isRunningAndClean(instanceName))
-                        {
-                            SystemUtils.killInstance(instanceName);
-                        }
-                        else
-                        {
-                            Launcher.launch(instanceName);
-                        }
-                    });
+            {
+                if(isRunningAndClean(instanceName))
+                {
+                    SystemUtils.killInstance(instanceName);
+                }
+                else
+                {
+                    Launcher.launch(instanceName);
+                }
+            });
 
             JLabel nameLabel = new JLabel(instanceName);
 
