@@ -9,7 +9,7 @@ WORK_DIR="${WORK_DIR:-target/appimage}"
 APP_IMAGE_DIR="$DIST_DIR/$APP_NAME"
 APPDIR="$WORK_DIR/$APP_NAME.AppDir"
 OUTPUT="$DIST_DIR/$APP_NAME-$ARCH.AppImage"
-ICON_OVERRIDE="packaging/linux/$APP_NAME.png"
+ICON_OVERRIDE=".github/workflows/$APP_NAME.png"
 APPIMAGETOOL_URL="https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage"
 
 if [ ! -x "$APP_IMAGE_DIR/bin/$APP_NAME" ]; then
