@@ -5,10 +5,9 @@ import net.consler.librelauncher.settings.AuthManager;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.settings.SettingsSaver;
 import net.consler.librelauncher.ui.ErrorDialog;
-import net.consler.librelauncher.ui.category.instancemanager.InstancePanel;
-import net.consler.librelauncher.ui.category.settings.Account;
+import net.consler.librelauncher.settings.Account;
 import net.consler.librelauncherlib.auth.AuthProfile;
-import net.consler.librelauncherlib.exception.TokenRefreshException;
+import net.consler.librelauncherlib.auth.TokenRefreshException;
 import net.consler.librelauncherlib.launch.LaunchProfile;
 import net.consler.librelauncherlib.launch.MinecraftLauncher;
 import net.consler.librelauncherlib.modloader.ModloaderProfile;
@@ -27,41 +26,44 @@ public class Launcher
             SettingsSaver settingsSaver = new SettingsSaver();
             InstancesConfig instancesConfig = new InstancesConfig();
             AuthManager authManager = new AuthManager();
-            Account activeAccount = authManager.getActiveAccount();
-
-            if (activeAccount == null)
+            authManager.getActiveAccount().thenAccept(activeAccount ->
             {
-                JOptionPane.showMessageDialog(Main.client,
+                if (instancesConfig.getProperty(instanceId, "version") == null)
+                {
+                    JOptionPane.showMessageDialog(Main.getInstance().client,
+                            "The selected instance is corrupted. Please reinstall it",
+                            "Corrupted instance",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                new Thread(() -> launchInBackground(instanceId, settingsSaver, instancesConfig, activeAccount), "Game-Launcher-Thread").start();
+            }).exceptionally(e ->
+            {
+                JOptionPane.showMessageDialog(Main.getInstance().client,
                         "Please add an account before launching the game",
                         "No account",
                         JOptionPane.WARNING_MESSAGE);
-                return;
-            }
-
-            if (instancesConfig.getProperty(instanceId, "version") == null)
-            {
-                JOptionPane.showMessageDialog(Main.client,
-                        "The selected instance is corrupted. Please reinstall it",
-                        "Corrupted instance",
-                        JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            new Thread(() -> launchInBackground(instanceId, settingsSaver, instancesConfig, activeAccount), "Game-Launcher-Thread").start();
+                return null;
+            });
         });
     }
 
     private static void launchInBackground(String instanceId, SettingsSaver settingsSaver, InstancesConfig instancesConfig, Account activeAccount)
     {
-        Path javaPath = settingsSaver.get("java_path") == null ?
+        Path javaPath = settingsSaver.get("java_path") == null && instancesConfig.getProperty(instanceId, "java_path") == null ?
                 SystemHelper.getJavaBin() :
-                Path.of(settingsSaver.get("java_path"));
+                Path.of(instancesConfig.getProperty(instanceId, "java_path", settingsSaver.get("java_path")));
+
+        int ram = settingsSaver.get("ram", "3028") == null && instancesConfig.getProperty(instanceId, "ram") == null ?
+                2048 :
+                Integer.parseInt(instancesConfig.getProperty(instanceId, "ram", settingsSaver.get("ram", "2048")));
 
         LaunchProfile launchProfile = new LaunchProfile.Builder(
                 instancesConfig.getProperty(instanceId, "version"),
                 InstancesConfig.instancesDir.resolve(instanceId))
                 .withJavaPath(javaPath)
-                .withRamMb(settingsSaver.getInt("ram", 2048))
+                .withRamMb(ram)
                 .linkProcess(false)
                 .build();
 
@@ -80,26 +82,23 @@ public class Launcher
         }
         catch (IOException e)
         {
-            SwingUtilities.invokeLater(() -> new ErrorDialog(Main.client, e, "launching"));
+            SwingUtilities.invokeLater(() -> new ErrorDialog(Main.getInstance().client, e, "launching"));
             throw new RuntimeException(e);
         }
 
         instancesConfig.saveProperty(instanceId, "pid", String.valueOf(gameProcess.pid()));
         instancesConfig.save();
 
-        SwingUtilities.invokeLater(InstancePanel::populate);
+        SwingUtilities.invokeLater(() -> Main.getInstance().refreshInstanceViews());
 
-        if ("true".equals(settingsSaver.get("close_after_launch")))
-        {
-            System.exit(0);
-        }
+        if ("true".equals(settingsSaver.get("close_after_launch"))) System.exit(0);
 
         gameProcess.onExit().thenAccept(action ->
         {
             instancesConfig.saveProperty(instanceId, "pid", null);
             instancesConfig.save();
 
-            SwingUtilities.invokeLater(InstancePanel::populate);
+            SwingUtilities.invokeLater(() -> Main.getInstance().refreshInstanceViews());
         });
     }
 
@@ -113,7 +112,7 @@ public class Launcher
         {
             if (retriesLeft <= 0)
             {
-                SwingUtilities.invokeLater(() -> new ErrorDialog(Main.client, e, "refreshing auth token"));
+                SwingUtilities.invokeLater(() -> new ErrorDialog(Main.getInstance().client, e, "refreshing auth token"));
                 throw new RuntimeException("Failed to refresh authentication token.", e);
             }
             try
@@ -129,7 +128,7 @@ public class Launcher
         }
         catch (IOException e)
         {
-            SwingUtilities.invokeLater(() -> new ErrorDialog(Main.client, e, "launching"));
+            SwingUtilities.invokeLater(() -> new ErrorDialog(Main.getInstance().client, e, "launching"));
             throw new RuntimeException(e);
         }
     }

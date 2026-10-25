@@ -1,7 +1,10 @@
 package net.consler.librelauncher;
 
 import net.consler.librelauncher.ui.ThemeManager;
+import net.consler.librelauncher.ui.category.instanceeditor.InstanceEditor;
 import net.consler.librelauncher.ui.category.home.Home;
+import net.consler.librelauncher.ui.category.instancemanager.InstanceManager;
+import net.consler.librelauncher.ui.category.settings.Settings;
 import net.consler.librelauncher.ui.Sidebar;
 import net.consler.librelauncher.ui.Titlebar;
 
@@ -13,14 +16,29 @@ import java.awt.geom.RoundRectangle2D;
 
 public class Main
 {
-    public static JFrame client;
-    public static JPanel pageContainer;
-    public static CardLayout pageLayout;
+    private static Main instance;
+
+    public JFrame client;
+    public JPanel pageContainer;
+    public CardLayout pageLayout;
+    public ThemeManager themeManager;
+    public Sidebar sidebar;
+    public Titlebar titlebar;
+    public Home home;
+    public InstanceManager instanceManager;
+    public Settings settings;
+    public InstanceEditor instanceEditor;
 
     static void main(String[] args)
     {
-        ThemeManager.init();
+        instance = new Main();
+        instance.start();
+    }
 
+    private void start()
+    {
+        themeManager = new ThemeManager(this);
+        themeManager.init();
         SwingUtilities.invokeLater(() ->
         {
             client = new JFrame("LibreLauncher");
@@ -48,17 +66,35 @@ public class Main
                 }
             });
 
-            Titlebar.show(client);
-            Sidebar.show();
+            titlebar = new Titlebar(this);
+            titlebar.show(client);
 
-            Home.show();
+            home = new Home(this);
+            instanceManager = new InstanceManager(this);
+            settings = new Settings(this);
+            instanceEditor = new InstanceEditor(this);
+            sidebar = new Sidebar(this);
+            sidebar.show();
+
+            home.show();
 
             client.setVisible(true);
         });
     }
 
-    public static void showPage(String name)
+    public static Main getInstance()
+    {
+        return instance;
+    }
+
+    public void showPage(String name)
     {
         pageLayout.show(pageContainer, name);
+    }
+
+    public void refreshInstanceViews()
+    {
+        if (instanceManager.instancePanel != null) instanceManager.instancePanel.populate();
+        else home.populate();
     }
 }

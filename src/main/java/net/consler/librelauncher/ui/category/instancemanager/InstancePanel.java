@@ -4,25 +4,35 @@ import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.settings.InstancesConfig;
+import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
-import net.consler.librelauncher.ui.category.home.Home;
 import net.consler.librelauncher.util.SystemUtils;
+import net.consler.librelauncherlib.instance.InstanceProfile;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 import static net.consler.librelauncher.util.SystemUtils.isRunningAndClean;
 
 public class InstancePanel
 {
+    private final Main main;
+    private final InstanceManager instanceManager;
 
-    public static JPanel instancePanel;
+    public JPanel instancePanel;
 
-    public static void show()
+    public InstancePanel(Main main, InstanceManager instanceManager)
     {
-        instancePanel = new RoundCornerPanel();
+        this.main = main;
+        this.instanceManager = instanceManager;
+    }
+
+    public void show()
+    {
+        instancePanel = new RoundCornerPanel(main.client.getBackground());
         instancePanel.setLayout(new BoxLayout(instancePanel, BoxLayout.Y_AXIS));
 
         populate();
@@ -32,10 +42,10 @@ public class InstancePanel
                 BorderFactory.createEmptyBorder(20, 15, 20, 15)
         ));
 
-        InstanceManager.panel.add(instancePanel, BorderLayout.CENTER);
+        instanceManager.panel.add(instancePanel, BorderLayout.CENTER);
     }
 
-    public static void populate()
+    public void populate()
     {
         InstancesConfig instancesConfig = new InstancesConfig();
 
@@ -63,41 +73,60 @@ public class InstancePanel
                 @Override
                 public void mousePressed(MouseEvent e)
                 {
-                    if(e.isPopupTrigger())
-                    {
-                        JPopupMenu contextMenu = new JPopupMenu();
+                    if(!e.isPopupTrigger()) return;
 
-                        if(isRunningAndClean(instanceName))
-                        {
-                            JMenuItem launch = new JMenuItem("Stop");
-                            launch.addActionListener(ev ->
-                            {
-                                SystemUtils.killInstance(instanceName);
-                                populate();
-                            });
-                            contextMenu.add(launch);
-                        }
-                        else
-                        {
-                            JMenuItem launch = new JMenuItem("Launch");
-                            launch.addActionListener(ev ->
-                            {
-                                Launcher.launch(instanceName);
-                                populate();
-                            });
-                            contextMenu.add(launch);
-                        }
-                        JMenuItem delete = new JMenuItem("Delete");
-                        delete.addActionListener(ev ->
+                    JPopupMenu contextMenu = new JPopupMenu();
+
+                    if(isRunningAndClean(instanceName))
+                    {
+                        JMenuItem launch = new JMenuItem("Stop");
+                        launch.addActionListener(ev ->
                         {
                             SystemUtils.killInstance(instanceName);
-                            instancesConfig.deleteInstance(instanceName);
                             populate();
                         });
-                        contextMenu.add(delete);
-
-                        contextMenu.show(e.getComponent(), e.getX(), e.getY());
+                        contextMenu.add(launch);
                     }
+                    else
+                    {
+                        JMenuItem launch = new JMenuItem("Launch");
+                        launch.addActionListener(ev ->
+                        {
+                            Launcher.launch(instanceName);
+                            populate();
+                        });
+                        contextMenu.add(launch);
+                    }
+
+                    JMenuItem edit = new JMenuItem("Edit");
+                    edit.addActionListener(ev -> main.instanceEditor.show(new InstanceProfile(InstancesConfig.instancesDir.resolve(instanceName))));
+                    contextMenu.add(edit);
+
+                    JMenuItem folder = new JMenuItem("Open Folder");
+                    folder.addActionListener(ev ->
+                    {
+                        try
+                        {
+                            SystemUtils.openDirectory(InstancesConfig.instancesDir.resolve(instanceName).toFile());
+                        }
+                        catch (IOException ex)
+                        {
+                            new ErrorDialog(main.client, ex, "creating UI: Open Folder menu item");
+                            throw new RuntimeException(ex);
+                        }
+                    });
+                    contextMenu.add(folder);
+
+                    JMenuItem delete = new JMenuItem("Delete");
+                    delete.addActionListener(ev ->
+                    {
+                        SystemUtils.killInstance(instanceName);
+                        instancesConfig.deleteInstance(instanceName);
+                        populate();
+                    });
+                    contextMenu.add(delete);
+
+                    contextMenu.show(e.getComponent(), e.getX(), e.getY());
                 }
             });
 
@@ -136,6 +165,6 @@ public class InstancePanel
         instancePanel.revalidate();
         instancePanel.repaint();
 
-        Home.populate();
+        main.home.populate();
     }
 }

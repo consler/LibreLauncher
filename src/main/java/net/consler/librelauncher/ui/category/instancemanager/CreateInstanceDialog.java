@@ -2,8 +2,6 @@ package net.consler.librelauncher.ui.category.instancemanager;
 
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.launcher.Downloader;
-import net.consler.librelauncher.ui.ThemeManager;
-import net.consler.librelauncher.ui.Titlebar;
 import net.consler.librelauncherlib.versions.*;
 
 import javax.swing.*;
@@ -15,32 +13,40 @@ import java.util.Objects;
 
 public class CreateInstanceDialog
 {
-    public static JDialog dialog;
+    private final Main main;
+    private final InstancePanel instancePanel;
+    public JDialog dialog;
 
-    public static JTextField nameField = new JTextField(36);
+    public JTextField nameField = new JTextField(36);
 
-    public static JComboBox<String> versionChoice = new JComboBox<>();
-    public static JCheckBox filterReleases = new JCheckBox("Releases", true);
-    public static JCheckBox filterSnapshots = new JCheckBox("Snapshots");
-    public static JCheckBox filterBetas = new JCheckBox("Betas");
-    public static JCheckBox filterAlphas = new JCheckBox("Alphas");
+    public JComboBox<String> versionChoice = new JComboBox<>();
+    public JCheckBox filterReleases = new JCheckBox("Releases", true);
+    public JCheckBox filterSnapshots = new JCheckBox("Snapshots");
+    public JCheckBox filterBetas = new JCheckBox("Betas");
+    public JCheckBox filterAlphas = new JCheckBox("Alphas");
 
-    public static JRadioButton loaderVanilla = new JRadioButton("Vanilla", true);
-    public static JRadioButton loaderFabric = new JRadioButton("Fabric");
-    public static JRadioButton loaderForge = new JRadioButton("Forge");
-    public static JRadioButton loaderNeoforge = new JRadioButton("NeoForge");
-    public static JRadioButton loaderQuilt = new JRadioButton("Quilt");
-    public static ButtonGroup loaders;
-    public static JComboBox<String> modLoaderVersionChoice = new JComboBox<>();
+    public JRadioButton loaderVanilla = new JRadioButton("Vanilla", true);
+    public JRadioButton loaderFabric = new JRadioButton("Fabric");
+    public JRadioButton loaderForge = new JRadioButton("Forge");
+    public JRadioButton loaderNeoforge = new JRadioButton("NeoForge");
+    public JRadioButton loaderQuilt = new JRadioButton("Quilt");
+    public ButtonGroup loaders;
+    public JComboBox<String> modLoaderVersionChoice = new JComboBox<>();
 
-    public static JProgressBar progressBar = new JProgressBar(0, 100);
+    public JProgressBar progressBar = new JProgressBar(0, 100);
 
-    public static JButton cancelButton = new JButton("Cancel");
-    public static JButton createButton = new JButton("Create Instance");
+    public JButton cancelButton = new JButton("Cancel");
+    public JButton createButton = new JButton("Create Instance");
 
-    public static void open()
+    public CreateInstanceDialog(Main main, InstancePanel instancePanel)
     {
-        dialog = new JDialog(Main.client, "Create New Instance", true);
+        this.main = main;
+        this.instancePanel = instancePanel;
+    }
+
+    public void open()
+    {
+        dialog = new JDialog(main.client, "Create New Instance", true);
         dialog.setUndecorated(true);
         dialog.setResizable(false);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
@@ -89,18 +95,18 @@ public class CreateInstanceDialog
         addRow(form, null, progressBar);
         addRow(form, null, buttons);
 
-        applyFont(form, ThemeManager.comfortaaBold.deriveFont(14f));
+        applyFont(form, main.themeManager.comfortaaBold.deriveFont(14f));
         versionChoice.setPreferredSize(new Dimension(260, versionChoice.getPreferredSize().height));
         versionChoice.setMaximumSize(versionChoice.getPreferredSize());
 
-        dialog.add(Titlebar.create(dialog, "Create New Instance", false, dialog::dispose), BorderLayout.NORTH);
+        dialog.add(main.titlebar.create(dialog, "Create New Instance", false, dialog::dispose), BorderLayout.NORTH);
         dialog.add(form, BorderLayout.CENTER);
         dialog.getRootPane().setDefaultButton(createButton);
         dialog.getRootPane().registerKeyboardAction(e -> dialog.dispose(), KeyStroke.getKeyStroke("ESCAPE"), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-        ThemeManager.silentField(nameField);
+        main.themeManager.silentField(nameField);
 
-        Downloader downloader = new Downloader();
+        Downloader downloader = new Downloader(this, instancePanel);
 
         cancelButton.addActionListener(e ->
         {
@@ -115,12 +121,16 @@ public class CreateInstanceDialog
             versionChoice.setEnabled(false);
             modLoaderVersionChoice.setEnabled(false);
             modLoaderVersionChoice.setEnabled(false);
+            filterReleases.setEnabled(false);
+            filterAlphas.setEnabled(false);
+            filterBetas.setEnabled(false);
+            filterSnapshots.setEnabled(false);
             loaderVanilla.setEnabled(false);
             loaderFabric.setEnabled(false);
             loaderForge.setEnabled(false);
-            loaderQuilt.setSelected(false);
-            loaderNeoforge.setSelected(false);
-            progressBar.setEnabled(false);
+            loaderQuilt.setEnabled(false);
+            loaderNeoforge.setEnabled(false);
+            createButton.setEnabled(false);
             progressBar.setEnabled(false);
 
             downloader.createInstance();
@@ -128,16 +138,16 @@ public class CreateInstanceDialog
 
         dialog.pack();
         dialog.setShape(new RoundRectangle2D.Double(0, 0, dialog.getWidth(), dialog.getHeight(), 20, 20));
-        dialog.setLocationRelativeTo(Main.client);
+        dialog.setLocationRelativeTo(main.client);
         dialog.setVisible(true);
     }
 
-    public static void close()
+    public void close()
     {
         dialog.dispose();
     }
 
-    private static void addRow(JPanel panel, String text, JComponent comp)
+    private void addRow(JPanel panel, String text, JComponent comp)
     {
         GridBagConstraints c = new GridBagConstraints();
         c.gridx = 0;
@@ -157,7 +167,7 @@ public class CreateInstanceDialog
         panel.add(comp, c);
     }
 
-    private static JPanel row(JComponent... items)
+    private JPanel row(JComponent... items)
     {
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
@@ -171,7 +181,7 @@ public class CreateInstanceDialog
         return p;
     }
 
-    private static void applyFont(Container container, Font font)
+    private void applyFont(Container container, Font font)
     {
         for (Component c : container.getComponents())
         {
@@ -180,7 +190,7 @@ public class CreateInstanceDialog
         }
     }
 
-    private static void putVersions()
+    public void putVersions()
     {
         new Thread(() ->
         {
@@ -193,14 +203,14 @@ public class CreateInstanceDialog
         }).start();
     }
 
-    private static void putLoaderVersions()
+    public void putLoaderVersions()
     {
+        SwingUtilities.invokeLater(() -> modLoaderVersionChoice.removeAllItems());
+
         String loader = getActiveLoader();
 
         if(versionChoice.getSelectedItem() == null) return;
         if(loader.equals("Vanilla")) return;
-
-        SwingUtilities.invokeLater(() -> modLoaderVersionChoice.removeAllItems());
 
         switch(loader)
         {
@@ -240,7 +250,7 @@ public class CreateInstanceDialog
         }
     }
 
-    private static void setupLoaderButtons()
+    private void setupLoaderButtons()
     {
         loaders = new ButtonGroup();
         for (JRadioButton loaderButton : new JRadioButton[]{loaderVanilla, loaderFabric, loaderForge, loaderNeoforge, loaderQuilt})
@@ -252,13 +262,13 @@ public class CreateInstanceDialog
             loaderButton.addActionListener(e ->
             {
                 modLoaderVersionChoice.removeAllItems();
-                new Thread(CreateInstanceDialog::putLoaderVersions).start();
+                new Thread(this::putLoaderVersions).start();
             });
 
         }
     }
 
-    public static String getActiveLoader()
+    public String getActiveLoader()
     {
         if(loaderFabric.isSelected()) return "fabric";
         if(loaderForge.isSelected()) return "forge";

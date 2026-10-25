@@ -14,10 +14,16 @@ import java.util.Objects;
 
 public class ThemeManager
 {
-    public static Font comfortaa;
-    public static Font comfortaaBold;
+    private final Main main;
+    public Font comfortaa;
+    public Font comfortaaBold;
 
-    public static void init()
+    public ThemeManager(Main main)
+    {
+        this.main = main;
+    }
+
+    public void init()
     {
         System.setProperty("awt.useSystemAAFontSettings", "on");
         System.setProperty("swing.aatext", "true");
@@ -56,7 +62,7 @@ public class ThemeManager
         setTheme();
     }
 
-    public static void setTheme()
+    public void setTheme()
     {
         String theme = new SettingsSaver().get("theme", "Dark");
         switch (theme)
@@ -67,14 +73,14 @@ public class ThemeManager
             case "Intellij" -> FlatIntelliJLaf.setup();
         }
 
-        if(Main.client == null) return;
+        if(main.client == null) return;
 
-        SwingUtilities.updateComponentTreeUI(Sidebar.sidebar);
-        SwingUtilities.updateComponentTreeUI(Titlebar.titlebar);
-        SwingUtilities.updateComponentTreeUI(Main.client);
+        if (main.sidebar != null) SwingUtilities.updateComponentTreeUI(main.sidebar.sidebar);
+        if (main.titlebar != null) SwingUtilities.updateComponentTreeUI(main.titlebar.titlebar);
+        SwingUtilities.updateComponentTreeUI(main.client);
     }
 
-    private static void loadFonts()
+    private void loadFonts()
     {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         try
@@ -93,7 +99,7 @@ public class ThemeManager
         }
     }
 
-    public static void silentField(JTextField textField)
+    public void silentField(JTextField textField)
     {
         textField.getActionMap().put(DefaultEditorKit.beepAction, new AbstractAction()
         {
@@ -101,8 +107,8 @@ public class ThemeManager
             public void actionPerformed(ActionEvent e) {}
         });
 
-        Action deleteAction = textField.getActionMap().get(DefaultEditorKit.deletePrevCharAction);
-        if (deleteAction != null)
+        Action deletePrevChar = textField.getActionMap().get(DefaultEditorKit.deletePrevCharAction);
+        if (deletePrevChar != null)
         {
             textField.getActionMap().put(DefaultEditorKit.deletePrevCharAction, new AbstractAction()
             {
@@ -111,7 +117,55 @@ public class ThemeManager
                 {
                     if (textField.getDocument().getLength() > 0)
                     {
-                        deleteAction.actionPerformed(e);
+                        deletePrevChar.actionPerformed(e);
+                    }
+                }
+            });
+        }
+
+        Action deletePrevWord = textField.getActionMap().get(DefaultEditorKit.deletePrevWordAction);
+        if(deletePrevWord != null)
+        {
+            textField.getActionMap().put(DefaultEditorKit.deletePrevWordAction, new AbstractAction()
+            {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    if (textField.getDocument().getLength() > 0)
+                    {
+                        deletePrevWord.actionPerformed(e);
+                    }
+                }
+            });
+        }
+
+        Action deleteNextChar = textField.getActionMap().get(DefaultEditorKit.deleteNextCharAction);
+        if(deleteNextChar != null)
+        {
+            textField.getActionMap().put(DefaultEditorKit.deleteNextCharAction, new AbstractAction()
+            {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    if (textField.getDocument().getLength() > 0)
+                    {
+                        deleteNextChar.actionPerformed(e);
+                    }
+                }
+            });
+        }
+
+        Action deleteNextWord = textField.getActionMap().get(DefaultEditorKit.deleteNextWordAction);
+        if(deleteNextWord != null)
+        {
+            textField.getActionMap().put(DefaultEditorKit.deleteNextWordAction, new AbstractAction()
+            {
+                @Override
+                public void actionPerformed(ActionEvent e)
+                {
+                    if (textField.getDocument().getLength() > 0)
+                    {
+                        deleteNextWord.actionPerformed(e);
                     }
                 }
             });

@@ -8,22 +8,31 @@ import java.awt.*;
 
 public class InstanceManager
 {
-    public static JPanel panel;
-    public static void show()
+    private final Main main;
+    public JPanel panel;
+    public InstancePanel instancePanel;
+
+    public InstanceManager(Main main)
+    {
+        this.main = main;
+    }
+
+    public void show()
     {
         if (panel != null)
         {
-            Main.showPage("instancemanager");
+            main.showPage("instancemanager");
             return;
         }
 
-        panel = new RoundCornerPanel();
+        panel = new RoundCornerPanel(main.client.getBackground());
         panel.setLayout(new BorderLayout());
 
-        SidePanel.show();
-        InstancePanel.show();
+        new SidePanel(main, this).show();
+        instancePanel = new InstancePanel(main, this);
+        instancePanel.show();
 
-        Main.pageContainer.add(panel, "instancemanager");
-        Main.showPage("instancemanager");
+        main.pageContainer.add(panel, "instancemanager");
+        main.showPage("instancemanager");
     }
 }

@@ -1,14 +1,15 @@
 package net.consler.librelauncher.ui.category;
 
-import net.consler.librelauncher.Main;
-
 import javax.swing.*;
 import java.awt.*;
 
 public class RoundCornerPanel extends JPanel
 {
-    public RoundCornerPanel()
+    private final Color background;
+
+    public RoundCornerPanel(Color background)
     {
+        this.background = background;
         this.setOpaque(false);
     }
 
@@ -18,7 +19,7 @@ public class RoundCornerPanel extends JPanel
         Graphics2D g2 = (Graphics2D) g.create();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        g2.setColor(Main.client.getBackground());
+        g2.setColor(background);
 
         int radius = 20;
 

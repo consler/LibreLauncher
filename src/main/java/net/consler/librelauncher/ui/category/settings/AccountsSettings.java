@@ -1,11 +1,12 @@
 package net.consler.librelauncher.ui.category.settings;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.settings.Account;
 import net.consler.librelauncher.settings.AuthManager;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncherlib.auth.AuthProfile;
 import net.consler.librelauncherlib.auth.MicrosoftAuthenticator;
-import net.consler.librelauncherlib.exception.UserCancelledException;
+import net.consler.librelauncherlib.auth.UserCancelledException;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -15,12 +16,18 @@ import java.awt.event.MouseEvent;
 
 public class AccountsSettings
 {
-    public static JPanel panel;
-    public static JPanel accountsListPanel;
+    private final Main main;
+    public JPanel panel;
+    public JPanel accountsListPanel;
 
-    public static AuthManager authManager = new AuthManager();
+    public AuthManager authManager = new AuthManager();
 
-    public static JPanel createPanel()
+    public AccountsSettings(Main main)
+    {
+        this.main = main;
+    }
+
+    public JPanel createPanel()
     {
         panel = new JPanel();
         panel.setOpaque(false);
@@ -58,7 +65,7 @@ public class AccountsSettings
             }
             catch (Exception ex)
             {
-                new ErrorDialog(Main.client, ex, "logging into account");
+                new ErrorDialog(main.client, ex, "logging into account");
             }
         });
         addOfflineBtn.addActionListener(e -> addOfflineAccount());
@@ -73,7 +80,7 @@ public class AccountsSettings
         return panel;
     }
 
-    private static void refreshAccountList()
+    private void refreshAccountList()
     {
         accountsListPanel.removeAll();
 
@@ -97,7 +104,7 @@ public class AccountsSettings
         accountsListPanel.repaint();
     }
 
-    private static JPanel createAccountCard(Account account)
+    private JPanel createAccountCard(Account account)
     {
         JPanel card = new JPanel(new BorderLayout(12, 0));
         card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 46));
@@ -178,10 +185,10 @@ public class AccountsSettings
         return card;
     }
 
-    private static void addOfflineAccount()
+    private void addOfflineAccount()
     {
         String username = JOptionPane.showInputDialog(
-                Main.client,
+                main.client,
                 "Enter offline username:",
                 "Add Offline Account",
                 JOptionPane.PLAIN_MESSAGE
@@ -195,7 +202,7 @@ public class AccountsSettings
         }
     }
 
-    private static void addOnlineAccount()
+    private void addOnlineAccount()
     {
         new MicrosoftAuthenticator().loginWithNativeWebView()
                 .thenAccept(profile -> SwingUtilities.invokeLater(() ->

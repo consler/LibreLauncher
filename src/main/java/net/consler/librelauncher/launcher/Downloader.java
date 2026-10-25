@@ -2,8 +2,8 @@ package net.consler.librelauncher.launcher;
 
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.settings.SettingsSaver;
-import net.consler.librelauncher.ui.category.instancemanager.CreateInstanceDialog;
 import net.consler.librelauncher.ui.category.instancemanager.InstancePanel;
+import net.consler.librelauncher.ui.category.instancemanager.CreateInstanceDialog;
 import net.consler.librelauncherlib.install.InstallerListener;
 import net.consler.librelauncherlib.install.MinecraftInstaller;
 import net.consler.librelauncherlib.modloader.ModloaderProfile;
@@ -15,14 +15,24 @@ import java.util.Objects;
 
 public class Downloader
 {
+    private final CreateInstanceDialog dialog;
+    private final InstancePanel instancePanel;
     private volatile MinecraftInstaller installer;
     private Thread t;
-    public Downloader()
+
+    public Downloader(CreateInstanceDialog dialog, InstancePanel instancePanel)
     {
+        this.dialog = dialog;
+        this.instancePanel = instancePanel;
     }
 
     public void createInstance()
     {
+        String name = dialog.nameField.getText();
+        String version = Objects.requireNonNull(dialog.versionChoice.getSelectedItem()).toString();
+        String loader = dialog.getActiveLoader();
+        String loaderVersion = Objects.toString(dialog.modLoaderVersionChoice.getSelectedItem(), "");
+
         installer = new MinecraftInstaller();
 
         t = new Thread(()->
@@ -34,8 +44,8 @@ public class Downloader
                 {
                     SwingUtilities.invokeLater(() ->
                     {
-                        if (CreateInstanceDialog.progressBar != null)  CreateInstanceDialog.progressBar.setVisible(true);
-                        if (CreateInstanceDialog.dialog != null) CreateInstanceDialog.dialog.enableInputMethods(false);
+                        if (dialog.progressBar != null) dialog.progressBar.setVisible(true);
+                        if (dialog.dialog != null) dialog.dialog.enableInputMethods(false);
                     });
                 }
                 @Override
@@ -43,18 +53,17 @@ public class Downloader
                 {
                     SwingUtilities.invokeLater(() ->
                     {
-                        CreateInstanceDialog.close();
+                        dialog.close();
 
                         InstancesConfig instancesConfig = new InstancesConfig();
-                        String name = CreateInstanceDialog.nameField.getText();
 
-                        instancesConfig.saveProperty(name, "version", Objects.requireNonNull(CreateInstanceDialog.versionChoice.getSelectedItem()).toString());
-                        instancesConfig.saveProperty(name, "modloader", CreateInstanceDialog.getActiveLoader());
-                        instancesConfig.saveProperty(name, "modloader_version", Objects.requireNonNullElse(CreateInstanceDialog.modLoaderVersionChoice.getSelectedItem(), "0.0.0").toString());
+                        instancesConfig.saveProperty(name, "version", version);
+                        instancesConfig.saveProperty(name, "modloader", loader);
+                        instancesConfig.saveProperty(name, "modloader_version", loaderVersion.isBlank() ? "0.0.0" : loaderVersion);
 
                         instancesConfig.save();
 
-                        InstancePanel.populate();
+                        instancePanel.populate();
                     });
                 }
                 @Override
@@ -62,19 +71,19 @@ public class Downloader
                 {
                     SwingUtilities.invokeLater(() ->
                     {
-                        if(CreateInstanceDialog.progressBar != null)
+                        if(dialog.progressBar != null)
                         {
-                            CreateInstanceDialog.progressBar.setVisible(true);
-                            CreateInstanceDialog.progressBar.setValue(percentage);
+                            dialog.progressBar.setVisible(true);
+                            dialog.progressBar.setValue(percentage);
                         }
                     });
                 }
             });
 
             installer.install(
-                    Objects.requireNonNull(CreateInstanceDialog.versionChoice.getSelectedItem()).toString(),
-                    InstancesConfig.instancesDir.resolve(CreateInstanceDialog.nameField.getText()),
-                    new ModloaderProfile(CreateInstanceDialog.getActiveLoader(), Objects.requireNonNullElse(CreateInstanceDialog.modLoaderVersionChoice.getSelectedItem(), "").toString()),
+                    version,
+                    InstancesConfig.instancesDir.resolve(name),
+                    new ModloaderProfile(loader, loaderVersion),
                     Path.of(new SettingsSaver().get("java_path", SystemHelper.getJavaBin().toString())));
 
         });

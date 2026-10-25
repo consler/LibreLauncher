@@ -1,5 +1,6 @@
 package net.consler.librelauncher.ui.category.settings;
 
+import net.consler.librelauncher.settings.SettingsSaver;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncherlib.util.SystemHelper;
 
@@ -10,8 +11,17 @@ import java.awt.event.KeyEvent;
 
 public class MinecraftSettings
 {
-    public static JPanel panel;
-    public static JPanel createPanel()
+    private final ThemeManager themeManager;
+    private final SettingsSaver settingsSaver;
+    public JPanel panel;
+
+    public MinecraftSettings(ThemeManager themeManager, SettingsSaver settingsSaver)
+    {
+        this.themeManager = themeManager;
+        this.settingsSaver = settingsSaver;
+    }
+
+    public JPanel createPanel()
     {
         panel = new JPanel();
         panel.setOpaque(false);
@@ -25,19 +35,19 @@ public class MinecraftSettings
         panel.add(ramLabel);
 
         JTextField ramField = new JTextField();
-        ramField.setText(Settings.settingsSaver.get("ram", "4096"));
+        ramField.setText(settingsSaver.get("ram", "2048"));
         ramField.setMaximumSize(new Dimension(250, 32));
         ramField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        ThemeManager.silentField(ramField);
+        themeManager.silentField(ramField);
 
         ramField.addKeyListener(new KeyAdapter()
         {
             @Override
             public void keyReleased(KeyEvent e)
             {
-                Settings.settingsSaver.set("ram", ramField.getText());
-                Settings.settingsSaver.save();
+                settingsSaver.set("ram", ramField.getText());
+                settingsSaver.save();
             }
         });
         panel.add(ramField);
@@ -49,19 +59,19 @@ public class MinecraftSettings
         panel.add(javaPathLabel);
 
         JTextField javaPathField = new JTextField();
-        javaPathField.setText(Settings.settingsSaver.get("java_path", SystemHelper.getJavaBin().toString()));
+        javaPathField.setText(settingsSaver.get("java_path", SystemHelper.getJavaBin().toString()));
         javaPathField.setMaximumSize(new Dimension(400, 32));
         javaPathField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        ThemeManager.silentField(javaPathField);
+        themeManager.silentField(javaPathField);
 
         javaPathField.addKeyListener(new KeyAdapter()
         {
             @Override
             public void keyReleased(KeyEvent e)
             {
-                Settings.settingsSaver.set("java_path", javaPathField.getText());
-                Settings.settingsSaver.save();
+                settingsSaver.set("java_path", javaPathField.getText());
+                settingsSaver.save();
             }
         });
         panel.add(javaPathField);

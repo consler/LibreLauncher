@@ -2,11 +2,19 @@ package net.consler.librelauncher.ui.category.settings;
 
 import javax.swing.*;
 import java.awt.*;
+import net.consler.librelauncher.settings.SettingsSaver;
 
 public class BehaviourSettings
 {
-    public static JPanel panel;
-    public static JPanel createPanel()
+    private final SettingsSaver settingsSaver;
+    public JPanel panel;
+
+    public BehaviourSettings(SettingsSaver settingsSaver)
+    {
+        this.settingsSaver = settingsSaver;
+    }
+
+    public JPanel createPanel()
     {
         panel = new JPanel();
         panel.setOpaque(false);
@@ -18,11 +26,11 @@ public class BehaviourSettings
 
         JCheckBox trayCheck = new JCheckBox("Close after launch");
         trayCheck.setAlignmentX(Component.LEFT_ALIGNMENT);
-        trayCheck.setSelected(Boolean.parseBoolean(Settings.settingsSaver.get("close_after_launch", "false")));
+        trayCheck.setSelected(Boolean.parseBoolean(settingsSaver.get("close_after_launch", "false")));
         trayCheck.addActionListener(e->
         {
-            Settings.settingsSaver.set("close_after_launch", String.valueOf(trayCheck.isSelected()));
-            Settings.settingsSaver.save();
+            settingsSaver.set("close_after_launch", String.valueOf(trayCheck.isSelected()));
+            settingsSaver.save();
         });
         panel.add(trayCheck);
 

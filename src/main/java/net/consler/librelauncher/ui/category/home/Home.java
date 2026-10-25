@@ -4,7 +4,6 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
-import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
@@ -16,19 +15,25 @@ import static net.consler.librelauncher.util.SystemUtils.isRunningAndClean;
 
 public class Home
 {
-    public static JButton playButton;
-    public static JPanel panel;
-    public static JComboBox<String> instances;
+    private final Main main;
+    public JButton playButton;
+    public JPanel panel;
+    public JComboBox<String> instances;
 
-    public static void show()
+    public Home(Main main)
+    {
+        this.main = main;
+    }
+
+    public void show()
     {
         if (panel != null)
         {
-            Main.showPage("home");
+            main.showPage("home");
             return;
         }
 
-        panel = new RoundCornerPanel();
+        panel = new RoundCornerPanel(main.client.getBackground());
         panel.setOpaque(false);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
@@ -36,17 +41,17 @@ public class Home
         playButton.setPreferredSize(new Dimension(200, 60));
         playButton.setMaximumSize(new Dimension(200, 60));
         playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        playButton.setBackground(Main.client.getBackground().darker());
+        playButton.setBackground(main.client.getBackground().darker());
         playButton.setForeground(Color.WHITE);
         playButton.setFocusable(false);
         playButton.setBorderPainted(false);
-        playButton.setFont(ThemeManager.comfortaaBold.deriveFont(18f));
+        playButton.setFont(main.themeManager.comfortaaBold.deriveFont(18f));
 
         instances = new JComboBox<>();
         instances.setPreferredSize(new Dimension(200, 40));
         instances.setMaximumSize(new Dimension(180, 40));
         instances.setAlignmentX(Component.CENTER_ALIGNMENT);
-        instances.setBackground(Main.client.getBackground().darker());
+        instances.setBackground(main.client.getBackground().darker());
         instances.setForeground(Color.WHITE);
         instances.setFocusable(false);
         instances.setBorder(BorderFactory.createEmptyBorder());
@@ -75,7 +80,7 @@ public class Home
                 }
                 catch (Exception ex)
                 {
-                    new ErrorDialog(Main.client, ex, "launching");
+                    new ErrorDialog(main.client, ex, "launching");
                 }
             }
         });
@@ -86,11 +91,11 @@ public class Home
         panel.add(instances);
         panel.add(Box.createVerticalGlue());
 
-        Main.pageContainer.add(panel, "home");
-        Main.showPage("home");
+        main.pageContainer.add(panel, "home");
+        main.showPage("home");
     }
 
-    public static void populate()
+    public void populate()
     {
         instances.removeAllItems();
         new InstancesConfig().getInstanceList().forEach(instances::addItem);

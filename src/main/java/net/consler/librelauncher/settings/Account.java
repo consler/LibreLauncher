@@ -1,4 +1,4 @@
-package net.consler.librelauncher.ui.category.settings;
+package net.consler.librelauncher.settings;
 
 import net.consler.librelauncherlib.auth.AuthProfile;
 

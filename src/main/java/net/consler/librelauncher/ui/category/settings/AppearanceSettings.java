@@ -1,11 +1,19 @@
 package net.consler.librelauncher.ui.category.settings;
 import javax.swing.*;
 import java.awt.*;
+import net.consler.librelauncher.settings.SettingsSaver;
 
 public class AppearanceSettings
 {
-    public static JPanel panel;
-    public static JPanel createPanel()
+    private final SettingsSaver settingsSaver;
+    public JPanel panel;
+
+    public AppearanceSettings(SettingsSaver settingsSaver)
+    {
+        this.settingsSaver = settingsSaver;
+    }
+
+    public JPanel createPanel()
     {
         panel = new JPanel();
         panel.setOpaque(false);
@@ -22,11 +30,11 @@ public class AppearanceSettings
         JComboBox<String> themeBox = new JComboBox<>(new String[]{"Dark", "Light", "Darcula", "Intellij"});
         themeBox.setMaximumSize(new Dimension(250, 32));
         themeBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-        themeBox.setSelectedItem(Settings.settingsSaver.get("theme", "Dark"));
+        themeBox.setSelectedItem(settingsSaver.get("theme", "Dark"));
         themeBox.addActionListener(e ->
         {
-            Settings.settingsSaver.set("theme", (String) themeBox.getSelectedItem());
-            Settings.settingsSaver.save();
+            settingsSaver.set("theme", (String) themeBox.getSelectedItem());
+            settingsSaver.save();
         });
         panel.add(themeBox);
 

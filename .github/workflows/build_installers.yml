@@ -245,5 +245,3 @@ jobs:
           name: "LibreLauncher ${{ github.ref_name }}"
           body: |
             Automated build containing native installers, application images, a universal JAR and a Linux AppImage for LibreLauncher.
-
-            Linux AppImage: `chmod +x LibreLauncher-x86_64.AppImage && ./LibreLauncher-x86_64.AppImage`

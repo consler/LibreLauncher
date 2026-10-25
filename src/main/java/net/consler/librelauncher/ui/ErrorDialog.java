@@ -63,6 +63,7 @@ public class ErrorDialog extends JDialog
 
         pack();
         setLocationRelativeTo(parentFrame);
+        setVisible(true);
     }
 
     private static String getStackTraceAsString(Throwable throwable)

@@ -7,36 +7,47 @@ import net.consler.librelauncher.ui.category.RoundCornerPanel;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Supplier;
 
 public class Settings
 {
-    public static JPanel panel;
-    public static JPanel contentPanel;
-    public static CardLayout cardLayout;
+    private final Main main;
+    public JPanel panel;
+    public JPanel contentPanel;
+    public CardLayout cardLayout;
 
-    public static List<JButton> categoryButtons;
-    public static JButton generalButton;
-    public static JButton appearanceButton;
-    public static JButton behaviourButton;
-    public static JButton accountsButton;
+    public final List<JButton> categoryButtons = new ArrayList<>();
+    public JButton generalButton;
+    public JButton appearanceButton;
+    public JButton behaviourButton;
+    public JButton accountsButton;
 
-    public static SettingsSaver settingsSaver;
+    public SettingsSaver settingsSaver;
+    private final Map<String, Supplier<JPanel>> categoryPages = new HashMap<>();
+    private final Set<String> loadedPages = new HashSet<>();
 
-    public static void show()
+    public Settings(Main main)
+    {
+        this.main = main;
+    }
+
+    public void show()
     {
         if (panel != null)
         {
-            Main.showPage("settings");
+            main.showPage("settings");
             return;
         }
 
         settingsSaver = new SettingsSaver();
 
-        panel = new RoundCornerPanel();
+        panel = new RoundCornerPanel(main.client.getBackground());
         panel.setLayout(new BorderLayout());
-
-        categoryButtons = new ArrayList<>();
 
         JPanel categoryPanel = new JPanel();
         categoryPanel.setLayout(new BoxLayout(categoryPanel, BoxLayout.Y_AXIS));
@@ -58,23 +69,23 @@ public class Settings
         behaviourButton = new JButton("Behaviour");
         accountsButton = new JButton("Accounts");
 
-        addCategory(generalButton, "Minecraft", MinecraftSettings.createPanel(), categoryPanel);
-        addCategory(appearanceButton, "Appearance", AppearanceSettings.createPanel(), categoryPanel);
-        addCategory(behaviourButton, "Behaviour", BehaviourSettings.createPanel(), categoryPanel);
-        addCategory(accountsButton, "Accounts", AccountsSettings.createPanel(), categoryPanel);
+        addCategory(generalButton, () -> new MinecraftSettings(main.themeManager, settingsSaver).createPanel(), categoryPanel);
+        addCategory(appearanceButton, () -> new AppearanceSettings(settingsSaver).createPanel(), categoryPanel);
+        addCategory(behaviourButton, () -> new BehaviourSettings(settingsSaver).createPanel(), categoryPanel);
+        addCategory(accountsButton, () -> new AccountsSettings(main).createPanel(), categoryPanel);
 
-        if (!categoryButtons.isEmpty()) selectCategory(generalButton, "Minecraft");
+        if (!categoryButtons.isEmpty()) selectCategory(generalButton);
 
         panel.add(categoryPanel, BorderLayout.WEST);
         panel.add(contentPanel, BorderLayout.CENTER);
 
-        Main.pageContainer.add(panel, "settings");
-        Main.showPage("settings");
+        main.pageContainer.add(panel, "settings");
+        main.showPage("settings");
     }
 
-    private static void addCategory(JButton button, String name, JPanel content, JPanel categoryPanel)
+    private void addCategory(JButton button, Supplier<JPanel> pageFactory, JPanel categoryPanel)
     {
-        contentPanel.add(content, name);
+        categoryPages.put(button.getText(), pageFactory);
 
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
         button.setPreferredSize(new Dimension(Integer.MAX_VALUE, 35));
@@ -83,16 +94,24 @@ public class Settings
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
-        button.addActionListener(e -> selectCategory(button, name));
+        button.addActionListener(e -> selectCategory(button));
 
         categoryButtons.add(button);
         categoryPanel.add(button);
         categoryPanel.add(Box.createRigidArea(new Dimension(0, 5)));
     }
 
-    public static void selectCategory(JButton selectedButton, String cardName)
+    public void selectCategory(JButton selectedButton)
     {
-        cardLayout.show(contentPanel, cardName);
+        String pageName = selectedButton.getText();
+        if (!categoryPages.containsKey(pageName)) return;
+
+        if (!loadedPages.contains(pageName))
+        {
+            contentPanel.add(categoryPages.get(pageName).get(), pageName);
+            loadedPages.add(pageName);
+        }
+        cardLayout.show(contentPanel, selectedButton.getText());
 
         for (JButton button : categoryButtons)
         {
@@ -109,5 +128,4 @@ public class Settings
         label.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         return label;
     }
-
 }

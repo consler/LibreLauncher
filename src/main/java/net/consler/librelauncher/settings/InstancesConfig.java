@@ -7,13 +7,11 @@ import dev.dirs.BaseDirectories;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ErrorDialog;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -71,15 +69,34 @@ public class InstancesConfig
 
     public String getProperty(String instanceId, String key)
     {
+        return getProperty(instanceId, key, null);
+    }
+
+    public String getProperty(String instanceId, String key, String defaultValue)
+    {
         Map<String, String> instanceProps = instanceCache.get(instanceId);
-        return instanceProps != null ? instanceProps.get(key) : null;
+
+        if (instanceProps == null) return defaultValue;
+
+        String value = instanceProps.get(key);
+        return value != null && !value.isEmpty() ? value : defaultValue;
     }
 
     public void save()
     {
-        try (FileWriter writer = new FileWriter(instancesConfigFile))
+        Path target = instancesConfigFile.toPath();
+        Path tmp = target.resolveSibling(target.getFileName() + ".tmp");
+        try (Writer writer = Files.newBufferedWriter(tmp))
         {
             GSON.toJson(instanceCache, MAP_TYPE, writer);
+        }
+        catch (IOException e)
+        {
+            throw new RuntimeException("Failed to save instances.json", e);
+        }
+        try
+        {
+            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
         }
         catch (IOException e)
         {
@@ -108,14 +125,14 @@ public class InstancesConfig
                                 Files.delete(path);
                             } catch (IOException e)
                             {
-                                new ErrorDialog(Main.client, e, "deleting instance");
+                                new ErrorDialog(Main.getInstance().client, e, "deleting instance");
                                 throw new RuntimeException(e);
                             }
                         });
             }
             catch (IOException e)
             {
-                new ErrorDialog(Main.client, e, "deleting instance");
+                new ErrorDialog(Main.getInstance().client, e, "deleting instance");
                 throw new RuntimeException(e);
             }
         }

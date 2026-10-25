@@ -11,20 +11,27 @@ import java.util.Objects;
 
 public class Titlebar
 {
-    private static Point initialClick;
+    private final net.consler.librelauncher.Main main;
+    private Point initialClick;
 
-    public static JPanel titlebar;
+    public JPanel titlebar;
 
-    public static void show(JFrame frame)
+    public Titlebar(net.consler.librelauncher.Main main)
     {
-        frame.add(create(frame, "LibreLauncher", true, () -> System.exit(0)), BorderLayout.NORTH);
+        this.main = main;
     }
 
-    public static JPanel create(Window window, String title, boolean minimizable, Runnable onClose)
+    public void show(JFrame frame)
     {
-        titlebar = new JPanel(new BorderLayout());
-        titlebar.setPreferredSize(new Dimension(window.getWidth(), 32));
-        titlebar.setBackground(window.getBackground().darker());
+        titlebar = create(frame, "LibreLauncher", true, () -> System.exit(0));
+        frame.add(titlebar, BorderLayout.NORTH);
+    }
+
+    public JPanel create(Window window, String title, boolean minimizable, Runnable onClose)
+    {
+        JPanel titleBar = new JPanel(new BorderLayout());
+        titleBar.setPreferredSize(new Dimension(window.getWidth(), 32));
+        titleBar.setBackground(window.getBackground().darker());
 
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         leftPanel.setOpaque(false);
@@ -37,7 +44,7 @@ public class Titlebar
 
         JLabel titleLabel = new JLabel(title);
         titleLabel.setForeground(new Color(220, 220, 220));
-        titleLabel.setFont(ThemeManager.comfortaaBold);
+        titleLabel.setFont(main.themeManager.comfortaaBold);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
         leftPanel.add(titleLabel);
 
@@ -50,8 +57,8 @@ public class Titlebar
         }
         rightPanel.add(createControlButton("✕", e -> onClose.run(), window));
 
-        titlebar.add(leftPanel, BorderLayout.WEST);
-        titlebar.add(rightPanel, BorderLayout.EAST);
+        titleBar.add(leftPanel, BorderLayout.WEST);
+        titleBar.add(rightPanel, BorderLayout.EAST);
 
         MouseAdapter dragAdapter = new MouseAdapter()
         {
@@ -74,13 +81,13 @@ public class Titlebar
             }
         };
 
-        titlebar.addMouseListener(dragAdapter);
-        titlebar.addMouseMotionListener(dragAdapter);
+        titleBar.addMouseListener(dragAdapter);
+        titleBar.addMouseMotionListener(dragAdapter);
 
-        return titlebar;
+        return titleBar;
     }
 
-    private static JButton createControlButton(String text, ActionListener action, Window window)
+    private JButton createControlButton(String text, ActionListener action, Window window)
     {
         JButton button = new JButton(text);
         button.setPreferredSize(new Dimension(46, 32));
