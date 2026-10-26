@@ -56,6 +56,7 @@ public class InstanceEditor
 
         addCategory(settingsButton, () -> new InstanceSettings(main, instancesConfig).createPanel(instance));
         addCategory(modsButton, () -> new InstanceMods(main).createPanel(instance));
+        addCategory(resourcePacksButton, () -> new InstanceResourcePacks(main).createPanel(instance));
 
         selectCategory(settingsButton);
         categoryPanel.revalidate();
