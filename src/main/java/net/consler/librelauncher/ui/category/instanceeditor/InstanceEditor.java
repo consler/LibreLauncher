@@ -28,6 +28,7 @@ public class InstanceEditor
     public JButton logsButton;
     public JButton modsButton;
     public JButton resourcePacksButton;
+    public JButton worldsButton;
 
     public InstancesConfig instancesConfig;
     private final Map<String, Supplier<JPanel>> categoryPages = new HashMap<>();
@@ -52,11 +53,13 @@ public class InstanceEditor
         settingsButton = new JButton("Settings");
         modsButton = new JButton("Mods");
         resourcePacksButton = new JButton("Resource Packs");
+        worldsButton = new JButton("Worlds");
         logsButton = new JButton("Logs");
 
         addCategory(settingsButton, () -> new InstanceSettings(main, instancesConfig).createPanel(instance));
         addCategory(modsButton, () -> new InstanceMods(main).createPanel(instance));
         addCategory(resourcePacksButton, () -> new InstanceResourcePacks(main).createPanel(instance));
+        addCategory(worldsButton, () -> new InstanceWorlds(main).createPanel(instance));
 
         selectCategory(settingsButton);
         categoryPanel.revalidate();
