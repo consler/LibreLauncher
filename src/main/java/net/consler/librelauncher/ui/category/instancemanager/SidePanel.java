@@ -1,13 +1,16 @@
 package net.consler.librelauncher.ui.category.instancemanager;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.instance.Importer;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.util.SystemUtils;
+import net.consler.librelauncherlib.instance.InstanceProfile;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
+import java.nio.file.Path;
 
 public class SidePanel
 {
@@ -16,6 +19,7 @@ public class SidePanel
     public JPanel panel;
     public JButton addInstanceButton;
     public JButton instanceFolderButton;
+    public JButton importButton;
 
     public SidePanel(Main main, InstanceManager instanceManager)
     {
@@ -35,6 +39,33 @@ public class SidePanel
         addInstanceButton = createButton("Add Instance");
         addInstanceButton.addActionListener(e -> new CreateInstanceDialog(main, instanceManager.instancePanel).open());
         panel.add(addInstanceButton);
+
+        panel.add(Box.createVerticalStrut(10));
+
+        importButton = createButton("Import");
+        importButton.addActionListener(e ->
+        {
+            try
+            {
+                Path gameDir = Importer.doImport(InstancesConfig.instancesDir.toFile());
+                if(gameDir == null) return;
+
+                InstanceProfile instance = new InstanceProfile(gameDir);
+                InstancesConfig instancesConfig = new InstancesConfig();
+                instancesConfig.saveProperty(instance.getName(), "version", instance.getVersion());
+                instancesConfig.saveProperty(instance.getName(), "modloader", instance.getModloader());
+                instancesConfig.saveProperty(instance.getName(), "modloader_version", instance.getLoaderVersion());
+                instancesConfig.save();
+
+                instanceManager.instancePanel.populate();
+            }
+            catch (IOException ex)
+            {
+                new ErrorDialog(main.client, ex, "importing instance");
+                throw new RuntimeException(ex);
+            }
+        });
+        panel.add(importButton);
 
         panel.add(Box.createVerticalStrut(10));
 

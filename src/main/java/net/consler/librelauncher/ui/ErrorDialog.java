@@ -26,7 +26,7 @@ public class ErrorDialog extends JDialog
         String stackTrace = getStackTraceAsString(ex);
 
         JLabel messageLabel = new JLabel();
-        if(action != null && !action.isBlank()) messageLabel.setText("An error occurred during " + action + ":");
+        if(action != null && !action.isBlank()) messageLabel.setText("An error occurred while " + action);
         else messageLabel.setText("An unexpected error!");
 
         messageLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));

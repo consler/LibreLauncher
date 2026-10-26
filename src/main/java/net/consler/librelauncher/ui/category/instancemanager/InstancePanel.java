@@ -2,6 +2,7 @@ package net.consler.librelauncher.ui.category.instancemanager;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.instance.Exporter;
 import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
@@ -101,6 +102,21 @@ public class InstancePanel
                     JMenuItem edit = new JMenuItem("Edit");
                     edit.addActionListener(ev -> main.instanceEditor.show(new InstanceProfile(InstancesConfig.instancesDir.resolve(instanceName))));
                     contextMenu.add(edit);
+
+                    JMenuItem export = new JMenuItem("Export");
+                    export.addActionListener(ev ->
+                    {
+                        try
+                        {
+                            Exporter.export(InstancesConfig.instancesDir.resolve(instanceName).toFile());
+                        }
+                        catch (IOException ex)
+                        {
+                            new ErrorDialog(main.client, ex, "exporting");
+                            throw new RuntimeException(ex);
+                        }
+                    });
+                    contextMenu.add(export);
 
                     JMenuItem folder = new JMenuItem("Open Folder");
                     folder.addActionListener(ev ->
