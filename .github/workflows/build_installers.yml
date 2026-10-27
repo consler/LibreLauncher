@@ -243,5 +243,3 @@ jobs:
           prerelease: false
           tag_name: ${{ github.ref_name }}
           name: "LibreLauncher ${{ github.ref_name }}"
-          body: |
-            Automated build containing native installers, application images, a universal JAR and a Linux AppImage for LibreLauncher.
