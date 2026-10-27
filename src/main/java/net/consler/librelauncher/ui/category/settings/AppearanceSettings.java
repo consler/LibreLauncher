@@ -38,6 +38,17 @@ public class AppearanceSettings
         });
         panel.add(themeBox);
 
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        JCheckBox showSidebar = new JCheckBox("Show Side Panel");
+        showSidebar.setSelected(Boolean.parseBoolean(settingsSaver.get("show_side_panel", "false")));
+        showSidebar.addActionListener(e ->
+        {
+            settingsSaver.set("show_side_panel", String.valueOf(showSidebar.isSelected()));
+            settingsSaver.save();
+        });
+        panel.add(showSidebar);
+
         return panel;
     }
 }

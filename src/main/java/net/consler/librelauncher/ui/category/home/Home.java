@@ -44,7 +44,6 @@ public class Home
         playButton.setBackground(main.client.getBackground().darker());
         playButton.setForeground(Color.WHITE);
         playButton.setFocusable(false);
-        playButton.setBorderPainted(false);
         playButton.setFont(main.themeManager.comfortaaBold.deriveFont(18f));
 
         instances = new JComboBox<>();
@@ -62,10 +61,7 @@ public class Home
             "buttonHoverArrowColor: #00000000; " +
             "buttonPressedArrowColor: #00000000;"
         );
-        instances.addActionListener(l ->
-        {
-            playButton.setEnabled(!isRunningAndClean(String.valueOf(instances.getSelectedItem())));
-        });
+        instances.addActionListener(l -> playButton.setEnabled(!isRunningAndClean(String.valueOf(instances.getSelectedItem()))));
 
         new InstancesConfig().getInstanceList().forEach(instances::addItem);
 

@@ -2,10 +2,11 @@ package net.consler.librelauncher.ui.category.instanceeditor;
 
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ThemeManager;
+import net.consler.librelauncher.ui.category.settings.AutoDetectJavaDialog;
 import net.consler.librelauncher.ui.category.settings.Settings;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncherlib.instance.InstanceProfile;
-import net.consler.librelauncherlib.util.SystemHelper;
+import net.consler.librelauncherlib.util.JavaVersion;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,12 +17,10 @@ public class InstanceSettings
 {
     public JPanel panel;
 
-    private final ThemeManager themeManager;
     private final InstancesConfig instancesConfig;
 
     public InstanceSettings(Main main, InstancesConfig instancesConfig)
     {
-        this.themeManager = main.themeManager;
         this.instancesConfig = instancesConfig;
     }
 
@@ -31,7 +30,7 @@ public class InstanceSettings
         panel.setOpaque(false);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-        panel.add(Settings.createHeader("Minecraft Settings"));
+        panel.add(Settings.createHeader("Default Minecraft Settings"));
         panel.add(Box.createRigidArea(new Dimension(0, 8)));
 
         JLabel ramLabel = new JLabel("Maximum Memory Allocation (MB)");
@@ -40,10 +39,10 @@ public class InstanceSettings
 
         JTextField ramField = new JTextField();
         ramField.setText(instancesConfig.getProperty(instance.getName(), "ram", "2048"));
-        ramField.setMaximumSize(new Dimension(250, 32));
+        ramField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
         ramField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        themeManager.silentField(ramField);
+        ThemeManager.silentField(ramField);
 
         ramField.addKeyListener(new KeyAdapter()
         {
@@ -63,11 +62,10 @@ public class InstanceSettings
         panel.add(javaPathLabel);
 
         JTextField javaPathField = new JTextField();
-        javaPathField.setText(instancesConfig.getProperty(instance.getName(), "java_path", SystemHelper.getJavaBin().toString()));
-        javaPathField.setMaximumSize(new Dimension(400, 32));
+        javaPathField.setText(instancesConfig.getProperty(instance.getName(), "java_path", JavaVersion.current().executable().toString()));
+        javaPathField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
         javaPathField.setAlignmentX(Component.LEFT_ALIGNMENT);
-
-        themeManager.silentField(javaPathField);
+        ThemeManager.silentField(javaPathField);
 
         javaPathField.addKeyListener(new KeyAdapter()
         {
@@ -78,7 +76,32 @@ public class InstanceSettings
                 instancesConfig.save();
             }
         });
-        panel.add(javaPathField);
+
+        JButton autoDetectJavaButton = new JButton("Auto Detect");
+        autoDetectJavaButton.setMaximumSize(new Dimension(150, 32));
+        autoDetectJavaButton.setFocusable(false);
+        autoDetectJavaButton.addActionListener(e ->
+        {
+            new AutoDetectJavaDialog(Main.getInstance().client, javaPathField)
+            {
+                @Override
+                public void onDone()
+                {
+                    instancesConfig.saveProperty(instance.getName(), "java_path", javaPathField.getText());
+                    instancesConfig.save();
+                }
+            };
+        });
+
+        JPanel javaPathRow = new JPanel(new BorderLayout(8, 0));
+        javaPathRow.setOpaque(false);
+        javaPathRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+        javaPathRow.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
+
+        javaPathRow.add(javaPathField, BorderLayout.CENTER);
+        javaPathRow.add(autoDetectJavaButton, BorderLayout.EAST);
+
+        panel.add(javaPathRow);
 
         return panel;
     }

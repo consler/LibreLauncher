@@ -41,7 +41,7 @@ public class SystemUtils
         Optional<ProcessHandle> process = ProcessHandle.of(Long.parseLong(pid));
         if (process.isPresent() && process.get().isAlive())
         {
-            process.get().destroy();
+            process.get().destroyForcibly();
         }
     }
 

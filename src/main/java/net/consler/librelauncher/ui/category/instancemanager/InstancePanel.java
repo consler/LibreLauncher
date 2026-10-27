@@ -3,6 +3,7 @@ package net.consler.librelauncher.ui.category.instancemanager;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.instance.Exporter;
+import net.consler.librelauncher.instance.Importer;
 import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
@@ -12,9 +13,8 @@ import net.consler.librelauncherlib.instance.InstanceProfile;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.nio.file.Path;
 
 import static net.consler.librelauncher.util.SystemUtils.isRunningAndClean;
 
@@ -24,6 +24,8 @@ public class InstancePanel
     private final InstanceManager instanceManager;
 
     public JPanel instancePanel;
+
+    InstancesConfig instancesConfig;
 
     public InstancePanel(Main main, InstanceManager instanceManager)
     {
@@ -35,6 +37,7 @@ public class InstancePanel
     {
         instancePanel = new RoundCornerPanel(main.client.getBackground());
         instancePanel.setLayout(new BoxLayout(instancePanel, BoxLayout.Y_AXIS));
+        instancePanel.setComponentPopupMenu(createPopup());
 
         populate();
 
@@ -48,7 +51,7 @@ public class InstancePanel
 
     public void populate()
     {
-        InstancesConfig instancesConfig = new InstancesConfig();
+        instancesConfig = new InstancesConfig();
 
         instancePanel.removeAll();
 
@@ -63,88 +66,13 @@ public class InstancePanel
         for (String instanceName : instancesConfig.instanceCache.keySet())
         {
             JPanel rowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 4));
-            rowPanel.setPreferredSize(new Dimension(700, 30));
-            rowPanel.setMaximumSize(new Dimension(700, 30));
+            rowPanel.setPreferredSize(new Dimension(Integer.MAX_VALUE, 30));
+            rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
             rowPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
             rowPanel.setOpaque(false);
             rowPanel.putClientProperty("FlatLaf.style", "arc:25;");
             rowPanel.setBackground(instancePanel.getBackground().darker());
-            rowPanel.addMouseListener(new MouseAdapter()
-            {
-                @Override
-                public void mousePressed(MouseEvent e)
-                {
-                    if(!e.isPopupTrigger()) return;
-
-                    JPopupMenu contextMenu = new JPopupMenu();
-
-                    if(isRunningAndClean(instanceName))
-                    {
-                        JMenuItem launch = new JMenuItem("Stop");
-                        launch.addActionListener(ev ->
-                        {
-                            SystemUtils.killInstance(instanceName);
-                            populate();
-                        });
-                        contextMenu.add(launch);
-                    }
-                    else
-                    {
-                        JMenuItem launch = new JMenuItem("Launch");
-                        launch.addActionListener(ev ->
-                        {
-                            Launcher.launch(instanceName);
-                            populate();
-                        });
-                        contextMenu.add(launch);
-                    }
-
-                    JMenuItem edit = new JMenuItem("Edit");
-                    edit.addActionListener(ev -> main.instanceEditor.show(new InstanceProfile(InstancesConfig.instancesDir.resolve(instanceName))));
-                    contextMenu.add(edit);
-
-                    JMenuItem export = new JMenuItem("Export");
-                    export.addActionListener(ev ->
-                    {
-                        try
-                        {
-                            Exporter.export(InstancesConfig.instancesDir.resolve(instanceName).toFile());
-                        }
-                        catch (IOException ex)
-                        {
-                            new ErrorDialog(main.client, ex, "exporting");
-                            throw new RuntimeException(ex);
-                        }
-                    });
-                    contextMenu.add(export);
-
-                    JMenuItem folder = new JMenuItem("Open Folder");
-                    folder.addActionListener(ev ->
-                    {
-                        try
-                        {
-                            SystemUtils.openDirectory(InstancesConfig.instancesDir.resolve(instanceName).toFile());
-                        }
-                        catch (IOException ex)
-                        {
-                            new ErrorDialog(main.client, ex, "creating UI: Open Folder menu item");
-                            throw new RuntimeException(ex);
-                        }
-                    });
-                    contextMenu.add(folder);
-
-                    JMenuItem delete = new JMenuItem("Delete");
-                    delete.addActionListener(ev ->
-                    {
-                        SystemUtils.killInstance(instanceName);
-                        instancesConfig.deleteInstance(instanceName);
-                        populate();
-                    });
-                    contextMenu.add(delete);
-
-                    contextMenu.show(e.getComponent(), e.getX(), e.getY());
-                }
-            });
+            rowPanel.setComponentPopupMenu(createInstancePopup(instanceName));
 
             JButton playButton = new JButton();
             playButton.setIcon(isRunningAndClean(instanceName) ? stopIcon : playIcon);
@@ -160,13 +88,9 @@ public class InstancePanel
             playButton.addActionListener(e ->
             {
                 if(isRunningAndClean(instanceName))
-                {
                     SystemUtils.killInstance(instanceName);
-                }
                 else
-                {
                     Launcher.launch(instanceName);
-                }
             });
 
             JLabel nameLabel = new JLabel(instanceName);
@@ -182,5 +106,126 @@ public class InstancePanel
         instancePanel.repaint();
 
         main.home.populate();
+    }
+
+    public JPopupMenu createInstancePopup(String instanceName)
+    {
+        JPopupMenu contextMenu = new JPopupMenu();
+
+        if(isRunningAndClean(instanceName))
+        {
+            JMenuItem launch = new JMenuItem("Stop");
+            launch.addActionListener(ev ->
+            {
+                SystemUtils.killInstance(instanceName);
+                populate();
+            });
+            contextMenu.add(launch);
+        }
+        else
+        {
+            JMenuItem launch = new JMenuItem("Launch");
+            launch.addActionListener(ev ->
+            {
+                Launcher.launch(instanceName);
+                populate();
+            });
+            contextMenu.add(launch);
+        }
+
+        JMenuItem edit = new JMenuItem("Edit");
+        edit.addActionListener(ev -> main.instanceEditor.show(new InstanceProfile(InstancesConfig.instancesDir.resolve(instanceName))));
+        contextMenu.add(edit);
+
+        JMenuItem export = new JMenuItem("Export");
+        export.addActionListener(ev ->
+        {
+            try
+            {
+                Exporter.export(InstancesConfig.instancesDir.resolve(instanceName).toFile());
+            }
+            catch (IOException ex)
+            {
+                new ErrorDialog(main.client, ex, "exporting");
+                throw new RuntimeException(ex);
+            }
+        });
+        contextMenu.add(export);
+
+        JMenuItem folder = new JMenuItem("Open Folder");
+        folder.addActionListener(ev ->
+        {
+            try
+            {
+                SystemUtils.openDirectory(InstancesConfig.instancesDir.resolve(instanceName).toFile());
+            }
+            catch (IOException ex)
+            {
+                new ErrorDialog(main.client, ex, "creating UI: Open Folder menu item");
+                throw new RuntimeException(ex);
+            }
+        });
+        contextMenu.add(folder);
+
+        JMenuItem delete = new JMenuItem("Delete");
+        delete.addActionListener(ev ->
+        {
+            SystemUtils.killInstance(instanceName);
+            instancesConfig.deleteInstance(instanceName);
+            populate();
+        });
+        contextMenu.add(delete);
+
+        return contextMenu;
+    }
+
+    public JPopupMenu createPopup()
+    {
+        JPopupMenu contextMenu = new JPopupMenu();
+
+        JMenuItem addInstance = new JMenuItem("Add Instance");
+        addInstance.addActionListener(ev -> new CreateInstanceDialog(main, instanceManager.instancePanel).open());
+        contextMenu.add(addInstance);
+
+        JMenuItem importInstance = new JMenuItem("Import");
+        importInstance.addActionListener(ev ->
+        {
+            try
+            {
+                Path gameDir = Importer.doImport(InstancesConfig.instancesDir.toFile());
+                if(gameDir == null) return;
+
+                InstanceProfile instance = new InstanceProfile(gameDir);
+                InstancesConfig instancesConfig = new InstancesConfig();
+                instancesConfig.saveProperty(instance.getName(), "version", instance.getVersion());
+                instancesConfig.saveProperty(instance.getName(), "modloader", instance.getModloader());
+                instancesConfig.saveProperty(instance.getName(), "modloader_version", instance.getLoaderVersion());
+                instancesConfig.save();
+
+                instanceManager.instancePanel.populate();
+            }
+            catch (IOException ex)
+            {
+                new ErrorDialog(main.client, ex, "importing instance");
+                throw new RuntimeException(ex);
+            }
+        });
+        contextMenu.add(importInstance);
+
+        JMenuItem openFolder = new JMenuItem("Open Folder");
+        openFolder.addActionListener(ev ->
+        {
+            try
+            {
+                SystemUtils.openDirectory(InstancesConfig.instancesDir.toFile());
+            }
+            catch (IOException ex)
+            {
+                new ErrorDialog(main.client, ex, "opening folder");
+            }
+        });
+        contextMenu.add(openFolder);
+
+        return contextMenu;
     }
 }

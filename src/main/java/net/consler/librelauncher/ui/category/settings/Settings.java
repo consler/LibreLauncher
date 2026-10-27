@@ -62,14 +62,14 @@ public class Settings
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
         contentPanel.setOpaque(false);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 30));
 
         generalButton = new JButton("Minecraft");
         appearanceButton = new JButton("Appearance");
         behaviourButton = new JButton("Behaviour");
         accountsButton = new JButton("Accounts");
 
-        addCategory(generalButton, () -> new MinecraftSettings(main.themeManager, settingsSaver).createPanel(), categoryPanel);
+        addCategory(generalButton, () -> new MinecraftSettings(settingsSaver).createPanel(), categoryPanel);
         addCategory(appearanceButton, () -> new AppearanceSettings(settingsSaver).createPanel(), categoryPanel);
         addCategory(behaviourButton, () -> new BehaviourSettings(settingsSaver).createPanel(), categoryPanel);
         addCategory(accountsButton, () -> new AccountsSettings(main).createPanel(), categoryPanel);
@@ -124,8 +124,8 @@ public class Settings
     {
         JLabel label = new JLabel(text);
         label.setFont(label.getFont().deriveFont(Font.BOLD, 18f));
-        label.setAlignmentX(Component.LEFT_ALIGNMENT);
         label.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
         return label;
     }
 }

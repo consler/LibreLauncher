@@ -11,8 +11,6 @@ import net.consler.librelauncherlib.auth.UserCancelledException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
 public class AccountsSettings
 {
@@ -154,6 +152,8 @@ public class AccountsSettings
             refreshAccountList();
         });
 
+        contextMenu.add(setActiveItem);
+
         JMenuItem removeItem = new JMenuItem("Remove");
         removeItem.addActionListener(e ->
         {
@@ -166,21 +166,9 @@ public class AccountsSettings
             refreshAccountList();
         });
 
-        contextMenu.add(setActiveItem);
-        contextMenu.addSeparator();
         contextMenu.add(removeItem);
 
-        card.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mousePressed(MouseEvent e)
-            {
-                if(e.isPopupTrigger())
-                {
-                    contextMenu.show(e.getComponent(), e.getX(), e.getY());
-                }
-            }
-        });
+        card.setComponentPopupMenu(contextMenu);
 
         return card;
     }

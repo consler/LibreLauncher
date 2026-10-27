@@ -72,7 +72,7 @@ public class Sidebar
 
     public void setUICategory(String category)
     {
-        if(category.equals(currentCategory)) return;
+        if (category.equals(currentCategory) && !category.equals("instancemanager")) return;
 
         switch (category)
         {

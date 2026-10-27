@@ -1,6 +1,7 @@
-package net.consler.librelauncher.ui.category.instanceeditor;
+package net.consler.librelauncher.ui.category.instanceeditor.download;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.ui.category.instanceeditor.InstanceMods;
 import net.consler.librelauncherlib.instance.InstanceProfile;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthProject;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthVersion;
@@ -11,12 +12,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class ModDownloadDialog extends ModrinthDownloadDialog
 {
-    private final InstanceMods instanceMods;
 
-    public ModDownloadDialog(Main main, InstanceProfile instance, InstanceMods instanceMods)
+    public ModDownloadDialog(Main main, InstanceProfile instance)
     {
         super(main, instance);
-        this.instanceMods = instanceMods;
     }
 
     @Override
@@ -38,8 +37,7 @@ public class ModDownloadDialog extends ModrinthDownloadDialog
     }
 
     @Override
-    protected CompletableFuture<?> downloadProject(
-            ModrinthProject project, ModrinthVersion version, Path destination, String userAgent)
+    protected CompletableFuture<?> downloadProject(ModrinthProject project, ModrinthVersion version, Path destination, String userAgent)
     {
         return project.downloadAsMod(version, destination, userAgent);
     }
@@ -47,12 +45,19 @@ public class ModDownloadDialog extends ModrinthDownloadDialog
     @Override
     protected void onDownloadsComplete()
     {
-        if (instanceMods != null) instanceMods.populate(instance);
+        InstanceMods.getInstance().populate(instance);
     }
 
     @Override
     protected boolean filterByModloader()
     {
         return true;
+    }
+
+    @Override
+    protected boolean projectExists(ModrinthProject project)
+    {
+        return InstanceMods.getInstance() != null
+                && InstanceMods.getInstance().doesExist(project.title());
     }
 }

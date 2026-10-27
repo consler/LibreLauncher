@@ -5,7 +5,9 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.SettingsSaver;
 
 import javax.swing.*;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.text.DefaultEditorKit;
+import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
@@ -59,6 +61,20 @@ public class ThemeManager
             Map.entry("ScrollBar.thumbInsets", "2,2,2,2")
         ));
 
+        try
+        {
+            UIManager.setLookAndFeel(new MetalLookAndFeel()
+            {
+                @Override
+                public void provideErrorFeedback(Component component) {}
+            });
+        }
+        catch (UnsupportedLookAndFeelException e)
+        {
+            new ErrorDialog(main.client, e, "setting theme");
+            throw new RuntimeException(e);
+        }
+
         setTheme();
     }
 
@@ -99,76 +115,44 @@ public class ThemeManager
         }
     }
 
-    public void silentField(JTextField textField)
+    public static void silentField(JTextComponent field)
     {
-        textField.getActionMap().put(DefaultEditorKit.beepAction, new AbstractAction()
+        ActionMap map = field.getActionMap();
+
+        guard(field, map, DefaultEditorKit.deletePrevCharAction, true);
+        guard(field, map, DefaultEditorKit.deletePrevWordAction, true);
+        guard(field, map, DefaultEditorKit.deleteNextCharAction, false);
+        guard(field, map, DefaultEditorKit.deleteNextWordAction, false);
+    }
+
+    private static void guard(JTextComponent field, ActionMap map, String actionName, boolean backwards)
+    {
+        Action original = map.get(actionName);
+        if (original == null) return;
+
+        map.put(actionName, new AbstractAction()
         {
             @Override
-            public void actionPerformed(ActionEvent e) {}
+            public void actionPerformed(ActionEvent e)
+            {
+                if (!field.isEditable() || !field.isEnabled()) return;
+
+                if (field.getSelectionStart() != field.getSelectionEnd())
+                {
+                    field.replaceSelection("");
+                    return;
+                }
+
+                int caret = field.getCaretPosition();
+                boolean nothingToDelete = backwards
+                        ? caret == 0
+                        : caret == field.getDocument().getLength();
+
+                if (!nothingToDelete)
+                {
+                    original.actionPerformed(e);
+                }
+            }
         });
-
-        Action deletePrevChar = textField.getActionMap().get(DefaultEditorKit.deletePrevCharAction);
-        if (deletePrevChar != null)
-        {
-            textField.getActionMap().put(DefaultEditorKit.deletePrevCharAction, new AbstractAction()
-            {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    if (textField.getDocument().getLength() > 0)
-                    {
-                        deletePrevChar.actionPerformed(e);
-                    }
-                }
-            });
-        }
-
-        Action deletePrevWord = textField.getActionMap().get(DefaultEditorKit.deletePrevWordAction);
-        if(deletePrevWord != null)
-        {
-            textField.getActionMap().put(DefaultEditorKit.deletePrevWordAction, new AbstractAction()
-            {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    if (textField.getDocument().getLength() > 0)
-                    {
-                        deletePrevWord.actionPerformed(e);
-                    }
-                }
-            });
-        }
-
-        Action deleteNextChar = textField.getActionMap().get(DefaultEditorKit.deleteNextCharAction);
-        if(deleteNextChar != null)
-        {
-            textField.getActionMap().put(DefaultEditorKit.deleteNextCharAction, new AbstractAction()
-            {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    if (textField.getDocument().getLength() > 0)
-                    {
-                        deleteNextChar.actionPerformed(e);
-                    }
-                }
-            });
-        }
-
-        Action deleteNextWord = textField.getActionMap().get(DefaultEditorKit.deleteNextWordAction);
-        if(deleteNextWord != null)
-        {
-            textField.getActionMap().put(DefaultEditorKit.deleteNextWordAction, new AbstractAction()
-            {
-                @Override
-                public void actionPerformed(ActionEvent e)
-                {
-                    if (textField.getDocument().getLength() > 0)
-                    {
-                        deleteNextWord.actionPerformed(e);
-                    }
-                }
-            });
-        }
     }
 }

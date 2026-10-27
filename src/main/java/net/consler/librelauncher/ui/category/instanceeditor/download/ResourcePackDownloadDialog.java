@@ -1,6 +1,7 @@
-package net.consler.librelauncher.ui.category.instanceeditor;
+package net.consler.librelauncher.ui.category.instanceeditor.download;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.ui.category.instanceeditor.InstanceResourcePacks;
 import net.consler.librelauncherlib.instance.InstanceProfile;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthProject;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthVersion;
@@ -11,12 +12,10 @@ import java.util.concurrent.CompletableFuture;
 
 public class ResourcePackDownloadDialog extends ModrinthDownloadDialog
 {
-    private final InstanceResourcePacks instanceResourcePacks;
 
-    public ResourcePackDownloadDialog(Main main, InstanceProfile instance, InstanceResourcePacks instanceResourcePacks)
+    public ResourcePackDownloadDialog(Main main, InstanceProfile instance)
     {
         super(main, instance);
-        this.instanceResourcePacks = instanceResourcePacks;
     }
 
     @Override
@@ -38,8 +37,7 @@ public class ResourcePackDownloadDialog extends ModrinthDownloadDialog
     }
 
     @Override
-    protected CompletableFuture<?> downloadProject(
-            ModrinthProject project, ModrinthVersion version, Path destination, String userAgent)
+    protected CompletableFuture<?> downloadProject(ModrinthProject project, ModrinthVersion version, Path destination, String userAgent)
     {
         return project.downloadAsResourcePack(version, destination, userAgent);
     }
@@ -47,6 +45,16 @@ public class ResourcePackDownloadDialog extends ModrinthDownloadDialog
     @Override
     protected void onDownloadsComplete()
     {
-        if (instanceResourcePacks != null) instanceResourcePacks.populate(instance);
+        InstanceResourcePacks.getInstance().populate(instance);
+    }
+
+    @Override
+    protected boolean projectExists(ModrinthProject project)
+    {
+        InstanceResourcePacks resourcePacks = InstanceResourcePacks.getInstance();
+        return resourcePacks != null
+                && (resourcePacks.doesExist(project.slug())
+                || resourcePacks.doesExist(project.title())
+                || resourcePacks.doesExist(project.id()));
     }
 }

@@ -7,7 +7,7 @@ import net.consler.librelauncher.ui.category.instancemanager.CreateInstanceDialo
 import net.consler.librelauncherlib.install.InstallerListener;
 import net.consler.librelauncherlib.install.MinecraftInstaller;
 import net.consler.librelauncherlib.modloader.ModloaderProfile;
-import net.consler.librelauncherlib.util.SystemHelper;
+import net.consler.librelauncherlib.util.JavaVersion;
 
 import javax.swing.*;
 import java.nio.file.Path;
@@ -84,7 +84,7 @@ public class Downloader
                     version,
                     InstancesConfig.instancesDir.resolve(name),
                     new ModloaderProfile(loader, loaderVersion),
-                    Path.of(new SettingsSaver().get("java_path", SystemHelper.getJavaBin().toString())));
+                    Path.of(new SettingsSaver().get("java_path", JavaVersion.current().executable().toString())));
 
         });
         t.start();

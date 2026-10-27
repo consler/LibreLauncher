@@ -34,13 +34,13 @@ public class SidePanel
         panel.setPreferredSize(new Dimension(150, 0));
         panel.setMaximumSize(new Dimension(150, 0));
 
-        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(20));
 
         addInstanceButton = createButton("Add Instance");
         addInstanceButton.addActionListener(e -> new CreateInstanceDialog(main, instanceManager.instancePanel).open());
         panel.add(addInstanceButton);
 
-        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(5));
 
         importButton = createButton("Import");
         importButton.addActionListener(e ->
@@ -67,7 +67,7 @@ public class SidePanel
         });
         panel.add(importButton);
 
-        panel.add(Box.createVerticalStrut(10));
+        panel.add(Box.createVerticalStrut(5));
 
         instanceFolderButton = createButton("Folder");
         instanceFolderButton.addActionListener(e ->

@@ -1,8 +1,9 @@
-package net.consler.librelauncher.ui.category.instanceeditor;
+package net.consler.librelauncher.ui.category.instanceeditor.download;
 
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncherlib.instance.InstanceProfile;
 import net.consler.librelauncherlib.integration.modrinth.*;
 
@@ -29,6 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public abstract class ModrinthDownloadDialog
 {
     private static final String USER_AGENT = "consler/LibreLauncher";
+    private static final int SEARCH_PAGE_SIZE = 20;
 
     protected final Main main;
     protected final InstanceProfile instance;
@@ -40,10 +42,16 @@ public abstract class ModrinthDownloadDialog
     private JLabel statusLabel;
     private JProgressBar progressBar;
     private JPanel resultsPanel;
+    private JScrollPane resultsScrollPane;
     private SwingWorker<List<ModrinthProject>, Void> searchWorker;
-    private SwingWorker<Void, Void> iconWorker;
+    private final List<SwingWorker<Void, Void>> iconWorkers = new ArrayList<>();
     private final List<ProjectRow> projectRows = new ArrayList<>();
     private final List<ModrinthProject> selectedProjects = new ArrayList<>();
+    private ButtonGroup selectionGroup;
+    private String currentQuery = "";
+    private int nextSearchOffset;
+    private boolean loadingSearchPage;
+    private boolean hasMoreSearchResults = true;
 
     protected ModrinthDownloadDialog(Main main, InstanceProfile instance)
     {
@@ -53,7 +61,7 @@ public abstract class ModrinthDownloadDialog
 
     protected abstract ProjectType projectType();
     protected abstract String itemNamePlural();
-    protected abstract Path downloadDirectory();
+    protected abstract Path downloadDirectory() throws IOException;
     protected abstract CompletableFuture<?> downloadProject(
             ModrinthProject project, ModrinthVersion version, Path destination, String userAgent);
     protected abstract void onDownloadsComplete();
@@ -63,9 +71,53 @@ public abstract class ModrinthDownloadDialog
         return false;
     }
 
+    protected boolean projectExists(ModrinthProject project)
+    {
+        return false;
+    }
+
+    protected boolean allowMultipleSelection()
+    {
+        return true;
+    }
+
+    protected boolean showProgressBar()
+    {
+        return true;
+    }
+
+    protected String dialogTitle()
+    {
+        return "Download " + itemNamePlural();
+    }
+
+    protected String actionButtonText()
+    {
+        return "Download";
+    }
+
+    protected String actionProgressText()
+    {
+        return "Downloading " + itemNamePlural().toLowerCase() + "...";
+    }
+
+    protected String completedItemText()
+    {
+        return itemNamePlural().toLowerCase() + " downloaded";
+    }
+
+    protected String completionStatusText()
+    {
+        return "All " + completedItemText() + ".";
+    }
+
+    protected void cleanupDownloadDirectory(Path destination) throws IOException
+    {
+    }
+
     public void open()
     {
-        String title = "Download " + itemNamePlural();
+        String title = dialogTitle();
         dialog = new JDialog(main.client, title, true);
         dialog.setUndecorated(true);
         dialog.setResizable(false);
@@ -98,18 +150,20 @@ public abstract class ModrinthDownloadDialog
 
         searchField = new JTextField();
         searchField.addActionListener(e -> search(searchField.getText().trim()));
-        main.themeManager.silentField(searchField);
+        ThemeManager.silentField(searchField);
         content.add(searchField, BorderLayout.NORTH);
 
         resultsPanel = new JPanel();
         resultsPanel.setOpaque(false);
         resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
 
-        JScrollPane resultsScrollPane = new JScrollPane(resultsPanel);
+        resultsScrollPane = new JScrollPane(resultsPanel);
         resultsScrollPane.setOpaque(false);
         resultsScrollPane.getViewport().setOpaque(false);
         resultsScrollPane.setBorder(null);
         resultsScrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        resultsScrollPane.getVerticalScrollBar().getModel().addChangeListener(e ->
+                SwingUtilities.invokeLater(this::loadNextPageAtScrollEnd));
         content.add(resultsScrollPane, BorderLayout.CENTER);
 
         progressBar = new JProgressBar(0, 100);
@@ -129,13 +183,14 @@ public abstract class ModrinthDownloadDialog
             dialog.dispose();
         });
 
-        downloadButton = new JButton("Download");
+        downloadButton = new JButton(actionButtonText());
         downloadButton.setEnabled(false);
         downloadButton.addActionListener(e ->
         {
             downloadButton.setEnabled(false);
             downloadSelected();
         });
+        selectionGroup = new ButtonGroup();
 
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         buttons.setOpaque(false);
@@ -155,10 +210,32 @@ public abstract class ModrinthDownloadDialog
     private void search(String query)
     {
         if (searchWorker != null) searchWorker.cancel(true);
-        if (iconWorker != null) iconWorker.cancel(true);
+        cancelIconWorkers();
         selectedProjects.clear();
+        selectionGroup = new ButtonGroup();
         downloadButton.setEnabled(false);
+        resultsPanel.removeAll();
+        projectRows.clear();
+        nextSearchOffset = 0;
+        loadingSearchPage = false;
+        hasMoreSearchResults = true;
+        currentQuery = query;
+        loadSearchPage(query, 0);
+    }
 
+    private void loadNextPageAtScrollEnd()
+    {
+        if (!dialog.isVisible() || resultsScrollPane == null) return;
+        JScrollBar scrollBar = resultsScrollPane.getVerticalScrollBar();
+        if (scrollBar.getValue() + scrollBar.getVisibleAmount() >= scrollBar.getMaximum() - 32)
+            loadSearchPage(currentQuery, nextSearchOffset);
+    }
+
+    private void loadSearchPage(String query, int offset)
+    {
+        if (loadingSearchPage || !hasMoreSearchResults) return;
+        loadingSearchPage = true;
+        statusLabel.setText(offset == 0 ? "Searching Modrinth..." : "Loading more...");
         searchWorker = new SwingWorker<>()
         {
             @Override
@@ -167,7 +244,8 @@ public abstract class ModrinthDownloadDialog
                 SearchQuery searchQuery = new SearchQuery(query)
                         .projectType(projectType())
                         .gameVersion(new InstancesConfig().getProperty(instance.getName(), "version"))
-                        .limit(50);
+                        .limit(SEARCH_PAGE_SIZE)
+                        .offset(offset);
                 if (filterByModloader()) searchQuery.category(instance.getModloader());
                 return Modrinth.search(searchQuery, USER_AGENT).get().hits();
             }
@@ -176,15 +254,11 @@ public abstract class ModrinthDownloadDialog
             protected void done()
             {
                 if (searchWorker != this || isCancelled()) return;
-
-                resultsPanel.removeAll();
-                projectRows.clear();
-                resultsPanel.revalidate();
-                resultsPanel.repaint();
+                loadingSearchPage = false;
                 try
                 {
                     List<ModrinthProject> projects = get();
-                    if (projects.isEmpty())
+                    if (offset == 0 && projects.isEmpty())
                     {
                         JLabel label = new JLabel("No " + itemNamePlural().toLowerCase() + " found.");
                         label.setBorder(new EmptyBorder(12, 8, 12, 8));
@@ -195,11 +269,20 @@ public abstract class ModrinthDownloadDialog
                         return;
                     }
 
-                    for (ModrinthProject project : projects) projectRows.add(addProjectRow(project));
-                    loadIcons(List.copyOf(projectRows));
-                    statusLabel.setText("");
+                    List<ProjectRow> newRows = new ArrayList<>();
+                    for (ModrinthProject project : projects)
+                    {
+                        ProjectRow row = addProjectRow(project);
+                        projectRows.add(row);
+                        newRows.add(row);
+                    }
+                    nextSearchOffset = offset + projects.size();
+                    hasMoreSearchResults = projects.size() == SEARCH_PAGE_SIZE;
+                    loadIcons(newRows);
+                    statusLabel.setText(hasMoreSearchResults ? " " : "");
                     resultsPanel.revalidate();
                     resultsPanel.repaint();
+                    loadNextPageAtScrollEnd();
                 }
                 catch (InterruptedException e)
                 {
@@ -207,7 +290,8 @@ public abstract class ModrinthDownloadDialog
                 }
                 catch (ExecutionException e)
                 {
-                    statusLabel.setText("Search failed.");
+                    hasMoreSearchResults = false;
+                    statusLabel.setText(offset == 0 ? "Search failed." : "Loading more results failed.");
                     new ErrorDialog(main.client, e, "searching Modrinth");
                 }
                 catch (CancellationException ignored)
@@ -221,16 +305,24 @@ public abstract class ModrinthDownloadDialog
     private ProjectRow addProjectRow(ModrinthProject project)
     {
         String title = project.title() == null || project.title().isBlank() ? project.slug() : project.title();
+        boolean exists = projectExists(project);
 
-        JCheckBox selected = new JCheckBox();
+        AbstractButton selected = allowMultipleSelection() ? new JCheckBox() : new JRadioButton();
         selected.setOpaque(false);
         selected.setToolTipText("Select " + title);
+        selected.setEnabled(!exists);
+        if (!allowMultipleSelection()) selectionGroup.add(selected);
         selected.addActionListener(e ->
         {
             if (selected.isSelected())
+            {
+                if (!allowMultipleSelection()) selectedProjects.clear();
                 selectedProjects.add(project);
+            }
             else
+            {
                 selectedProjects.remove(project);
+            }
             downloadButton.setEnabled(!selectedProjects.isEmpty());
         });
 
@@ -241,7 +333,8 @@ public abstract class ModrinthDownloadDialog
 
         JLabel titleLabel = new JLabel(title);
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD));
-        titleLabel.setToolTipText(title);
+        titleLabel.setToolTipText(exists ? title + " is already installed" : title);
+        if (exists) titleLabel.setForeground(Color.GRAY);
 
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 5));
         row.setPreferredSize(new Dimension(500, 60));
@@ -256,12 +349,12 @@ public abstract class ModrinthDownloadDialog
         row.add(titleLabel);
         resultsPanel.add(row);
         resultsPanel.add(Box.createVerticalStrut(5));
-        return new ProjectRow(project, iconLabel);
+        return new ProjectRow(project, selected, iconLabel);
     }
 
     private void loadIcons(List<ProjectRow> rows)
     {
-        iconWorker = new SwingWorker<>()
+        SwingWorker<Void, Void> worker = new SwingWorker<>()
         {
             @Override
             protected Void doInBackground()
@@ -286,8 +379,15 @@ public abstract class ModrinthDownloadDialog
                 }
                 return null;
             }
+
+            @Override
+            protected void done()
+            {
+                iconWorkers.remove(this);
+            }
         };
-        iconWorker.execute();
+        iconWorkers.add(worker);
+        worker.execute();
     }
 
     private void downloadSelected()
@@ -298,13 +398,13 @@ public abstract class ModrinthDownloadDialog
         downloadButton.setEnabled(false);
         progressBar.setValue(0);
         progressBar.setMaximum(projects.size());
-        progressBar.setString("0 / " + projects.size() + " " + itemNamePlural().toLowerCase() + " downloaded");
-        progressBar.setVisible(true);
-        statusLabel.setText("Downloading " + itemNamePlural().toLowerCase() + "...");
+        progressBar.setString("0 / " + projects.size() + " " + completedItemText());
+        progressBar.setVisible(showProgressBar());
 
-        Path destination = downloadDirectory();
+        Path destination;
         try
         {
+            destination = downloadDirectory();
             Files.createDirectories(destination);
         }
         catch (IOException e)
@@ -313,6 +413,7 @@ public abstract class ModrinthDownloadDialog
             downloadButton.setEnabled(true);
             return;
         }
+        statusLabel.setText(actionProgressText());
 
         AtomicInteger downloaded = new AtomicInteger();
         ConcurrentLinkedQueue<Throwable> failures = new ConcurrentLinkedQueue<>();
@@ -329,8 +430,7 @@ public abstract class ModrinthDownloadDialog
                         .thenCompose(versions ->
                         {
                             if (versions.isEmpty())
-                                return CompletableFuture.failedFuture(new IllegalStateException(
-                                        "No compatible version found for " + project.title()));
+                                return CompletableFuture.failedFuture(new IllegalStateException("No compatible version found for " + project.title()));
                             return downloadProject(project, versions.getFirst(), destination, USER_AGENT);
                         });
             }
@@ -341,47 +441,61 @@ public abstract class ModrinthDownloadDialog
 
             downloads.add(download.whenComplete((result, error) ->
             {
-                if (error == null)
-                    downloaded.incrementAndGet();
-                else
-                    failures.add(error);
+                if (error == null) downloaded.incrementAndGet();
+                else failures.add(error);
 
                 SwingUtilities.invokeLater(() ->
                 {
                     int completed = downloaded.get();
                     progressBar.setValue(completed);
-                    progressBar.setString(completed + " / " + projects.size() + " "
-                            + itemNamePlural().toLowerCase() + " downloaded");
+                    progressBar.setString(completed + " / " + projects.size() + " " + completedItemText());
                 });
             }));
         }
 
         CompletableFuture.allOf(downloads.toArray(CompletableFuture[]::new))
-                .whenComplete((result, error) -> SwingUtilities.invokeLater(() ->
+                .whenComplete((result, error) ->
                 {
-                    if (failures.isEmpty())
+                    try
                     {
-                        statusLabel.setText("All " + itemNamePlural().toLowerCase() + " downloaded.");
-                        onDownloadsComplete();
-                        dialog.dispose();
-                        return;
+                        cleanupDownloadDirectory(destination);
+                    }
+                    catch (IOException cleanupError)
+                    {
+                        failures.add(cleanupError);
                     }
 
-                    statusLabel.setText("Downloaded " + downloaded.get() + " of " + projects.size()
-                            + " " + itemNamePlural().toLowerCase() + "; some failed.");
-                    downloadButton.setEnabled(!selectedProjects.isEmpty());
-                    Throwable failure = failures.peek();
-                    while (Objects.requireNonNull(failure).getCause() != null) failure = failure.getCause();
-                    Exception exception = failure instanceof Exception e ? e : new Exception(failure);
-                    new ErrorDialog(main.client, exception, "downloading " + itemNamePlural().toLowerCase());
-                }));
+                    SwingUtilities.invokeLater(() ->
+                    {
+                        if (failures.isEmpty())
+                        {
+                            statusLabel.setText(completionStatusText());
+                            onDownloadsComplete();
+                            dialog.dispose();
+                            return;
+                        }
+
+                        statusLabel.setText("Downloaded " + downloaded.get() + " of " + projects.size() + " " + itemNamePlural().toLowerCase() + "; some failed.");
+                        downloadButton.setEnabled(!selectedProjects.isEmpty());
+                        Throwable failure = failures.peek();
+                        while (Objects.requireNonNull(failure).getCause() != null) failure = failure.getCause();
+                        Exception exception = failure instanceof Exception e ? e : new Exception(failure);
+                        new ErrorDialog(main.client, exception, actionProgressText().replace("...", ""));
+                    });
+                });
     }
 
     private void cancelWorkers()
     {
         if (searchWorker != null) searchWorker.cancel(true);
-        if (iconWorker != null) iconWorker.cancel(true);
+        cancelIconWorkers();
     }
 
-    private record ProjectRow(ModrinthProject project, JLabel iconLabel) {}
+    private void cancelIconWorkers()
+    {
+        for (SwingWorker<Void, Void> worker : iconWorkers) worker.cancel(true);
+        iconWorkers.clear();
+    }
+
+    private record ProjectRow(ModrinthProject project, AbstractButton selection, JLabel iconLabel) {}
 }

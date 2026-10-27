@@ -86,7 +86,7 @@ public class InstanceEditor
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
         contentPanel.setOpaque(false);
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 30, 20, 30));
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 15, 20, 5));
 
         panel.add(categoryPanel, BorderLayout.WEST);
         panel.add(contentPanel, BorderLayout.CENTER);
@@ -99,7 +99,7 @@ public class InstanceEditor
 
         button.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
         button.setPreferredSize(new Dimension(Integer.MAX_VALUE, 35));
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setAlignmentX(Component.LEFT_ALIGNMENT);
         button.setHorizontalAlignment(SwingConstants.LEFT);
         button.setFocusPainted(false);
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -128,14 +128,5 @@ public class InstanceEditor
             if (button == selectedButton) button.setBackground(new Color(255, 255, 255, 30));
             else button.setBackground(null);
         }
-    }
-
-    public static JLabel createHeader(String text)
-    {
-        JLabel label = new JLabel(text);
-        label.setFont(label.getFont().deriveFont(Font.BOLD, 18f));
-        label.setAlignmentX(Component.LEFT_ALIGNMENT);
-        label.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
-        return label;
     }
 }

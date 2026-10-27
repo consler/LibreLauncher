@@ -2,19 +2,20 @@ package net.consler.librelauncher.ui.category.instanceeditor;
 
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ErrorDialog;
-import net.consler.librelauncher.ui.category.settings.Settings;
+import net.consler.librelauncher.ui.category.instanceeditor.download.ResourcePackDownloadDialog;
 import net.consler.librelauncher.util.SystemUtils;
 import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.ResourcePack;
+import net.consler.librelauncherlib.instance.ResourcePackReadException;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -25,76 +26,24 @@ import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class InstanceResourcePacks
+public class InstanceResourcePacks extends InstanceItem
 {
-    private final Main main;
-    private JPanel listPanel;
-    private SwingWorker<Void, ResourcePackEntry> resourcePackLoader;
+    private SwingWorker<List<ResourcePack>, ResourcePackEntry> resourcePackLoader;
     private final Map<Path, JLabel> iconLabels = new HashMap<>();
+    private volatile List<ResourcePack> resourcePacks = List.of();
 
-    public JPanel panel;
+    private static InstanceResourcePacks instance;
 
     public InstanceResourcePacks(Main main)
     {
-        this.main = main;
+        super(main, "Resource Packs", "Resource Pack");
+        instance = this;
     }
 
-    public JPanel createPanel(InstanceProfile instance)
-    {
-        panel = new JPanel();
-        panel.setOpaque(false);
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.add(Settings.createHeader("Resource Packs"));
-        panel.add(Box.createRigidArea(new Dimension(0, 8)));
-
-        listPanel = new JPanel();
-        listPanel.setOpaque(false);
-        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
-
-        JScrollPane scrollPane = new JScrollPane(listPanel);
-        scrollPane.setOpaque(false);
-        scrollPane.getViewport().setOpaque(false);
-        scrollPane.setBorder(null);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        panel.add(scrollPane);
-
-        panel.addMouseListener(new MouseAdapter()
-        {
-            @Override
-            public void mousePressed(MouseEvent e)
-            {
-                if (!e.isPopupTrigger()) return;
-
-                JPopupMenu popupMenu = new JPopupMenu();
-                JMenuItem addResourcePacks = new JMenuItem("Add Resource Packs");
-                addResourcePacks.addActionListener(ev ->
-                        new ResourcePackDownloadDialog(main, instance, InstanceResourcePacks.this).open());
-                popupMenu.add(addResourcePacks);
-
-                JMenuItem openFolder = new JMenuItem("Open Folder");
-                openFolder.addActionListener(ev ->
-                {
-                    try
-                    {
-                        SystemUtils.openDirectory(instance.getResourcePackFolder().toFile());
-                    }
-                    catch (IOException ex)
-                    {
-                        new ErrorDialog(main.client, ex, "opening resource packs folder");
-                        throw new RuntimeException(ex);
-                    }
-                });
-                popupMenu.add(openFolder);
-                popupMenu.show(e.getComponent(), e.getX(), e.getY());
-            }
-        });
-
-        populate(instance);
-        return panel;
-    }
-
+    @Override
     public void populate(InstanceProfile instance)
     {
+        resourcePacks = List.of();
         if (resourcePackLoader != null) resourcePackLoader.cancel(true);
         listPanel.removeAll();
         iconLabels.clear();
@@ -104,10 +53,10 @@ public class InstanceResourcePacks
         resourcePackLoader = new SwingWorker<>()
         {
             @Override
-            protected Void doInBackground() throws IOException
+            protected List<ResourcePack> doInBackground() throws IOException
             {
                 Path resourcePackFolder = instance.getResourcePackFolder();
-                if (!Files.isDirectory(resourcePackFolder)) return null;
+                if (!Files.isDirectory(resourcePackFolder)) return List.of();
 
                 List<Path> packFiles;
                 try (Stream<Path> paths = Files.list(resourcePackFolder))
@@ -120,9 +69,17 @@ public class InstanceResourcePacks
                             .toList();
                 }
 
+                List<ResourcePack> loadedPacks = new ArrayList<>();
                 for (Path packFile : packFiles)
                 {
                     if (isCancelled()) return null;
+                    try
+                    {
+                        loadedPacks.add(new ResourcePack(packFile));
+                    }
+                    catch (ResourcePackReadException ignored)
+                    {
+                    }
                     publish(new ResourcePackEntry(packFile, getPackName(packFile), null, false));
                 }
 
@@ -141,7 +98,7 @@ public class InstanceResourcePacks
                         publish(new ResourcePackEntry(packFile, getPackName(packFile), null, true));
                     }
                 }
-                return null;
+                return loadedPacks;
             }
 
             @Override
@@ -171,7 +128,7 @@ public class InstanceResourcePacks
                 if (resourcePackLoader != this || isCancelled()) return;
                 try
                 {
-                    get();
+                    resourcePacks = List.copyOf(get());
                 }
                 catch (InterruptedException e)
                 {
@@ -179,7 +136,7 @@ public class InstanceResourcePacks
                 }
                 catch (ExecutionException e)
                 {
-                    new ErrorDialog(main.client, new Exception(e.getCause()), "listing resource packs");
+                    showListingError(e, "listing resource packs");
                 }
                 catch (CancellationException ignored)
                 {
@@ -191,43 +148,29 @@ public class InstanceResourcePacks
 
     private void addResourcePackRow(InstanceProfile instance, ResourcePackEntry entry)
     {
-        JPanel rowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        rowPanel.setPreferredSize(new Dimension(500, 60));
-        rowPanel.setMaximumSize(new Dimension(500, 60));
-        rowPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        rowPanel.setBackground(panel.getBackground().darker());
-        rowPanel.addMouseListener(new MouseAdapter()
+        JPanel rowPanel = createItemRow(entry.name(), null, true);
+
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem delete = new JMenuItem("Delete");
+        delete.addActionListener(ev ->
         {
-            @Override
-            public void mousePressed(MouseEvent e)
+            try
             {
-                if (!e.isPopupTrigger()) return;
-                JPopupMenu popupMenu = new JPopupMenu();
-                JMenuItem delete = new JMenuItem("Delete");
-                delete.addActionListener(ev ->
-                {
-                    try
-                    {
-                        Files.delete(entry.path());
-                        populate(instance);
-                    }
-                    catch (IOException ex)
-                    {
-                        new ErrorDialog(main.client, ex, "deleting resource pack");
-                    }
-                });
-                popupMenu.add(delete);
-                popupMenu.show(rowPanel, e.getX(), e.getY());
+                Files.delete(entry.path());
+                populate(instance);
+            }
+            catch (IOException ex)
+            {
+                new ErrorDialog(main.client, ex, "deleting resource pack");
             }
         });
+        popupMenu.add(delete);
 
-        JLabel iconLabel = new JLabel();
-        iconLabel.setPreferredSize(new Dimension(50, 50));
+        rowPanel.setComponentPopupMenu(popupMenu);
+
+        JLabel iconLabel = (JLabel) rowPanel.getComponent(0);
         iconLabels.put(entry.path(), iconLabel);
-        rowPanel.add(iconLabel);
-        rowPanel.add(new JLabel(entry.name()));
-        listPanel.add(rowPanel);
-        listPanel.add(Box.createVerticalStrut(5));
+        addItemRow(rowPanel);
     }
 
     private static BufferedImage readPackIcon(Path packFile) throws IOException
@@ -243,11 +186,49 @@ public class InstanceResourcePacks
         }
     }
 
+    @Override
+    public JPopupMenu createPopup(InstanceProfile instance)
+    {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem addResourcePacks = new JMenuItem("Add Resource Packs");
+        addResourcePacks.addActionListener(ev ->
+                new ResourcePackDownloadDialog(main, instance).open());
+        popupMenu.add(addResourcePacks);
+
+        JMenuItem openFolder = new JMenuItem("Open Folder");
+        openFolder.addActionListener(ev ->
+        {
+            try
+            {
+                SystemUtils.openDirectory(instance.getResourcePackFolder().toFile());
+            }
+            catch (IOException ex)
+            {
+                new ErrorDialog(main.client, ex, "opening resource packs folder");
+                throw new RuntimeException(ex);
+            }
+        });
+        popupMenu.add(openFolder);
+
+        return popupMenu;
+    }
+
     private static String getPackName(Path packFile)
     {
         String filename = packFile.getFileName().toString();
         return filename.replaceFirst("[.][^.]+$", "");
     }
 
+    public boolean doesExist(String packName)
+    {
+        if (packName == null) return false;
+        return resourcePacks.stream().anyMatch(pack -> pack.getName().equalsIgnoreCase(packName));
+    }
+
     private record ResourcePackEntry(Path path, String name, Image icon, boolean iconLoaded) {}
+
+    public static InstanceResourcePacks getInstance()
+    {
+        return instance;
+    }
 }

@@ -11,7 +11,7 @@ import net.consler.librelauncherlib.auth.TokenRefreshException;
 import net.consler.librelauncherlib.launch.LaunchProfile;
 import net.consler.librelauncherlib.launch.MinecraftLauncher;
 import net.consler.librelauncherlib.modloader.ModloaderProfile;
-import net.consler.librelauncherlib.util.SystemHelper;
+import net.consler.librelauncherlib.util.JavaVersion;
 
 import javax.swing.*;
 import java.io.IOException;
@@ -52,8 +52,16 @@ public class Launcher
     private static void launchInBackground(String instanceId, SettingsSaver settingsSaver, InstancesConfig instancesConfig, Account activeAccount)
     {
         Path javaPath = settingsSaver.get("java_path") == null && instancesConfig.getProperty(instanceId, "java_path") == null ?
-                SystemHelper.getJavaBin() :
+                JavaVersion.current().executable() :
                 Path.of(instancesConfig.getProperty(instanceId, "java_path", settingsSaver.get("java_path")));
+
+        if(JavaVersion.fromExecutable(javaPath).isEmpty())
+        {
+            RuntimeException e = new RuntimeException("Invalid Java executable: " + javaPath);
+            new ErrorDialog(Main.getInstance().client, e, "launching");
+            throw e;
+        }
+        JavaVersion javaVersion = JavaVersion.fromExecutable(javaPath).get();
 
         int ram = settingsSaver.get("ram", "3028") == null && instancesConfig.getProperty(instanceId, "ram") == null ?
                 2048 :
@@ -62,7 +70,7 @@ public class Launcher
         LaunchProfile launchProfile = new LaunchProfile.Builder(
                 instancesConfig.getProperty(instanceId, "version"),
                 InstancesConfig.instancesDir.resolve(instanceId))
-                .withJavaPath(javaPath)
+                .withJavaVersion(javaVersion)
                 .withRamMb(ram)
                 .linkProcess(false)
                 .build();
