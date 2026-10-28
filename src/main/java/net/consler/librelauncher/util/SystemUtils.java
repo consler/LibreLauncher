@@ -1,5 +1,6 @@
 package net.consler.librelauncher.util;
 
+import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.InstancesConfig;
 
 import javax.swing.*;
@@ -41,7 +42,10 @@ public class SystemUtils
         Optional<ProcessHandle> process = ProcessHandle.of(Long.parseLong(pid));
         if (process.isPresent() && process.get().isAlive())
         {
-            process.get().destroyForcibly();
+            process.get().destroy();
+            process.get().onExit().thenAccept(action ->
+                    SwingUtilities.invokeLater(() ->
+                            Main.getInstance().refreshInstanceViews()));
         }
     }
 

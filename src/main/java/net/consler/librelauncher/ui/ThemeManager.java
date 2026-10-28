@@ -19,7 +19,6 @@ import java.util.Objects;
 public class ThemeManager
 {
     private final Main main;
-    public Font comfortaa;
     public Font comfortaaBold;
 
     public ThemeManager(Main main)
@@ -137,10 +136,6 @@ public class ThemeManager
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         try
         {
-            comfortaa = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("font/comfortaa.ttf")));
-            comfortaa = comfortaa.deriveFont(12f);
-            ge.registerFont(comfortaa);
-
             comfortaaBold = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("font/comfortaa-bold.ttf")));
             comfortaaBold = comfortaaBold.deriveFont(12f);
             ge.registerFont(comfortaaBold);
