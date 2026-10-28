@@ -7,6 +7,7 @@ import net.consler.librelauncher.instance.Importer;
 import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 import net.consler.librelauncher.util.SystemUtils;
 import net.consler.librelauncherlib.instance.InstanceProfile;
@@ -42,7 +43,7 @@ public class InstancePanel
         populate();
 
         instancePanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(255, 255, 255, 20)),
+                BorderFactory.createMatteBorder(0, 0, 0, 1, ThemeManager.outlineColor(instancePanel.getBackground())),
                 BorderFactory.createEmptyBorder(20, 15, 20, 15)
         ));
 
@@ -71,7 +72,7 @@ public class InstancePanel
             rowPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
             rowPanel.setOpaque(false);
             rowPanel.putClientProperty("FlatLaf.style", "arc:25;");
-            rowPanel.setBackground(instancePanel.getBackground().darker());
+            rowPanel.setBackground(ThemeManager.surfaceColor(instancePanel.getBackground()));
             rowPanel.setComponentPopupMenu(createInstancePopup(instanceName));
 
             JButton playButton = new JButton();

@@ -4,6 +4,7 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.instance.Importer;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.util.SystemUtils;
 import net.consler.librelauncherlib.instance.InstanceProfile;
 
@@ -94,7 +95,7 @@ public class SidePanel
         button.setPreferredSize(new Dimension(120, 30));
         button.setMaximumSize(new Dimension(120, 30));
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setBackground(main.client.getBackground().darker());
+        button.setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
         button.setFont(main.themeManager.comfortaaBold);
 
         return button;

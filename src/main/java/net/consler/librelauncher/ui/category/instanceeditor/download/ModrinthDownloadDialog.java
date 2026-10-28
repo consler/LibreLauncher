@@ -122,7 +122,7 @@ public abstract class ModrinthDownloadDialog
         dialog.setUndecorated(true);
         dialog.setResizable(false);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        dialog.getContentPane().setBackground(main.client.getBackground().darker());
+        dialog.getContentPane().setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
         dialog.add(main.titlebar.create(dialog, title, false, dialog::dispose), BorderLayout.NORTH);
         dialog.add(createContent(), BorderLayout.CENTER);
         dialog.addWindowListener(new WindowAdapter()
@@ -329,19 +329,19 @@ public abstract class ModrinthDownloadDialog
         JLabel iconLabel = new JLabel();
         iconLabel.setPreferredSize(new Dimension(50, 50));
         iconLabel.setOpaque(true);
-        iconLabel.setBackground(dialog.getBackground().brighter());
+        iconLabel.setBackground(ThemeManager.surfaceColor(dialog.getBackground()));
 
         JLabel titleLabel = new JLabel(title);
         titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD));
         titleLabel.setToolTipText(exists ? title + " is already installed" : title);
-        if (exists) titleLabel.setForeground(Color.GRAY);
+        if (exists) titleLabel.setForeground(UIManager.getColor("Label.disabledForeground"));
 
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 5));
         row.setPreferredSize(new Dimension(500, 60));
         row.setAlignmentX(Component.CENTER_ALIGNMENT);
-        row.setBackground(dialog.getBackground().darker());
+        row.setBackground(ThemeManager.surfaceColor(dialog.getBackground()));
         row.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(255, 255, 255, 25)),
+                BorderFactory.createMatteBorder(0, 0, 1, 0, ThemeManager.outlineColor(dialog.getBackground())),
                 new EmptyBorder(0, 6, 0, 6)
         ));
         row.add(selected);

@@ -1,6 +1,7 @@
 package net.consler.librelauncher.ui.category.settings;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.settings.SettingsSaver;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
@@ -54,7 +55,7 @@ public class Settings
         categoryPanel.setOpaque(false);
 
         categoryPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(255, 255, 255, 20)),
+                BorderFactory.createMatteBorder(0, 0, 0, 1, ThemeManager.outlineColor(main.client.getBackground())),
                 BorderFactory.createEmptyBorder(20, 15, 20, 15)
         ));
         categoryPanel.setPreferredSize(new Dimension(170, 0));
@@ -70,7 +71,7 @@ public class Settings
         accountsButton = new JButton("Accounts");
 
         addCategory(generalButton, () -> new MinecraftSettings(settingsSaver).createPanel(), categoryPanel);
-        addCategory(appearanceButton, () -> new AppearanceSettings(settingsSaver).createPanel(), categoryPanel);
+        addCategory(appearanceButton, () -> new AppearanceSettings(main, settingsSaver).createPanel(), categoryPanel);
         addCategory(behaviourButton, () -> new BehaviourSettings(settingsSaver).createPanel(), categoryPanel);
         addCategory(accountsButton, () -> new AccountsSettings(main).createPanel(), categoryPanel);
 
@@ -115,7 +116,7 @@ public class Settings
 
         for (JButton button : categoryButtons)
         {
-            if (button == selectedButton) button.setBackground(new Color(255, 255, 255, 30));
+            if (button == selectedButton) button.setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
             else button.setBackground(null);
         }
     }

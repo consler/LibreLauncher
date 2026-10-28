@@ -1,6 +1,7 @@
 package net.consler.librelauncher.ui.category.instanceeditor;
 
 import net.consler.librelauncher.Main;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 import net.consler.librelauncherlib.instance.InstanceProfile;
@@ -78,7 +79,7 @@ public class InstanceEditor
         categoryPanel.setLayout(new BoxLayout(categoryPanel, BoxLayout.Y_AXIS));
         categoryPanel.setOpaque(false);
         categoryPanel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 0, 1, new Color(255, 255, 255, 20)),
+                BorderFactory.createMatteBorder(0, 0, 0, 1, ThemeManager.outlineColor(main.client.getBackground())),
                 BorderFactory.createEmptyBorder(20, 15, 20, 15)
         ));
         categoryPanel.setPreferredSize(new Dimension(170, 0));
@@ -125,7 +126,7 @@ public class InstanceEditor
 
         for (JButton button : categoryButtons)
         {
-            if (button == selectedButton) button.setBackground(new Color(255, 255, 255, 30));
+            if (button == selectedButton) button.setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
             else button.setBackground(null);
         }
     }

@@ -31,7 +31,7 @@ public class Titlebar
     {
         JPanel titleBar = new JPanel(new BorderLayout());
         titleBar.setPreferredSize(new Dimension(window.getWidth(), 32));
-        titleBar.setBackground(window.getBackground().darker());
+        titleBar.setBackground(ThemeManager.surfaceColor(window.getBackground()));
 
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         leftPanel.setOpaque(false);
@@ -43,7 +43,7 @@ public class Titlebar
         leftPanel.add(iconLabel);
 
         JLabel titleLabel = new JLabel(title);
-        titleLabel.setForeground(new Color(220, 220, 220));
+        titleLabel.setForeground(UIManager.getColor("Label.foreground"));
         titleLabel.setFont(main.themeManager.comfortaaBold);
         titleLabel.setBorder(BorderFactory.createEmptyBorder(8, 0, 8, 0));
         leftPanel.add(titleLabel);
@@ -92,7 +92,7 @@ public class Titlebar
         JButton button = new JButton(text);
         button.setPreferredSize(new Dimension(46, 32));
         button.setBorderPainted(false);
-        button.setBackground(window.getBackground().darker());
+        button.setBackground(ThemeManager.surfaceColor(window.getBackground()));
         button.setFocusable(false);
         button.setFont(new Font("SansSerif", Font.PLAIN, 12));
         button.addActionListener(action);

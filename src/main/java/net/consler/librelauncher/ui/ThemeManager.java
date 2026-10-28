@@ -1,6 +1,8 @@
 package net.consler.librelauncher.ui;
 
 import com.formdev.flatlaf.*;
+import com.formdev.flatlaf.themes.FlatMacDarkLaf;
+import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.SettingsSaver;
 
@@ -85,15 +87,49 @@ public class ThemeManager
         {
             case "Dark" -> FlatDarkLaf.setup();
             case "Light" -> FlatLightLaf.setup();
-            case "Darcula" -> FlatDarculaLaf.setup();
-            case "Intellij" -> FlatIntelliJLaf.setup();
+            case "Dark (mac)" -> FlatMacDarkLaf.setup();
+            case "Light (mac)" -> FlatMacLightLaf.setup();
         }
 
-        if(main.client == null) return;
+        if (main.client == null) return;
 
-        if (main.sidebar != null) SwingUtilities.updateComponentTreeUI(main.sidebar.sidebar);
-        if (main.titlebar != null) SwingUtilities.updateComponentTreeUI(main.titlebar.titlebar);
         SwingUtilities.updateComponentTreeUI(main.client);
+        main.reloadThemeUI();
+    }
+
+    public static Color surfaceColor(Color background)
+    {
+        Objects.requireNonNull(background, "background");
+        return isDark(background) ? shade(background, 0.30f) : shade(background, 0.04f);
+    }
+
+    public static Color outlineColor(Color background)
+    {
+        Objects.requireNonNull(background, "background");
+        return isDark(background) ? shade(background, 0.30f) : shade(background, 0.12f);
+    }
+
+    private static Color shade(Color background, float amount)
+    {
+        return new Color(
+                blend(background.getRed(), 0, amount),
+                blend(background.getGreen(), 0, amount),
+                blend(background.getBlue(), 0, amount),
+                background.getAlpha()
+        );
+    }
+
+    private static boolean isDark(Color color)
+    {
+        double luminance = 0.2126 * color.getRed()
+                + 0.7152 * color.getGreen()
+                + 0.0722 * color.getBlue();
+        return luminance < 128;
+    }
+
+    private static int blend(int color, int target, float amount)
+    {
+        return Math.round(color + (target - color) * amount);
     }
 
     private void loadFonts()

@@ -4,6 +4,7 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
@@ -41,8 +42,8 @@ public class Home
         playButton.setPreferredSize(new Dimension(200, 60));
         playButton.setMaximumSize(new Dimension(200, 60));
         playButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        playButton.setBackground(main.client.getBackground().darker());
-        playButton.setForeground(Color.WHITE);
+        playButton.setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
+        playButton.setForeground(UIManager.getColor("Button.foreground"));
         playButton.setFocusable(false);
         playButton.setFont(main.themeManager.comfortaaBold.deriveFont(18f));
 
@@ -50,8 +51,8 @@ public class Home
         instances.setPreferredSize(new Dimension(200, 40));
         instances.setMaximumSize(new Dimension(180, 40));
         instances.setAlignmentX(Component.CENTER_ALIGNMENT);
-        instances.setBackground(main.client.getBackground().darker());
-        instances.setForeground(Color.WHITE);
+        instances.setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
+        instances.setForeground(UIManager.getColor("ComboBox.foreground"));
         instances.setFocusable(false);
         instances.setBorder(BorderFactory.createEmptyBorder());
         instances.putClientProperty("FlatLaf.style",

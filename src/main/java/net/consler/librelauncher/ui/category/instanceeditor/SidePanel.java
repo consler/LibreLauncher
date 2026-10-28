@@ -2,6 +2,7 @@ package net.consler.librelauncher.ui.category.instanceeditor;
 
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ErrorDialog;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModDownloadDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModpackDownloadDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ResourcePackDownloadDialog;
@@ -93,7 +94,7 @@ public class SidePanel
         button.setPreferredSize(new Dimension(130, 30));
         button.setMaximumSize(new Dimension(130, 30));
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setBackground(main.client.getBackground().darker());
+        button.setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
         button.setFont(main.themeManager.comfortaaBold);
 
         return button;

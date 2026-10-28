@@ -49,13 +49,6 @@ public class Main
             client.setLayout(new BorderLayout());
             client.setUndecorated(true);
 
-            client.getContentPane().setBackground(client.getBackground().darker());
-
-            pageLayout = new CardLayout();
-            pageContainer = new JPanel(pageLayout);
-            pageContainer.setOpaque(false);
-            client.add(pageContainer, BorderLayout.CENTER);
-
             client.setShape(new RoundRectangle2D.Double(0, 0, 800, 500, 20, 20));
             client.addComponentListener(new ComponentAdapter()
             {
@@ -66,17 +59,7 @@ public class Main
                 }
             });
 
-            titlebar = new Titlebar(this);
-            titlebar.show(client);
-
-            home = new Home(this);
-            instanceManager = new InstanceManager(this);
-            settings = new Settings(this);
-            instanceEditor = new InstanceEditor(this);
-            sidebar = new Sidebar(this);
-            sidebar.show();
-
-            home.show();
+            reloadThemeUI(false);
 
             client.setVisible(true);
         });
@@ -90,6 +73,42 @@ public class Main
     public void showPage(String name)
     {
         pageLayout.show(pageContainer, name);
+    }
+
+    public void reloadThemeUI()
+    {
+        reloadThemeUI(true);
+    }
+
+    private void reloadThemeUI(boolean showAppearanceSettings)
+    {
+        client.getContentPane().removeAll();
+        client.getContentPane().setBackground(ThemeManager.surfaceColor(client.getBackground()));
+
+        pageLayout = new CardLayout();
+        pageContainer = new JPanel(pageLayout);
+        pageContainer.setOpaque(false);
+        client.add(pageContainer, BorderLayout.CENTER);
+
+        titlebar = new Titlebar(this);
+        titlebar.show(client);
+
+        home = new Home(this);
+        instanceManager = new InstanceManager(this);
+        settings = new Settings(this);
+        instanceEditor = new InstanceEditor(this);
+        sidebar = new Sidebar(this);
+        sidebar.show();
+
+        home.show();
+        if (showAppearanceSettings)
+        {
+            sidebar.setUICategory("settings");
+            settings.selectCategory(settings.appearanceButton);
+        }
+
+        client.revalidate();
+        client.repaint();
     }
 
     public void refreshInstanceViews()

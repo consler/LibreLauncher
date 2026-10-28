@@ -3,6 +3,7 @@ package net.consler.librelauncher.ui.category.instanceeditor;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.SettingsSaver;
 import net.consler.librelauncher.ui.ErrorDialog;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.settings.Settings;
 import net.consler.librelauncherlib.instance.InstanceProfile;
 
@@ -63,7 +64,7 @@ public abstract class InstanceItem
     protected final JPanel createItemRow(String name, Image icon, boolean reserveIconSpace)
     {
         JPanel rowPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        rowPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, panel.getBackground().darker()));
+        rowPanel.setBorder(BorderFactory.createMatteBorder(2, 2, 2, 2, ThemeManager.outlineColor(panel.getBackground())));
         rowPanel.setPreferredSize(new Dimension(0, 65));
         rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 65));
         rowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
