@@ -12,6 +12,7 @@ import net.consler.librelauncherlib.instance.ModReadException;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -53,7 +54,9 @@ public class InstanceMods extends InstanceItem
                 try (Stream<Path> paths = Files.list(instance.getModsFolder()))
                 {
                     paths.filter(Files::isRegularFile)
-                            .filter(p -> p.getFileName().toString().endsWith(".jar"))
+                            .filter(p ->(
+                                    p.getFileName().toString().endsWith(".jar")) ||
+                                    p.getFileName().toString().endsWith(".jar.disabled"))
                             .forEach(modFile ->
                             {
                                 if (isCancelled()) return;
@@ -72,7 +75,7 @@ public class InstanceMods extends InstanceItem
                                         graphics.dispose();
                                     }
                                     loadedMods.add(mod);
-                                    publish(new ModEntry(modFile, mod.getName(), scaledImage));
+                                    publish(new ModEntry(modFile, mod.getName(), scaledImage, !modFile.getFileName().toString().endsWith(".jar.disabled")));
                                 }
                                 catch (ModReadException ignore)
                                 {
@@ -89,16 +92,39 @@ public class InstanceMods extends InstanceItem
 
                 for (ModEntry entry : entries)
                 {
-                    JPanel rowPanel = createItemRow(entry.name(), entry.icon(), false);
+                    JPanel rowPanel;
+                    if(entry.enabled)
+                        rowPanel = createItemRow(entry.name() , entry.icon(), false);
+                    else
+                        rowPanel = createItemRow(entry.name() + " (disabled)" , entry.icon(), false);
 
                     JPopupMenu popupMenu = new JPopupMenu();
+
                     JMenuItem delete = new JMenuItem("Delete");
                     delete.addActionListener(ev ->
                     {
-                        entry.path().toFile().delete();
+                        try
+                        {
+                            Files.delete(entry.path());
+                            populate(instance);
+                        }
+                        catch (IOException ex)
+                        {
+                            new ErrorDialog(main.client, ex, "deleting a mod");
+                        }
+                    });
+
+                    JMenuItem disable = entry.enabled ? new JMenuItem("Disable") : new JMenuItem("Enable");
+                    disable.addActionListener(ev ->
+                    {
+                        if (entry.enabled())
+                            entry.path().toFile().renameTo(new File(entry.path().toFile().getAbsolutePath() + ".disabled"));
+                        else
+                            entry.path().toFile().renameTo(new File(entry.path().toFile().getAbsolutePath().replace(".disabled", "")));
                         populate(instance);
                     });
                     popupMenu.add(delete);
+                    popupMenu.add(disable);
 
                     rowPanel.setComponentPopupMenu(popupMenu);
 
@@ -172,7 +198,7 @@ public class InstanceMods extends InstanceItem
         return mods.stream().anyMatch(mod -> mod.getName() != null && mod.getName().equalsIgnoreCase(title));
     }
 
-    private record ModEntry(Path path, String name, Image icon) {}
+    private record ModEntry(Path path, String name, Image icon, boolean enabled) {}
 
     public static InstanceMods getInstance()
     {

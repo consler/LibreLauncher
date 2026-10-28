@@ -10,6 +10,8 @@ import net.consler.librelauncherlib.integration.modrinth.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.RoundRectangle2D;
@@ -19,6 +21,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CancellationException;
@@ -336,6 +339,11 @@ public abstract class ModrinthDownloadDialog
         titleLabel.setToolTipText(exists ? title + " is already installed" : title);
         if (exists) titleLabel.setForeground(UIManager.getColor("Label.disabledForeground"));
 
+        JLabel descriptionLabel = new JLabel(project.description());
+        descriptionLabel.setFont(descriptionLabel.getFont().deriveFont(10f));
+        descriptionLabel.setForeground(UIManager.getColor("Label.disabledForeground"));
+
+
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 5));
         row.setPreferredSize(new Dimension(500, 60));
         row.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -344,9 +352,33 @@ public abstract class ModrinthDownloadDialog
                 BorderFactory.createMatteBorder(0, 0, 1, 0, ThemeManager.outlineColor(dialog.getBackground())),
                 new EmptyBorder(0, 6, 0, 6)
         ));
+
+        MouseAdapter mouseAdapter = new MouseAdapter()
+        {
+            @Override
+            public void mousePressed(MouseEvent e)
+            {
+                Arrays.stream(resultsPanel.getComponents()).forEach(component ->
+                        component.setBackground(ThemeManager.surfaceColor(dialog.getBackground())));
+                row.setBackground(ThemeManager.surfaceColor(dialog.getBackground()).brighter());
+
+                if(!exists && e.getClickCount() == 2)
+                {
+                    if (!allowMultipleSelection()) selectedProjects.clear();
+                    selectedProjects.add(project);
+                    selected.setSelected(true);
+                }
+            }
+        };
+        row.addMouseListener(mouseAdapter);
+        titleLabel.addMouseListener(mouseAdapter);
+        titleLabel.addMouseListener(mouseAdapter);
+
         row.add(selected);
         row.add(iconLabel);
         row.add(titleLabel);
+        row.add(descriptionLabel);
+
         resultsPanel.add(row);
         resultsPanel.add(Box.createVerticalStrut(5));
         return new ProjectRow(project, selected, iconLabel);

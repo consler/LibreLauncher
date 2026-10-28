@@ -12,11 +12,11 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,10 +62,9 @@ public class InstanceResourcePacks extends InstanceItem
                 try (Stream<Path> paths = Files.list(resourcePackFolder))
                 {
                     packFiles = paths.filter(Files::isRegularFile)
-                            .filter(path -> path.getFileName().toString().toLowerCase().endsWith(".zip"))
-                            .sorted(Comparator.comparing(
-                                    path -> path.getFileName().toString(),
-                                    String.CASE_INSENSITIVE_ORDER))
+                            .filter(path -> (
+                                    path.getFileName().toString().toLowerCase().endsWith(".zip") ||
+                                    path.getFileName().toString().toLowerCase().endsWith(".zip.disabled")))
                             .toList();
                 }
 
@@ -80,7 +79,7 @@ public class InstanceResourcePacks extends InstanceItem
                     catch (ResourcePackReadException ignored)
                     {
                     }
-                    publish(new ResourcePackEntry(packFile, getPackName(packFile), null, false));
+                    publish(new ResourcePackEntry(packFile, getPackName(packFile), null, false, !packFile.getFileName().toString().toLowerCase().endsWith(".zip.disabled")));
                 }
 
                 for (Path packFile : packFiles)
@@ -89,13 +88,14 @@ public class InstanceResourcePacks extends InstanceItem
                     try
                     {
                         BufferedImage icon = readPackIcon(packFile);
-                        Image scaledIcon = icon == null ? null
+                        Image scaledIcon = icon == null ?
+                                null
                                 : icon.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
-                        publish(new ResourcePackEntry(packFile, getPackName(packFile), scaledIcon, true));
+                        publish(new ResourcePackEntry(packFile, getPackName(packFile), scaledIcon, true, !packFile.getFileName().toString().toLowerCase().endsWith(".zip.disabled")));
                     }
                     catch (IOException ignored)
                     {
-                        publish(new ResourcePackEntry(packFile, getPackName(packFile), null, true));
+                        publish(new ResourcePackEntry(packFile, getPackName(packFile), null, true, !packFile.getFileName().toString().toLowerCase().endsWith(".zip.disabled")));
                     }
                 }
                 return loadedPacks;
@@ -148,9 +148,14 @@ public class InstanceResourcePacks extends InstanceItem
 
     private void addResourcePackRow(InstanceProfile instance, ResourcePackEntry entry)
     {
-        JPanel rowPanel = createItemRow(entry.name(), null, true);
+        JPanel rowPanel;
+        if(entry.enabled())
+            rowPanel = createItemRow(entry.name(), null, true);
+        else
+            rowPanel = createItemRow(entry.name() + " (disabled)", null, true);
 
         JPopupMenu popupMenu = new JPopupMenu();
+
         JMenuItem delete = new JMenuItem("Delete");
         delete.addActionListener(ev ->
         {
@@ -161,10 +166,22 @@ public class InstanceResourcePacks extends InstanceItem
             }
             catch (IOException ex)
             {
-                new ErrorDialog(main.client, ex, "deleting resource pack");
+                new ErrorDialog(main.client, ex, "deleting a resource pack");
             }
         });
+
+        JMenuItem disable = entry.enabled() ? new JMenuItem("Disable") : new JMenuItem("Enable");
+        disable.addActionListener(ev ->
+        {
+            if (entry.enabled())
+                entry.path().toFile().renameTo(new File(entry.path().toFile().getAbsolutePath() + ".disabled"));
+            else
+                entry.path().toFile().renameTo(new File(entry.path().toFile().getAbsolutePath().replace(".disabled", "")));
+            populate(instance);
+        });
+
         popupMenu.add(delete);
+        popupMenu.add(disable);
 
         rowPanel.setComponentPopupMenu(popupMenu);
 
@@ -225,7 +242,7 @@ public class InstanceResourcePacks extends InstanceItem
         return resourcePacks.stream().anyMatch(pack -> pack.getName().equalsIgnoreCase(packName));
     }
 
-    private record ResourcePackEntry(Path path, String name, Image icon, boolean iconLoaded) {}
+    private record ResourcePackEntry(Path path, String name, Image icon, boolean iconLoaded, boolean enabled) {}
 
     public static InstanceResourcePacks getInstance()
     {

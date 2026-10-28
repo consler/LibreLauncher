@@ -9,6 +9,9 @@ import net.consler.librelauncherlib.instance.InstanceProfile;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
 public abstract class InstanceItem
@@ -83,6 +86,18 @@ public abstract class InstanceItem
 
     protected final void addItemRow(JPanel rowPanel)
     {
+        rowPanel.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mousePressed(MouseEvent e)
+            {
+                Arrays.stream(listPanel.getComponents()).forEach(component -> {
+                    component.setBackground(panel.getBackground());
+                });
+                rowPanel.setBackground(panel.getBackground().brighter());
+            }
+        });
+
         listPanel.add(rowPanel);
         listPanel.add(Box.createVerticalStrut(5));
     }
