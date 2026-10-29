@@ -54,10 +54,4 @@ public class ModDownloadDialog extends ModrinthDownloadDialog
         return true;
     }
 
-    @Override
-    protected boolean projectExists(ModrinthProject project)
-    {
-        return InstanceMods.getInstance() != null
-                && InstanceMods.getInstance().doesExist(project.title());
-    }
 }

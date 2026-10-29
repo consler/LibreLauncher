@@ -49,8 +49,8 @@ public abstract class AutoDetectJavaDialog extends JDialog
         cancelButton.addActionListener(e -> dispose());
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        buttonPanel.add(doneButton);
         buttonPanel.add(cancelButton);
+        buttonPanel.add(doneButton);
 
         setLayout(new BorderLayout());
         add(scrollPane, BorderLayout.CENTER);
@@ -124,7 +124,7 @@ public abstract class AutoDetectJavaDialog extends JDialog
 
                 group.add(radio);
                 listPanel.add(radio);
-                listPanel.add(Box.createVerticalStrut(10));
+                listPanel.add(Box.createVerticalStrut(25));
                 listPanel.add(new JSeparator(SwingConstants.HORIZONTAL));
 
                 if (currentPath != null && currentPath.equals(version.executable()))

@@ -54,7 +54,7 @@ public class Sidebar
     private JButton createButton(String path)
     {
         FlatSVGIcon icon = new FlatSVGIcon(Main.class.getResource(path)).derive(24, 24);
-        Color iconColor = UIManager.getColor("Label.foreground");
+        Color iconColor = UIManager.getColor("Label.disabledForeground");
         FlatSVGIcon.ColorFilter filter = new FlatSVGIcon.ColorFilter(color -> iconColor);
         icon.setColorFilter(filter);
 
