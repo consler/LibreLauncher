@@ -3,7 +3,7 @@ package net.consler.librelauncher.ui.category.instanceeditor;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.util.SystemUtils;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.instance.World;
 
 import javax.swing.*;
@@ -26,7 +26,7 @@ public class InstanceWorlds extends InstanceItem
     }
 
     @Override
-    public void populate(InstanceProfile instance)
+    public void populate(Instance instance)
     {
         if (worldLoader != null) worldLoader.cancel(true);
         listPanel.removeAll();
@@ -101,7 +101,7 @@ public class InstanceWorlds extends InstanceItem
     }
 
     @Override
-    public JPopupMenu createPopup(InstanceProfile instance)
+    public JPopupMenu createPopup(Instance instance)
     {
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem openFolder = new JMenuItem("Open Worlds Folder");

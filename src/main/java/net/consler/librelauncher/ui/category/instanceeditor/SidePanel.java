@@ -7,7 +7,7 @@ import net.consler.librelauncher.ui.category.instanceeditor.download.ModDownload
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModpackDownloadDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ResourcePackDownloadDialog;
 import net.consler.librelauncher.util.SystemUtils;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,11 +17,11 @@ public class SidePanel
 {
     private final Main main;
     private final String type;
-    private final InstanceProfile instance;
+    private final Instance instance;
 
     public JPanel panel;
 
-    public SidePanel(Main main, String type, InstanceProfile instance)
+    public SidePanel(Main main, String type, Instance instance)
     {
         this.main = main;
         this.type = type;

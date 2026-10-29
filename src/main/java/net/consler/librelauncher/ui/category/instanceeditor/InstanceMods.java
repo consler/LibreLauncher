@@ -5,7 +5,7 @@ import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModDownloadDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModpackDownloadDialog;
 import net.consler.librelauncher.util.SystemUtils;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.instance.Mod;
 import net.consler.librelauncherlib.instance.ModReadException;
 
@@ -35,7 +35,7 @@ public class InstanceMods extends InstanceItem
     }
 
     @Override
-    public void populate(InstanceProfile instance)
+    public void populate(Instance instance)
     {
         mods = List.of();
         if (modLoader != null) modLoader.cancel(true);
@@ -161,7 +161,7 @@ public class InstanceMods extends InstanceItem
     }
 
     @Override
-    public JPopupMenu createPopup(InstanceProfile instance)
+    public JPopupMenu createPopup(Instance instance)
     {
         JPopupMenu popupMenu = new JPopupMenu();
 

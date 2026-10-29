@@ -5,7 +5,7 @@ import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.settings.AutoDetectJavaDialog;
 import net.consler.librelauncher.ui.category.settings.Settings;
 import net.consler.librelauncher.settings.InstancesConfig;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.util.JavaVersion;
 
 import javax.swing.*;
@@ -24,7 +24,7 @@ public class InstanceSettings
         this.instancesConfig = instancesConfig;
     }
 
-    public JPanel createPanel(InstanceProfile instance)
+    public JPanel createPanel(Instance instance)
     {
         panel = new JPanel();
         panel.setOpaque(false);

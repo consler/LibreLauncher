@@ -4,7 +4,7 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.InstanceMods;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.instance.MrpackInstaller;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthProject;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthVersion;
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
 public class ModpackDownloadDialog extends ModrinthDownloadDialog
 {
 
-    public ModpackDownloadDialog(Main main, InstanceProfile instance)
+    public ModpackDownloadDialog(Main main, Instance instance)
     {
         super(main, instance);
     }

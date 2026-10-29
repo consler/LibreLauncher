@@ -4,7 +4,7 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 
 import javax.swing.*;
 import java.awt.*;
@@ -40,7 +40,7 @@ public class InstanceEditor
         this.main = main;
     }
 
-    public void show(InstanceProfile instance)
+    public void show(Instance instance)
     {
         instancesConfig = new InstancesConfig();
 

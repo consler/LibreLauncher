@@ -4,7 +4,7 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.ThemeManager;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.integration.modrinth.*;
 
 import javax.swing.*;
@@ -45,7 +45,7 @@ public abstract class ModrinthDownloadDialog
     private static final int SEARCH_PAGE_SIZE = 20;
 
     protected final Main main;
-    protected final InstanceProfile instance;
+    protected final Instance instance;
 
     public JDialog dialog;
 
@@ -70,7 +70,7 @@ public abstract class ModrinthDownloadDialog
     private volatile Set<String> installedModHashes;
     private final ConcurrentMap<String, CompletableFuture<Boolean>> installedProjectChecks = new ConcurrentHashMap<>();
 
-    protected ModrinthDownloadDialog(Main main, InstanceProfile instance)
+    protected ModrinthDownloadDialog(Main main, Instance instance)
     {
         this.main = main;
         this.instance = instance;

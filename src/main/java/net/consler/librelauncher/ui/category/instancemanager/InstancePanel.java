@@ -10,7 +10,7 @@ import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 import net.consler.librelauncher.util.SystemUtils;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 
 import javax.swing.*;
 import java.awt.*;
@@ -121,7 +121,7 @@ public class InstancePanel
 
             JButton editButton = createButton();
             editButton.setIcon(editIcon);
-            editButton.addActionListener(e -> main.instanceEditor.show(new InstanceProfile(InstancesConfig.instancesDir.resolve(instanceName))));
+            editButton.addActionListener(e -> main.instanceEditor.show(new Instance(InstancesConfig.instancesDir.resolve(instanceName))));
 
             JLabel nameLabel = new JLabel(instanceName);
             nameLabel.setAlignmentY(Component.CENTER_ALIGNMENT);
@@ -180,7 +180,7 @@ public class InstancePanel
         }
 
         JMenuItem edit = new JMenuItem("Edit");
-        edit.addActionListener(ev -> main.instanceEditor.show(new InstanceProfile(InstancesConfig.instancesDir.resolve(instanceName))));
+        edit.addActionListener(ev -> main.instanceEditor.show(new Instance(InstancesConfig.instancesDir.resolve(instanceName))));
         contextMenu.add(edit);
 
         JMenuItem export = new JMenuItem("Export");
@@ -241,7 +241,7 @@ public class InstancePanel
                 Path gameDir = Importer.doImport(InstancesConfig.instancesDir.toFile());
                 if(gameDir == null) return;
 
-                InstanceProfile instance = new InstanceProfile(gameDir);
+                Instance instance = new Instance(gameDir);
                 InstancesConfig instancesConfig = new InstancesConfig();
                 instancesConfig.saveProperty(instance.getName(), "version", instance.getVersion());
                 instancesConfig.saveProperty(instance.getName(), "modloader", instance.getModloader());

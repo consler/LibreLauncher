@@ -2,7 +2,7 @@ package net.consler.librelauncher.ui.category.instanceeditor.download;
 
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.category.instanceeditor.InstanceMods;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthProject;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthVersion;
 import net.consler.librelauncherlib.integration.modrinth.ProjectType;
@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
 public class ModDownloadDialog extends ModrinthDownloadDialog
 {
 
-    public ModDownloadDialog(Main main, InstanceProfile instance)
+    public ModDownloadDialog(Main main, Instance instance)
     {
         super(main, instance);
     }

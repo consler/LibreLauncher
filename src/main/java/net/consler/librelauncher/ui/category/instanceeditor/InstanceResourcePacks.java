@@ -4,7 +4,7 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ResourcePackDownloadDialog;
 import net.consler.librelauncher.util.SystemUtils;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.instance.ResourcePack;
 import net.consler.librelauncherlib.instance.ResourcePackReadException;
 
@@ -41,7 +41,7 @@ public class InstanceResourcePacks extends InstanceItem
     }
 
     @Override
-    public void populate(InstanceProfile instance)
+    public void populate(Instance instance)
     {
         resourcePacks = List.of();
         if (resourcePackLoader != null) resourcePackLoader.cancel(true);
@@ -146,7 +146,7 @@ public class InstanceResourcePacks extends InstanceItem
         resourcePackLoader.execute();
     }
 
-    private void addResourcePackRow(InstanceProfile instance, ResourcePackEntry entry)
+    private void addResourcePackRow(Instance instance, ResourcePackEntry entry)
     {
         JPanel rowPanel;
         if(entry.enabled())
@@ -204,7 +204,7 @@ public class InstanceResourcePacks extends InstanceItem
     }
 
     @Override
-    public JPopupMenu createPopup(InstanceProfile instance)
+    public JPopupMenu createPopup(Instance instance)
     {
         JPopupMenu popupMenu = new JPopupMenu();
         JMenuItem addResourcePacks = new JMenuItem("Add Resource Packs");

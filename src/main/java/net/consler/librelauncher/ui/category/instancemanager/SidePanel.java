@@ -6,7 +6,7 @@ import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.util.SystemUtils;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,7 +51,7 @@ public class SidePanel
                 Path gameDir = Importer.doImport(InstancesConfig.instancesDir.toFile());
                 if(gameDir == null) return;
 
-                InstanceProfile instance = new InstanceProfile(gameDir);
+                Instance instance = new Instance(gameDir);
                 InstancesConfig instancesConfig = new InstancesConfig();
                 instancesConfig.saveProperty(instance.getName(), "version", instance.getVersion());
                 instancesConfig.saveProperty(instance.getName(), "modloader", instance.getModloader());

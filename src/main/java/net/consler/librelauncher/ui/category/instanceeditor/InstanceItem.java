@@ -5,7 +5,7 @@ import net.consler.librelauncher.settings.SettingsSaver;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.settings.Settings;
-import net.consler.librelauncherlib.instance.InstanceProfile;
+import net.consler.librelauncherlib.instance.Instance;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +30,7 @@ public abstract class InstanceItem
         this.type = type;
     }
 
-    public final JPanel createPanel(InstanceProfile instance)
+    public final JPanel createPanel(Instance instance)
     {
         panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
@@ -60,9 +60,9 @@ public abstract class InstanceItem
         return panel;
     }
 
-    public abstract void populate(InstanceProfile instance);
+    public abstract void populate(Instance instance);
 
-    public abstract JPopupMenu createPopup(InstanceProfile instance);
+    public abstract JPopupMenu createPopup(Instance instance);
 
     protected final JPanel createItemRow(String name, Image icon, boolean reserveIconSpace)
     {
