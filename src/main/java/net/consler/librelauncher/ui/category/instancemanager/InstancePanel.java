@@ -14,6 +14,8 @@ import net.consler.librelauncherlib.instance.Instance;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.nio.file.Path;
 
@@ -92,8 +94,22 @@ public class InstancePanel
             rowPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
             rowPanel.setOpaque(false);
             rowPanel.putClientProperty("FlatLaf.style", "arc:25;");
-            rowPanel.setBackground(ThemeManager.surfaceColor(instancePanel.getBackground()));
+            rowPanel.setBackground(ThemeManager.surfaceColor(ThemeManager.panelBackground()));
             rowPanel.setComponentPopupMenu(createInstancePopup(instanceName));
+            rowPanel.addMouseListener(new MouseAdapter()
+            {
+                @Override
+                public void mouseEntered(MouseEvent e)
+                {
+                    rowPanel.setBackground(ThemeManager.hoverColor(ThemeManager.surfaceColor(ThemeManager.panelBackground()), 0.02f));
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e)
+                {
+                    rowPanel.setBackground(ThemeManager.surfaceColor(ThemeManager.panelBackground()));
+                }
+            });
 
             JButton playButton = createButton();
             playButton.setIcon(isRunningAndClean(instanceName) ? stopIcon : playIcon);

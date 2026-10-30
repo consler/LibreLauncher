@@ -22,6 +22,7 @@ public abstract class InstanceItem
 
     private final String title;
     private final String type;
+    private JPanel selectedRow;
 
     protected InstanceItem(Main main, String title, String type)
     {
@@ -45,7 +46,7 @@ public abstract class InstanceItem
         scrollPane.getViewport().setOpaque(false);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_NEVER);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         panel.add(scrollPane, BorderLayout.CENTER);
 
         JPopupMenu popupMenu = createPopup(instance);
@@ -73,6 +74,23 @@ public abstract class InstanceItem
         rowPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         rowPanel.setBackground(panel.getBackground());
 
+        rowPanel.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mouseEntered(MouseEvent e)
+            {
+                if(rowPanel != selectedRow)
+                    rowPanel.setBackground(ThemeManager.hoverColor(panel.getBackground(), 0.02f));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e)
+            {
+                if(rowPanel != selectedRow)
+                    rowPanel.setBackground(panel.getBackground());
+            }
+        });
+
         if (icon != null) rowPanel.add(new JLabel(new ImageIcon(icon)));
         else if (reserveIconSpace)
         {
@@ -91,10 +109,12 @@ public abstract class InstanceItem
             @Override
             public void mousePressed(MouseEvent e)
             {
-                Arrays.stream(listPanel.getComponents()).forEach(component -> {
+                Arrays.stream(listPanel.getComponents()).forEach(component ->
+                {
                     component.setBackground(panel.getBackground());
                 });
                 rowPanel.setBackground(panel.getBackground().brighter());
+                selectedRow = rowPanel;
             }
         });
 

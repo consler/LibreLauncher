@@ -175,7 +175,6 @@ public abstract class ModrinthDownloadDialog
 
         searchField = new JTextField();
         searchField.addActionListener(e -> search(searchField.getText().trim()));
-        ThemeManager.silentField(searchField);
         content.add(searchField, BorderLayout.NORTH);
 
         resultsPanel = new JPanel();

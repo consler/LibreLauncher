@@ -104,8 +104,6 @@ public class CreateInstanceDialog
         dialog.getRootPane().setDefaultButton(createButton);
         dialog.getRootPane().registerKeyboardAction(e -> dialog.dispose(), KeyStroke.getKeyStroke("ESCAPE"), JComponent.WHEN_IN_FOCUSED_WINDOW);
 
-        main.themeManager.silentField(nameField);
-
         Downloader downloader = new Downloader(this, instancePanel);
 
         cancelButton.addActionListener(e ->

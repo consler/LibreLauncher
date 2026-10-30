@@ -88,9 +88,7 @@ public class InstanceResourcePacks extends InstanceItem
                     try
                     {
                         BufferedImage icon = readPackIcon(packFile);
-                        Image scaledIcon = icon == null ?
-                                null
-                                : icon.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+                        Image scaledIcon = icon == null ? null : scaleIcon(icon, 50);
                         publish(new ResourcePackEntry(packFile, getPackName(packFile), scaledIcon, true, !packFile.getFileName().toString().toLowerCase().endsWith(".zip.disabled")));
                     }
                     catch (IOException ignored)
@@ -240,6 +238,31 @@ public class InstanceResourcePacks extends InstanceItem
     {
         if (packName == null) return false;
         return resourcePacks.stream().anyMatch(pack -> pack.getName().equalsIgnoreCase(packName));
+    }
+
+    private static BufferedImage scaleIcon(BufferedImage source, int size)
+    {
+        BufferedImage current = source;
+        int w = source.getWidth();
+        int h = source.getHeight();
+
+        while (w / 2 >= size && h / 2 >= size)
+        {
+            w /= 2;
+            h /= 2;
+            current = drawScaled(current, w, h);
+        }
+        return drawScaled(current, size, size);
+    }
+
+    private static BufferedImage drawScaled(BufferedImage src, int w, int h)
+    {
+        BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = out.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.drawImage(src, 0, 0, w, h, null);
+        g.dispose();
+        return out;
     }
 
     private record ResourcePackEntry(Path path, String name, Image icon, boolean iconLoaded, boolean enabled) {}

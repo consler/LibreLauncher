@@ -35,6 +35,7 @@ public abstract class AutoDetectJavaDialog extends JDialog
 
         JScrollPane scrollPane = new JScrollPane(listPanel);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 
         doneButton.setEnabled(false);
         doneButton.addActionListener(e ->

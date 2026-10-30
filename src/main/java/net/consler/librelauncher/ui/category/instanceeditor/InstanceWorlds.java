@@ -50,8 +50,9 @@ public class InstanceWorlds extends InstanceItem
                                 try
                                 {
                                     World world = new World(worldFolder);
-                                    Image icon = world.getIcon() == null ? null
-                                            : world.getIcon().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+                                    Image icon = world.getIcon() == null ?
+                                            null :
+                                            world.getIcon().getScaledInstance(50, 50, Image.SCALE_SMOOTH);
                                     publish(new WorldEntry(world.getLevelName(), icon));
                                 }
                                 catch (IOException ignored)

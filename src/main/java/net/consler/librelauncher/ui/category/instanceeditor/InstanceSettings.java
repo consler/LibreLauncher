@@ -48,8 +48,6 @@ public class InstanceSettings
         ramField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
         ramField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        ThemeManager.silentField(ramField);
-
         ramField.addKeyListener(new KeyAdapter()
         {
             @Override
@@ -71,7 +69,6 @@ public class InstanceSettings
         javaPathField.setText(instancesConfig.getProperty(instance.getName(), "java_path", JavaVersion.current().executable().toString()));
         javaPathField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
         javaPathField.setAlignmentX(Component.LEFT_ALIGNMENT);
-        ThemeManager.silentField(javaPathField);
 
         javaPathField.addKeyListener(new KeyAdapter()
         {
@@ -115,12 +112,12 @@ public class InstanceSettings
             String currentLoader = modloaderInfo.loader();
             String currentLoaderVersion = modloaderInfo.version();
 
-            JLabel modLoader = new JLabel("Mod Loader: " + currentLoader + " " + currentLoaderVersion);
+            JLabel modLoader = new JLabel("Mod Loader:");
             modLoader.setAlignmentX(Component.LEFT_ALIGNMENT);
             panel.add(modLoader);
 
-            JButton changeModloader = new JButton("Change");
-            changeModloader.setMaximumSize(new Dimension(80, 32));
+            JButton changeModloader = new JButton(currentLoader + " " + currentLoaderVersion);
+            changeModloader.setMaximumSize(new Dimension(150, 32));
             changeModloader.addActionListener(e -> new ModloaderChangeDialog(
                     Main.getInstance().client, instance, instancesConfig, currentLoader, currentLoaderVersion)
                     {

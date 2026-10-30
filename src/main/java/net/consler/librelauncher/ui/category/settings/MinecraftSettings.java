@@ -38,8 +38,6 @@ public class MinecraftSettings
         ramField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
         ramField.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        ThemeManager.silentField(ramField);
-
         ramField.addKeyListener(new KeyAdapter()
         {
             @Override
@@ -61,7 +59,6 @@ public class MinecraftSettings
         javaPathField.setText(settingsSaver.get("java_path", JavaVersion.current().executable().toString()));
         javaPathField.setMaximumSize(new Dimension(Integer.MAX_VALUE, 32));
         javaPathField.setAlignmentX(Component.LEFT_ALIGNMENT);
-        ThemeManager.silentField(javaPathField);
 
         javaPathField.addKeyListener(new KeyAdapter()
         {
