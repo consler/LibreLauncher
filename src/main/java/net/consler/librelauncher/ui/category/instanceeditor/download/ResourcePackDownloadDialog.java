@@ -5,7 +5,7 @@ import net.consler.librelauncher.ui.category.instanceeditor.InstanceResourcePack
 import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthProject;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthVersion;
-import net.consler.librelauncherlib.integration.modrinth.ProjectType;
+import net.consler.librelauncherlib.integration.modrinth.ModrinthProjectType;
 
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
@@ -19,9 +19,9 @@ public class ResourcePackDownloadDialog extends ModrinthDownloadDialog
     }
 
     @Override
-    protected ProjectType projectType()
+    protected ModrinthProjectType projectType()
     {
-        return ProjectType.RESOURCE_PACK;
+        return ModrinthProjectType.RESOURCE_PACK;
     }
 
     @Override

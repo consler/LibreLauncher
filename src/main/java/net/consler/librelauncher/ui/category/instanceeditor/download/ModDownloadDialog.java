@@ -4,8 +4,8 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.category.instanceeditor.InstanceMods;
 import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthProject;
+import net.consler.librelauncherlib.integration.modrinth.ModrinthProjectType;
 import net.consler.librelauncherlib.integration.modrinth.ModrinthVersion;
-import net.consler.librelauncherlib.integration.modrinth.ProjectType;
 
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
@@ -19,9 +19,9 @@ public class ModDownloadDialog extends ModrinthDownloadDialog
     }
 
     @Override
-    protected ProjectType projectType()
+    protected ModrinthProjectType projectType()
     {
-        return ProjectType.MOD;
+        return ModrinthProjectType.MOD;
     }
 
     @Override

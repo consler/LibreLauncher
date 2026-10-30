@@ -10,8 +10,11 @@ import net.consler.librelauncherlib.integration.modrinth.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.awt.geom.RoundRectangle2D;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import java.io.IOException;
@@ -21,14 +24,9 @@ import java.net.URISyntaxException;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HexFormat;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
@@ -55,8 +53,9 @@ public abstract class ModrinthDownloadDialog
     private JProgressBar progressBar;
     private JPanel resultsPanel;
     private JScrollPane resultsScrollPane;
-    private DescriptionView descriptionView;
+    private ModrinthDescriptionView modrinthDescriptionView;
     private JSplitPane resultsAndDescription;
+    private ModrinthVersionSelector versionSelector;
     private ModrinthProject selectedDescriptionProject;
     private SwingWorker<SearchPage, Void> searchWorker;
     private final List<SwingWorker<Void, Void>> iconWorkers = new ArrayList<>();
@@ -76,7 +75,7 @@ public abstract class ModrinthDownloadDialog
         this.instance = instance;
     }
 
-    protected abstract ProjectType projectType();
+    protected abstract ModrinthProjectType projectType();
     protected abstract String itemNamePlural();
     protected abstract Path downloadDirectory() throws IOException;
     protected abstract CompletableFuture<?> downloadProject(
@@ -142,12 +141,21 @@ public abstract class ModrinthDownloadDialog
         dialog.getContentPane().setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
         dialog.add(main.titlebar.create(dialog, title, false, dialog::dispose), BorderLayout.NORTH);
         dialog.add(createContent(), BorderLayout.CENTER);
+        dialog.setShape(new RoundRectangle2D.Double(0, 0, dialog.getWidth(), dialog.getHeight(), 20, 20));
         dialog.addWindowListener(new WindowAdapter()
         {
             @Override
             public void windowClosed(WindowEvent e)
             {
                 cancelWorkers();
+            }
+        });
+        dialog.addComponentListener(new ComponentAdapter()
+        {
+            @Override
+            public void componentResized(ComponentEvent e)
+            {
+                dialog.setShape(new RoundRectangle2D.Double(0, 0, dialog.getWidth(), dialog.getHeight(), 20, 20));
             }
         });
 
@@ -182,8 +190,16 @@ public abstract class ModrinthDownloadDialog
         resultsScrollPane.getVerticalScrollBar().getModel().addChangeListener(e ->
                 SwingUtilities.invokeLater(this::loadNextPageAtScrollEnd));
 
-        descriptionView = new DescriptionView();
-        resultsAndDescription = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, resultsScrollPane, null);
+        versionSelector = new ModrinthVersionSelector(
+                this::loadProjectVersions, this::showVersionLoadingError);
+
+        JPanel resultsSide = new JPanel(new BorderLayout(0, 8));
+        resultsSide.setOpaque(false);
+        resultsSide.add(resultsScrollPane, BorderLayout.CENTER);
+        resultsSide.add(versionSelector, BorderLayout.SOUTH);
+
+        modrinthDescriptionView = new ModrinthDescriptionView();
+        resultsAndDescription = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, resultsSide, null);
         resultsAndDescription.setResizeWeight(1.0);
         resultsAndDescription.setContinuousLayout(true);
         resultsAndDescription.setBorder(null);
@@ -236,8 +252,9 @@ public abstract class ModrinthDownloadDialog
         if (searchWorker != null) searchWorker.cancel(true);
         cancelIconWorkers();
         selectedProjects.clear();
+        versionSelector.clear();
         selectedDescriptionProject = null;
-        if (descriptionView != null) descriptionView.clear();
+        if (modrinthDescriptionView != null) modrinthDescriptionView.clear();
         selectionGroup = new ButtonGroup();
         downloadButton.setEnabled(false);
         resultsPanel.removeAll();
@@ -266,7 +283,7 @@ public abstract class ModrinthDownloadDialog
             @Override
             protected SearchPage doInBackground() throws Exception
             {
-                SearchQuery searchQuery = new SearchQuery(query)
+                ModrinthSearchQuery searchQuery = new ModrinthSearchQuery(query)
                         .projectType(projectType())
                         .gameVersion(new InstancesConfig().getProperty(instance.getName(), "version"))
                         .limit(SEARCH_PAGE_SIZE)
@@ -274,19 +291,16 @@ public abstract class ModrinthDownloadDialog
                 if (filterByModloader()) searchQuery.category(instance.getModloader());
                 List<ModrinthProject> projects = Modrinth.search(searchQuery, USER_AGENT).get().hits();
                 Set<String> installedProjectIds = new HashSet<>();
-                if (projectType() == ProjectType.MOD)
+                if (projectType() == ModrinthProjectType.MOD)
                 {
                     Set<String> installedHashes = getInstalledModHashes();
                     if (!installedHashes.isEmpty())
                     {
-                        String gameVersion = new InstancesConfig().getProperty(instance.getName(), "version");
-                        VersionQuery versionQuery = new VersionQuery().gameVersion(gameVersion);
-                        if (filterByModloader()) versionQuery.loader(instance.getModloader());
-
                         List<CompletableFuture<Boolean>> projectChecks = projects.stream()
                                 .map(project -> installedProjectChecks.computeIfAbsent(project.id(), projectId ->
-                                        Modrinth.getProjectVersions(projectId, versionQuery, USER_AGENT)
-                                                .thenApply(versions -> hasInstalledVersion(versions, installedHashes))
+                                        versionSelector.versionsFor(project)
+                                                .thenApply(versions ->
+                                                        InstalledModHashes.containsAnyVersion(versions, installedHashes))
                                                 .whenComplete((result, error) ->
                                                 {
                                                     if (error != null) installedProjectChecks.remove(projectId);
@@ -369,21 +383,21 @@ public abstract class ModrinthDownloadDialog
                     if (selected.isSelected())
                     {
                         if (!allowMultipleSelection()) selectedProjects.clear();
-                        selectedProjects.add(project);
+                        if (!selectedProjects.contains(project)) selectedProjects.add(project);
                     }
                     else
                     {
                         selectedProjects.remove(project);
                     }
                     downloadButton.setEnabled(!selectedProjects.isEmpty());
+                    if (projectType() == ModrinthProjectType.MOD)
+                    {
+                        if (selected.isSelected()) versionSelector.selectProject(project);
+                        else versionSelector.deselectProject(project, selectedProjects.isEmpty()
+                                ? null : selectedProjects.getLast());
+                    }
                 },
-                selected ->
-                {
-                    if (!allowMultipleSelection()) selectedProjects.clear();
-                    selectedProjects.add(project);
-                    selected.setSelected(true);
-                    downloadButton.setEnabled(!selectedProjects.isEmpty());
-                },
+                AbstractButton::doClick,
                 this::showProjectDescription,
                 this::highlightRow);
         if (!allowMultipleSelection()) selectionGroup.add(row.selectionButton());
@@ -405,14 +419,17 @@ public abstract class ModrinthDownloadDialog
 
     private void showProjectDescription(ModrinthProject project)
     {
+        if (selectedDescriptionProject != null
+                && Objects.equals(selectedDescriptionProject.id(), project.id())) return;
+
         selectedDescriptionProject = project;
         if (resultsAndDescription.getRightComponent() == null)
         {
-            resultsAndDescription.setRightComponent(descriptionView);
+            resultsAndDescription.setRightComponent(modrinthDescriptionView);
             resultsAndDescription.setResizeWeight(0.55);
             resultsAndDescription.setDividerLocation(0.55);
         }
-        descriptionView.showLoading(project.title());
+        modrinthDescriptionView.showLoading(project.title());
 
         projectDetails.computeIfAbsent(project.id(), ignored -> project.fetchDetails(USER_AGENT)
                 .whenComplete((details, error) ->
@@ -424,15 +441,31 @@ public abstract class ModrinthDownloadDialog
                     if (selectedDescriptionProject != project || !dialog.isDisplayable()) return;
                     if (error != null)
                     {
-                        descriptionView.showError();
+                        modrinthDescriptionView.showError();
                         Throwable cause = error;
                         while (cause.getCause() != null) cause = cause.getCause();
                         Exception exception = cause instanceof Exception e ? e : new Exception(cause);
                         new ErrorDialog(main.client, exception, "loading project description");
                         return;
                     }
-                    descriptionView.showProject(details);
+                    modrinthDescriptionView.showProject(details);
                 }));
+    }
+
+    private CompletableFuture<List<ModrinthVersion>> loadProjectVersions(ModrinthProject project)
+    {
+        String gameVersion = new InstancesConfig().getProperty(instance.getName(), "version");
+        ModrinthVersionQuery versionQuery = new ModrinthVersionQuery().gameVersion(gameVersion);
+        if (filterByModloader()) versionQuery.loader(instance.getModloader());
+        return Modrinth.getProjectVersions(project.id(), versionQuery, USER_AGENT);
+    }
+
+    private void showVersionLoadingError(Throwable error)
+    {
+        Throwable cause = error;
+        while (cause.getCause() != null) cause = cause.getCause();
+        Exception exception = cause instanceof Exception e ? e : new Exception(cause);
+        new ErrorDialog(main.client, exception, "loading mod versions");
     }
 
     private void loadIcons(List<ProjectRow> rows)
@@ -522,15 +555,17 @@ public abstract class ModrinthDownloadDialog
             CompletableFuture<?> download;
             try
             {
-                String gameVersion = new InstancesConfig().getProperty(instance.getName(), "version");
-                VersionQuery versionQuery = new VersionQuery().gameVersion(gameVersion);
-                if (filterByModloader()) versionQuery.loader(instance.getModloader());
-                download = Modrinth.getProjectVersions(project.id(), versionQuery, USER_AGENT)
+                download = versionSelector.versionsFor(project)
                         .thenCompose(versions ->
                         {
                             if (versions.isEmpty())
                                 return CompletableFuture.failedFuture(new IllegalStateException("No compatible version found for " + project.title()));
-                            return downloadProject(project, versions.getFirst(), destination, USER_AGENT);
+                            String selectedVersionId = versionSelector.selectedVersionId(project.id());
+                            ModrinthVersion version = versions.stream()
+                                    .filter(candidate -> Objects.equals(candidate.id(), selectedVersionId))
+                                    .findFirst()
+                                    .orElse(versions.getFirst());
+                            return downloadProject(project, version, destination, USER_AGENT);
                         });
             }
             catch (RuntimeException e)
@@ -594,62 +629,11 @@ public abstract class ModrinthDownloadDialog
             hashes = installedModHashes;
             if (hashes == null)
             {
-                hashes = readInstalledModHashes();
+                hashes = InstalledModHashes.read(instance.getModsFolder());
                 installedModHashes = hashes;
             }
         }
         return hashes;
-    }
-
-    private Set<String> readInstalledModHashes() throws IOException
-    {
-        Set<String> hashes = new HashSet<>();
-        Path modsFolder = instance.getModsFolder();
-        if (!Files.isDirectory(modsFolder)) return hashes;
-
-        try (var modFiles = Files.list(modsFolder))
-        {
-            for (Path path : modFiles.filter(Files::isRegularFile)
-                    .filter(path -> path.getFileName().toString().endsWith(".jar")
-                            || path.getFileName().toString().endsWith(".jar.disabled"))
-                    .toList())
-                hashes.add(sha1(path));
-        }
-        return hashes;
-    }
-
-    private static String sha1(Path file) throws IOException
-    {
-        try
-        {
-            MessageDigest digest = MessageDigest.getInstance("SHA-1");
-            try (InputStream input = Files.newInputStream(file))
-            {
-                byte[] buffer = new byte[8192];
-                int bytesRead;
-                while ((bytesRead = input.read(buffer)) != -1) digest.update(buffer, 0, bytesRead);
-            }
-            return HexFormat.of().formatHex(digest.digest());
-        }
-        catch (NoSuchAlgorithmException e)
-        {
-            throw new IllegalStateException("SHA-1 is not available", e);
-        }
-    }
-
-    private static boolean hasInstalledVersion(List<ModrinthVersion> versions, Set<String> installedHashes)
-    {
-        for (ModrinthVersion version : versions)
-        {
-            for (ModrinthVersion.VersionFile file : version.files())
-            {
-                Map<String, String> fileHashes = file.hashes();
-                String sha1Hash = fileHashes == null ? null : fileHashes.get("sha1");
-                if (sha1Hash != null && installedHashes.contains(sha1Hash.toLowerCase(Locale.ROOT)))
-                    return true;
-            }
-        }
-        return false;
     }
 
     private void cancelWorkers()

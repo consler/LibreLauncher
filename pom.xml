@@ -27,12 +27,14 @@
     </repositories>
 
     <dependencies>
+        <!-- Standardized directories -->
         <dependency>
             <groupId>dev.dirs</groupId>
             <artifactId>directories</artifactId>
             <version>26</version>
         </dependency>
 
+        <!-- Modernized Swing UI -->
         <dependency>
             <groupId>com.formdev</groupId>
             <artifactId>flatlaf</artifactId>
@@ -44,32 +46,39 @@
             <version>3.7.2</version>
         </dependency>
 
+        <!-- JSON handler -->
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.14.0</version>
         </dependency>
 
+        <!-- Lightweight WebView -->
         <dependency>
             <groupId>ca.weblite</groupId>
             <artifactId>webview</artifactId>
             <version>1.10.2</version>
         </dependency>
+
+        <!-- Webp image support -->
         <dependency>
             <groupId>org.sejda.imageio</groupId>
             <artifactId>webp-imageio</artifactId>
             <version>0.1.6</version>
         </dependency>
+
+        <!-- Markdown parser -->
         <dependency>
             <groupId>org.commonmark</groupId>
             <artifactId>commonmark</artifactId>
             <version>0.31.0</version>
         </dependency>
 
+        <!-- Launcher helper -->
         <dependency>
             <groupId>net.consler</groupId>
             <artifactId>librelauncherlib</artifactId>
-            <version>642742e4b5</version>
+            <version>c657651185</version>
         </dependency>
     </dependencies>
 

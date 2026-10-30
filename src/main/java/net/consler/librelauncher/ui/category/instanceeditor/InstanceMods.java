@@ -4,6 +4,7 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModDownloadDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModpackDownloadDialog;
+import net.consler.librelauncher.ui.category.instanceeditor.download.ModrinthUpdater;
 import net.consler.librelauncher.util.SystemUtils;
 import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.instance.Mod;
@@ -123,8 +124,14 @@ public class InstanceMods extends InstanceItem
                             entry.path().toFile().renameTo(new File(entry.path().toFile().getAbsolutePath().replace(".disabled", "")));
                         populate(instance);
                     });
-                    popupMenu.add(delete);
+
+                    JMenuItem update = new JMenuItem("Update");
+                    update.addActionListener(ev -> new ModrinthUpdater(
+                            main, instance, List.of(new Mod(entry.path()))).open());
+
+                    popupMenu.add(update);
                     popupMenu.add(disable);
+                    popupMenu.add(delete);
 
                     rowPanel.setComponentPopupMenu(popupMenu);
 
@@ -173,6 +180,11 @@ public class InstanceMods extends InstanceItem
         addModpack.addActionListener(ev ->
                 new ModpackDownloadDialog(main, instance).open());
         popupMenu.add(addModpack);
+
+        JMenuItem updateMods = new JMenuItem("Update Mods");
+        updateMods.addActionListener(ev ->
+                new ModrinthUpdater(main, instance, mods).open());
+        popupMenu.add(updateMods);
 
         JMenuItem openFolder = new JMenuItem("Open Folder");
         openFolder.addActionListener(ev ->
