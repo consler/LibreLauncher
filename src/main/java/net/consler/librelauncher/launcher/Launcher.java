@@ -101,12 +101,16 @@ public class Launcher
 
         if ("true".equals(settingsSaver.get("close_after_launch"))) System.exit(0);
 
-        gameProcess.onExit().thenAccept(action ->
+        gameProcess.onExit().thenAccept(process ->
         {
             instancesConfig.saveProperty(instanceId, "pid", null);
             instancesConfig.save();
 
             SwingUtilities.invokeLater(() -> Main.getInstance().refreshInstanceViews());
+        }).exceptionally(throwable ->
+        {
+            SwingUtilities.invokeLater(() -> new ErrorDialog(Main.getInstance().client, (Exception) throwable, "launched"));
+            return null;
         });
     }
 

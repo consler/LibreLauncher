@@ -9,12 +9,8 @@ import java.net.URI;
 
 public class ErrorDialog extends JDialog
 {
-    public ErrorDialog(JFrame parentFrame, Exception ex)
-    {
-        this(parentFrame, ex, null);
-    }
 
-    public ErrorDialog(JFrame parentFrame, Exception ex, String action)
+    public ErrorDialog(JFrame parentFrame, String stackTrace, String action)
     {
         super(parentFrame, true);
 
@@ -22,8 +18,6 @@ public class ErrorDialog extends JDialog
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
-
-        String stackTrace = getStackTraceAsString(ex);
 
         JLabel messageLabel = new JLabel();
         if(action != null && !action.isBlank()) messageLabel.setText("An error occurred while " + action);
@@ -64,6 +58,12 @@ public class ErrorDialog extends JDialog
         pack();
         setLocationRelativeTo(parentFrame);
         setVisible(true);
+    }
+
+
+    public ErrorDialog(JFrame parentFrame, Exception ex, String action)
+    {
+        this(parentFrame, getStackTraceAsString(ex), action);
     }
 
     private static String getStackTraceAsString(Throwable throwable)

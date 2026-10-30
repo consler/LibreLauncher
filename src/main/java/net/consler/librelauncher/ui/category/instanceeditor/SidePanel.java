@@ -5,6 +5,7 @@ import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModDownloadDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModpackDownloadDialog;
+import net.consler.librelauncher.ui.category.instanceeditor.download.ModrinthUpdater;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ResourcePackDownloadDialog;
 import net.consler.librelauncher.util.SystemUtils;
 import net.consler.librelauncherlib.instance.Instance;
@@ -48,6 +49,12 @@ public class SidePanel
             JButton addModpackButton = createButton("Add modpack");
             addModpackButton.addActionListener(e -> new ModpackDownloadDialog(main, instance).open());
             panel.add(addModpackButton);
+
+            panel.add(Box.createVerticalStrut(5));
+
+            JButton updateButton = createButton("Update mods");
+            updateButton.addActionListener(e -> new ModrinthUpdater(main, instance, InstanceMods.getInstance().mods).open());
+            panel.add(updateButton);
 
             panel.add(Box.createVerticalStrut(5));
         }

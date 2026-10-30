@@ -27,7 +27,7 @@ public class InstanceMods extends InstanceItem
 {
     private static InstanceMods instance;
     private SwingWorker<List<Mod>, ModEntry> modLoader;
-    private volatile List<Mod> mods = List.of();
+    public volatile List<Mod> mods = List.of();
 
     public InstanceMods(Main main)
     {
