@@ -4,6 +4,7 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.ThemeManager;
+import net.consler.librelauncher.ui.category.instanceeditor.InstanceMods;
 import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.instance.Mod;
 import net.consler.librelauncherlib.integration.modrinth.Modrinth;
@@ -346,7 +347,7 @@ public class ModrinthUpdater
                 try
                 {
                     UpdateResult result = get();
-                    net.consler.librelauncher.ui.category.instanceeditor.InstanceMods.getInstance().populate(instance);
+                    InstanceMods.getInstance().populate(instance, InstanceMods.getInstance().search);
                     if (result.failures().isEmpty())
                         statusLabel.setText(result.updated() + " mod(s) updated.");
                     else

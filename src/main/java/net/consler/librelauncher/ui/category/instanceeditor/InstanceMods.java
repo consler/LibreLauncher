@@ -9,6 +9,7 @@ import net.consler.librelauncher.util.SystemUtils;
 import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.instance.Mod;
 import net.consler.librelauncherlib.instance.ModReadException;
+import org.jdesktop.swingx.prompt.PromptSupport;
 
 import javax.swing.*;
 import java.awt.*;
@@ -23,11 +24,12 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-public class InstanceMods extends InstanceItem
+public class InstanceMods extends InstanceItems
 {
     private static InstanceMods instance;
     private SwingWorker<List<Mod>, ModEntry> modLoader;
     public volatile List<Mod> mods = List.of();
+    public String search;
 
     public InstanceMods(Main main)
     {
@@ -36,13 +38,15 @@ public class InstanceMods extends InstanceItem
     }
 
     @Override
-    public void populate(Instance instance)
+    public void populate(Instance instance, String search)
     {
         mods = List.of();
         if (modLoader != null) modLoader.cancel(true);
         listPanel.removeAll();
         listPanel.revalidate();
         listPanel.repaint();
+
+        this.search = search;
 
         modLoader = new SwingWorker<>()
         {
@@ -55,9 +59,10 @@ public class InstanceMods extends InstanceItem
                 try (Stream<Path> paths = Files.list(instance.getModsFolder()))
                 {
                     paths.filter(Files::isRegularFile)
-                            .filter(p ->(
+                            .filter(p ->((
                                     p.getFileName().toString().endsWith(".jar")) ||
-                                    p.getFileName().toString().endsWith(".jar.disabled"))
+                                    p.getFileName().toString().endsWith(".jar.disabled")) &&
+                                    p.getFileName().toString().toLowerCase().contains(search))
                             .forEach(modFile ->
                             {
                                 if (isCancelled()) return;
@@ -107,7 +112,7 @@ public class InstanceMods extends InstanceItem
                         try
                         {
                             Files.delete(entry.path());
-                            populate(instance);
+                            populate(instance, search);
                         }
                         catch (IOException ex)
                         {
@@ -122,7 +127,7 @@ public class InstanceMods extends InstanceItem
                             entry.path().toFile().renameTo(new File(entry.path().toFile().getAbsolutePath() + ".disabled"));
                         else
                             entry.path().toFile().renameTo(new File(entry.path().toFile().getAbsolutePath().replace(".disabled", "")));
-                        populate(instance);
+                        populate(instance, search);
                     });
 
                     JMenuItem update = new JMenuItem("Update");
@@ -150,6 +155,7 @@ public class InstanceMods extends InstanceItem
                 try
                 {
                     mods = List.copyOf(get());
+                    PromptSupport.setPrompt("Search " + mods.size() + " mods", searchField);
                 }
                 catch (InterruptedException e)
                 {

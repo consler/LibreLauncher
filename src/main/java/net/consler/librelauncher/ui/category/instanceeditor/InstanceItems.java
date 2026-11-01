@@ -6,6 +6,7 @@ import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.settings.Settings;
 import net.consler.librelauncherlib.instance.Instance;
+import org.jdesktop.swingx.prompt.PromptSupport;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,17 +15,18 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.concurrent.ExecutionException;
 
-public abstract class InstanceItem
+public abstract class InstanceItems
 {
     protected final Main main;
     public JPanel panel;
     protected JPanel listPanel;
+    protected JTextField searchField;
 
     private final String title;
     private final String type;
     private JPanel selectedRow;
 
-    protected InstanceItem(Main main, String title, String type)
+    protected InstanceItems(Main main, String title, String type)
     {
         this.main = main;
         this.title = title;
@@ -36,6 +38,12 @@ public abstract class InstanceItem
         panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
         panel.add(Settings.createHeader(title), BorderLayout.NORTH);
+
+        searchField = new JTextField();
+        searchField.setSize(new Dimension(Integer.MAX_VALUE, 50));
+        searchField.addActionListener(e -> populate(instance, searchField.getText()));
+        PromptSupport.setPrompt("Search " + type.toLowerCase() + "s", searchField);
+        panel.add(searchField, BorderLayout.NORTH);
 
         listPanel = new ItemListPanel();
         listPanel.setOpaque(false);
@@ -56,12 +64,12 @@ public abstract class InstanceItem
         if (Boolean.parseBoolean(new SettingsSaver().get("show_side_panel", "false")))
             panel.add(new SidePanel(main, type, instance).show(), BorderLayout.EAST);
 
-        populate(instance);
+        populate(instance, "");
 
         return panel;
     }
 
-    public abstract void populate(Instance instance);
+    public abstract void populate(Instance instance, String search);
 
     public abstract JPopupMenu createPopup(Instance instance);
 
@@ -110,9 +118,7 @@ public abstract class InstanceItem
             public void mousePressed(MouseEvent e)
             {
                 Arrays.stream(listPanel.getComponents()).forEach(component ->
-                {
-                    component.setBackground(panel.getBackground());
-                });
+                        component.setBackground(panel.getBackground()));
                 rowPanel.setBackground(panel.getBackground().brighter());
                 selectedRow = rowPanel;
             }

@@ -45,7 +45,7 @@ public class ModDownloadDialog extends ModrinthDownloadDialog
     @Override
     protected void onDownloadsComplete()
     {
-        InstanceMods.getInstance().populate(instance);
+        InstanceMods.getInstance().populate(instance, InstanceMods.getInstance().search);
     }
 
     @Override

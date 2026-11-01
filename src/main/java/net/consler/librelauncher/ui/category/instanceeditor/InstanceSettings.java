@@ -3,7 +3,6 @@ package net.consler.librelauncher.ui.category.instanceeditor;
 import com.google.gson.JsonParser;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ErrorDialog;
-import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.settings.AutoDetectJavaDialog;
 import net.consler.librelauncher.ui.category.settings.Settings;
 import net.consler.librelauncher.settings.InstancesConfig;
@@ -117,7 +116,6 @@ public class InstanceSettings
             panel.add(modLoader);
 
             JButton changeModloader = new JButton(currentLoader + " " + currentLoaderVersion);
-            changeModloader.setMaximumSize(new Dimension(150, 32));
             changeModloader.addActionListener(e -> new ModloaderChangeDialog(
                     Main.getInstance().client, instance, instancesConfig, currentLoader, currentLoaderVersion)
                     {

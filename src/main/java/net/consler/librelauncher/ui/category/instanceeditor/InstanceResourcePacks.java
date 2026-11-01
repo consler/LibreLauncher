@@ -7,6 +7,7 @@ import net.consler.librelauncher.util.SystemUtils;
 import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.instance.ResourcePack;
 import net.consler.librelauncherlib.instance.ResourcePackReadException;
+import org.jdesktop.swingx.prompt.PromptSupport;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -16,23 +17,22 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-public class InstanceResourcePacks extends InstanceItem
+public class InstanceResourcePacks extends InstanceItems
 {
     private SwingWorker<List<ResourcePack>, ResourcePackEntry> resourcePackLoader;
     private final Map<Path, JLabel> iconLabels = new HashMap<>();
     private volatile List<ResourcePack> resourcePacks = List.of();
 
     private static InstanceResourcePacks instance;
+    public String search = "";
 
     public InstanceResourcePacks(Main main)
     {
@@ -41,7 +41,7 @@ public class InstanceResourcePacks extends InstanceItem
     }
 
     @Override
-    public void populate(Instance instance)
+    public void populate(Instance instance, String search)
     {
         resourcePacks = List.of();
         if (resourcePackLoader != null) resourcePackLoader.cancel(true);
@@ -49,6 +49,8 @@ public class InstanceResourcePacks extends InstanceItem
         iconLabels.clear();
         listPanel.revalidate();
         listPanel.repaint();
+
+        this.search = search;
 
         resourcePackLoader = new SwingWorker<>()
         {
@@ -62,9 +64,10 @@ public class InstanceResourcePacks extends InstanceItem
                 try (Stream<Path> paths = Files.list(resourcePackFolder))
                 {
                     packFiles = paths.filter(Files::isRegularFile)
-                            .filter(path -> (
+                            .filter(path -> ((
                                     path.getFileName().toString().toLowerCase().endsWith(".zip") ||
-                                    path.getFileName().toString().toLowerCase().endsWith(".zip.disabled")))
+                                    path.getFileName().toString().toLowerCase().endsWith(".zip.disabled"))) &&
+                                    path.getFileName().toString().toLowerCase().contains(search))
                             .toList();
                 }
 
@@ -127,6 +130,7 @@ public class InstanceResourcePacks extends InstanceItem
                 try
                 {
                     resourcePacks = List.copyOf(get());
+                    PromptSupport.setPrompt("Search " + resourcePacks.size() + " resource packs", searchField);
                 }
                 catch (InterruptedException e)
                 {
@@ -160,7 +164,7 @@ public class InstanceResourcePacks extends InstanceItem
             try
             {
                 Files.delete(entry.path());
-                populate(instance);
+                populate(instance, search);
             }
             catch (IOException ex)
             {
@@ -175,7 +179,7 @@ public class InstanceResourcePacks extends InstanceItem
                 entry.path().toFile().renameTo(new File(entry.path().toFile().getAbsolutePath() + ".disabled"));
             else
                 entry.path().toFile().renameTo(new File(entry.path().toFile().getAbsolutePath().replace(".disabled", "")));
-            populate(instance);
+            populate(instance, search);
         });
 
         popupMenu.add(delete);

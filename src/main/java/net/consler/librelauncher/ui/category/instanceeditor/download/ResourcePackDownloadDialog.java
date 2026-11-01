@@ -45,7 +45,7 @@ public class ResourcePackDownloadDialog extends ModrinthDownloadDialog
     @Override
     protected void onDownloadsComplete()
     {
-        InstanceResourcePacks.getInstance().populate(instance);
+        InstanceResourcePacks.getInstance().populate(instance, InstanceResourcePacks.getInstance().search);
     }
 
     @Override

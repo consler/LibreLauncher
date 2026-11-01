@@ -5,20 +5,23 @@ import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.util.SystemUtils;
 import net.consler.librelauncherlib.instance.Instance;
 import net.consler.librelauncherlib.instance.World;
+import org.jdesktop.swingx.prompt.PromptSupport;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-public class InstanceWorlds extends InstanceItem
+public class InstanceWorlds extends InstanceItems
 {
     private SwingWorker<Void, WorldEntry> worldLoader;
+    private final List<WorldEntry> worldEntries = new ArrayList<>();
 
     public InstanceWorlds(Main main)
     {
@@ -26,7 +29,7 @@ public class InstanceWorlds extends InstanceItem
     }
 
     @Override
-    public void populate(Instance instance)
+    public void populate(Instance instance, String search)
     {
         if (worldLoader != null) worldLoader.cancel(true);
         listPanel.removeAll();
@@ -44,6 +47,7 @@ public class InstanceWorlds extends InstanceItem
                 try (Stream<Path> paths = Files.list(savesFolder))
                 {
                     paths.filter(Files::isDirectory)
+                            .filter(path -> path.getFileName().toString().toLowerCase().contains(search))
                             .forEach(worldFolder ->
                             {
                                 if (isCancelled()) return;
@@ -78,6 +82,7 @@ public class InstanceWorlds extends InstanceItem
                 if (worldLoader != this || isCancelled()) return;
                 try
                 {
+                    PromptSupport.setPrompt("Search "  + worldEntries.size() + " worlds", searchField);
                     get();
                 }
                 catch (InterruptedException e)
@@ -98,6 +103,7 @@ public class InstanceWorlds extends InstanceItem
 
     private void addWorldRow(WorldEntry entry)
     {
+        worldEntries.add(entry);
         addItemRow(createItemRow(entry.name(), entry.icon(), true));
     }
 

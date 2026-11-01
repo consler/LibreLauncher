@@ -250,12 +250,9 @@ public abstract class ModrinthDownloadDialog
     {
         if (searchWorker != null) searchWorker.cancel(true);
         cancelIconWorkers();
-        selectedProjects.clear();
-        versionSelector.clear();
         selectedDescriptionProject = null;
         if (modrinthDescriptionView != null) modrinthDescriptionView.clear();
         selectionGroup = new ButtonGroup();
-        downloadButton.setEnabled(false);
         resultsPanel.removeAll();
         nextSearchOffset = 0;
         loadingSearchPage = false;
@@ -382,11 +379,12 @@ public abstract class ModrinthDownloadDialog
                     if (selected.isSelected())
                     {
                         if (!allowMultipleSelection()) selectedProjects.clear();
-                        if (!selectedProjects.contains(project)) selectedProjects.add(project);
+                        if (!isProjectSelected(project)) selectedProjects.add(project);
                     }
                     else
                     {
-                        selectedProjects.remove(project);
+                        selectedProjects.removeIf(selectedProject ->
+                                Objects.equals(selectedProject.id(), project.id()));
                     }
                     downloadButton.setEnabled(!selectedProjects.isEmpty());
                     if (projectType() == ModrinthProjectType.MOD)
@@ -400,9 +398,16 @@ public abstract class ModrinthDownloadDialog
                 this::showProjectDescription,
                 this::highlightRow);
         if (!allowMultipleSelection()) selectionGroup.add(row.selectionButton());
+        row.selectionButton().setSelected(isProjectSelected(project));
         resultsPanel.add(row);
         resultsPanel.add(Box.createVerticalStrut(5));
         return new ProjectRow(project, row.iconLabel());
+    }
+
+    private boolean isProjectSelected(ModrinthProject project)
+    {
+        return selectedProjects.stream()
+                .anyMatch(selectedProject -> Objects.equals(selectedProject.id(), project.id()));
     }
 
     private void highlightRow(ModrinthDownloadDialogItem selectedRow)
