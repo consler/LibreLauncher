@@ -12,10 +12,14 @@ public class InstanceManager
     private final Main main;
     public JPanel panel;
     public InstancePanel instancePanel;
+    private SidePanel sidePanel;
+
+    public static InstanceManager instanceManager;
 
     public InstanceManager(Main main)
     {
         this.main = main;
+        instanceManager = this;
     }
 
     public void show()
@@ -29,13 +33,35 @@ public class InstanceManager
         panel = new RoundCornerPanel(main.client.getBackground());
         panel.setLayout(new BorderLayout());
 
-        if (Boolean.parseBoolean(new SettingsSaver().get("show_side_panel", "false")))
-            new SidePanel(main, this).show();
+        updateSidePanelVisibility(Boolean.parseBoolean(new SettingsSaver().get("show_side_panel", "false")));
 
         instancePanel = new InstancePanel(main, this);
         instancePanel.show();
 
         main.pageContainer.add(panel, "instancemanager");
         main.showPage("instancemanager");
+    }
+
+    public void updateSidePanelVisibility(boolean visible)
+    {
+        if (panel == null) return;
+
+        if (visible && sidePanel == null)
+        {
+            sidePanel = new SidePanel(main, this);
+            sidePanel.show();
+        }
+        else if (!visible && sidePanel != null)
+        {
+            panel.remove(sidePanel.panel);
+            sidePanel = null;
+            panel.revalidate();
+            panel.repaint();
+        }
+    }
+
+    public static InstanceManager getInstance()
+    {
+        return instanceManager;
     }
 }

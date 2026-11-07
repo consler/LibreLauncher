@@ -2,7 +2,6 @@ package net.consler.librelauncher.ui.category.instanceeditor;
 
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ErrorDialog;
-import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModDownloadDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModpackDownloadDialog;
 import net.consler.librelauncher.ui.category.instanceeditor.download.ModrinthUpdater;
@@ -96,12 +95,11 @@ public class SidePanel
     private JButton createButton(String name)
     {
         JButton button = new JButton(name);
-        button.setBorderPainted(false);
         button.setFocusable(false);
-        button.setPreferredSize(new Dimension(130, 30));
-        button.setMaximumSize(new Dimension(130, 30));
+        button.setPreferredSize(new Dimension(120, 30));
+        button.setMaximumSize(new Dimension(120, 30));
         button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
+        button.setBackground(null);
         button.setFont(main.themeManager.comfortaaBold);
 
         return button;

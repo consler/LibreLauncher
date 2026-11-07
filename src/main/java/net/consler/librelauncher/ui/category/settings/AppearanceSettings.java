@@ -3,6 +3,7 @@ import javax.swing.*;
 import java.awt.*;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.SettingsSaver;
+import net.consler.librelauncher.ui.category.instancemanager.InstanceManager;
 
 public class AppearanceSettings
 {
@@ -50,6 +51,9 @@ public class AppearanceSettings
         {
             settingsSaver.set("show_side_panel", String.valueOf(showSidebar.isSelected()));
             settingsSaver.save();
+            InstanceManager instanceManager = InstanceManager.getInstance();
+            if (instanceManager != null)
+                instanceManager.updateSidePanelVisibility(showSidebar.isSelected());
         });
         panel.add(showSidebar);
 
