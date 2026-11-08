@@ -3,23 +3,26 @@ package net.consler.librelauncher.ui.category.home;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.launcher.Launcher;
 import net.consler.librelauncher.settings.InstancesConfig;
+import net.consler.librelauncher.settings.SettingsSaver;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 
 import static net.consler.librelauncher.util.SystemUtils.isRunningAndClean;
 
 public class Home
 {
     private final Main main;
-    public JButton playButton;
     public JPanel panel;
-    public JComboBox<String> instances;
+    private JButton playButton;
+    private JComboBox<String> instances;
+    private SettingsSaver settingsSaver;
+
+    private boolean populating = false;
 
     public Home(Main main)
     {
@@ -34,6 +37,8 @@ public class Home
             return;
         }
 
+        settingsSaver = new SettingsSaver();
+
         panel = new RoundCornerPanel(main.client.getBackground());
         panel.setOpaque(false);
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
@@ -46,26 +51,6 @@ public class Home
         playButton.setForeground(UIManager.getColor("Button.foreground"));
         playButton.setFocusable(false);
         playButton.setFont(main.themeManager.comfortaaBold.deriveFont(18f));
-
-        instances = new JComboBox<>();
-        instances.setPreferredSize(new Dimension(200, 40));
-        instances.setMaximumSize(new Dimension(180, 40));
-        instances.setAlignmentX(Component.CENTER_ALIGNMENT);
-        instances.setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
-        instances.setForeground(UIManager.getColor("ComboBox.foreground"));
-        instances.setFocusable(false);
-        instances.setBorder(BorderFactory.createEmptyBorder());
-        instances.putClientProperty("FlatLaf.style",
-            "buttonBackground: #00000000; " +
-            "buttonSeparatorColor: #00000000; " +
-            "buttonArrowColor: #00000000; " +
-            "buttonHoverArrowColor: #00000000; " +
-            "buttonPressedArrowColor: #00000000;"
-        );
-        instances.addActionListener(l -> playButton.setEnabled(!isRunningAndClean(String.valueOf(instances.getSelectedItem()))));
-
-        new InstancesConfig().getInstanceList().forEach(instances::addItem);
-
         playButton.addMouseListener(new MouseAdapter()
         {
             @Override
@@ -82,6 +67,38 @@ public class Home
             }
         });
 
+        instances = new JComboBox<>();
+        instances.setPreferredSize(new Dimension(200, 40));
+        instances.setMaximumSize(new Dimension(180, 40));
+        instances.setAlignmentX(Component.CENTER_ALIGNMENT);
+        instances.setBackground(ThemeManager.surfaceColor(main.client.getBackground()));
+        instances.setForeground(UIManager.getColor("ComboBox.foreground"));
+        instances.setFocusable(false);
+        instances.setBorder(BorderFactory.createEmptyBorder());
+        instances.putClientProperty("FlatLaf.style",
+                "buttonBackground: #00000000; " +
+                        "buttonSeparatorColor: #00000000; " +
+                        "buttonArrowColor: #00000000; " +
+                        "buttonHoverArrowColor: #00000000; " +
+                        "buttonPressedArrowColor: #00000000;"
+        );
+        instances.addItemListener(e ->
+        {
+            if (populating) return;
+            if (e.getStateChange() != ItemEvent.SELECTED) return;
+
+            updatePlayButton();
+
+            Object selected = instances.getSelectedItem();
+            if (selected != null)
+            {
+                settingsSaver.set("last_chosen", selected.toString());
+                settingsSaver.save();
+            }
+        });
+
+        populate();
+
         panel.add(Box.createVerticalGlue());
         panel.add(playButton);
         panel.add(Box.createRigidArea(new Dimension(0, 5)));
@@ -94,7 +111,30 @@ public class Home
 
     public void populate()
     {
-        instances.removeAllItems();
-        new InstancesConfig().getInstanceList().forEach(instances::addItem);
+        String lastChosen = settingsSaver != null ? settingsSaver.get("last_chosen") : null;
+
+        populating = true;
+        try
+        {
+            instances.removeAllItems();
+            new InstancesConfig().getInstanceList().forEach(instances::addItem);
+
+            if (lastChosen != null)
+                instances.setSelectedItem(lastChosen);
+        }
+        finally
+        {
+            populating = false;
+        }
+
+        updatePlayButton();
+    }
+
+    private void updatePlayButton()
+    {
+        if (playButton == null || instances == null) return;
+
+        Object selected = instances.getSelectedItem();
+        playButton.setEnabled(selected != null && !isRunningAndClean(selected.toString()));
     }
 }
