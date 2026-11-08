@@ -4,6 +4,7 @@ import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.Account;
 import net.consler.librelauncher.settings.AuthManager;
 import net.consler.librelauncher.ui.ErrorDialog;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncherlib.auth.AuthProfile;
 import net.consler.librelauncherlib.auth.MicrosoftAuthenticator;
 import net.consler.librelauncherlib.auth.UserCancelledException;
@@ -11,6 +12,8 @@ import net.consler.librelauncherlib.auth.UserCancelledException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class AccountsSettings
 {
@@ -73,6 +76,25 @@ public class AccountsSettings
 
         panel.add(bottomPanel, BorderLayout.SOUTH);
 
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem addOnline = new JMenuItem("Add Online");
+        addOnline.addActionListener(e ->
+        {
+            try
+            {
+                addOnlineAccount();
+            }
+            catch (Exception ex)
+            {
+                new ErrorDialog(main.client, ex, "logging into account");
+            }
+        });
+        JMenuItem addOffline = new JMenuItem("Add Offline");
+        addOffline.addActionListener(e -> addOfflineAccount());
+        popupMenu.add(addOnline);
+        popupMenu.add(addOffline);
+        scrollPane.setComponentPopupMenu(popupMenu);
+
         refreshAccountList();
 
         return panel;
@@ -114,6 +136,31 @@ public class AccountsSettings
                 BorderFactory.createLineBorder(borderColor),
                 new EmptyBorder(8, 14, 8, 14)
         ));
+
+        card.addMouseListener(new MouseAdapter()
+        {
+            @Override
+            public void mouseEntered(MouseEvent e)
+            {
+                card.setBackground(ThemeManager.hoverColor(panel.getBackground(), 0.02f));
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e)
+            {
+                card.setBackground(null);
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e)
+            {
+                if(e.getClickCount() == 2)
+                {
+                    authManager.setActiveAccount(account);
+                    refreshAccountList();
+                }
+            }
+        });
 
         JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         leftPanel.setOpaque(false);
