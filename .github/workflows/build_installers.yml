@@ -78,13 +78,13 @@ jobs:
       - name: Verify AppImage
         run: |
           ls -lah target/dist
-          file "target/dist/${APP_NAME}-${ARCH}.AppImage"
+          file "target/dist/${APP_NAME}-Linux-AppImage.AppImage"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: LibreLauncher-Linux-AppImage
-          path: target/dist/LibreLauncher-x86_64.AppImage
+          path: target/dist/LibreLauncher-Linux-AppImage.AppImage
           if-no-files-found: error
 
   build-packages:
@@ -99,17 +99,19 @@ jobs:
           - os: windows-latest
             profile: exe
             artifact-name: LibreLauncher-Windows-EXE
-            artifact-path: target/dist/*.exe
+            artifact-filename: LibreLauncher-Windows-EXE.exe
+            package-extension: exe
 
           - os: windows-latest
             profile: msi
             artifact-name: LibreLauncher-Windows-MSI
-            artifact-path: target/dist/*.msi
+            artifact-filename: LibreLauncher-Windows-MSI.msi
+            package-extension: msi
 
           - os: windows-latest
             profile: app-image
             artifact-name: LibreLauncher-Windows-Portable
-            artifact-path: target/dist/LibreLauncher-app-image-windows-latest.tar.gz
+            artifact-path: target/dist/LibreLauncher-Windows-Portable.tar.gz
             is-folder: true
             app-image-dir: LibreLauncher
 
@@ -117,17 +119,19 @@ jobs:
           - os: macos-latest
             profile: dmg
             artifact-name: LibreLauncher-macOS-DMG
-            artifact-path: target/dist/*.dmg
+            artifact-filename: LibreLauncher-macOS-DMG.dmg
+            package-extension: dmg
 
           - os: macos-latest
             profile: pkg
             artifact-name: LibreLauncher-macOS-PKG
-            artifact-path: target/dist/*.pkg
+            artifact-filename: LibreLauncher-macOS-PKG.pkg
+            package-extension: pkg
 
           - os: macos-latest
             profile: app-image
             artifact-name: LibreLauncher-macOS-Portable
-            artifact-path: target/dist/LibreLauncher-app-image-macos.zip
+            artifact-path: target/dist/LibreLauncher-macOS-Portable.zip
             is-folder: true
             app-image-dir: LibreLauncher.app
 
@@ -135,17 +139,19 @@ jobs:
           - os: ubuntu-latest
             profile: deb
             artifact-name: LibreLauncher-Linux-DEB
-            artifact-path: target/dist/*.deb
+            artifact-filename: LibreLauncher-Linux-DEB.deb
+            package-extension: deb
 
           - os: ubuntu-latest
             profile: rpm
             artifact-name: LibreLauncher-Linux-RPM
-            artifact-path: target/dist/*.rpm
+            artifact-filename: LibreLauncher-Linux-RPM.rpm
+            package-extension: rpm
 
           - os: ubuntu-latest
             profile: app-image
             artifact-name: LibreLauncher-Linux-Portable
-            artifact-path: target/dist/LibreLauncher-app-image-ubuntu-latest.tar.gz
+            artifact-path: target/dist/LibreLauncher-Linux-Portable.tar.gz
             is-folder: true
             app-image-dir: LibreLauncher
 
@@ -181,19 +187,29 @@ jobs:
         shell: bash
         run: mvn --batch-mode --no-transfer-progress package -P${{ matrix.profile }} -DskipTests
 
+      - name: Normalize package filename
+        if: matrix.is-folder != true
+        shell: bash
+        run: |
+          shopt -s nullglob
+          package_files=(target/dist/*.${{ matrix.package-extension }})
+          if [ "${#package_files[@]}" -ne 1 ]; then
+            echo "Expected exactly one .${{ matrix.package-extension }} package, found ${#package_files[@]}" >&2
+            exit 1
+          fi
+          mv "${package_files[0]}" "target/dist/${{ matrix.artifact-filename }}"
+
       - name: Compress App Image folder
         if: matrix.is-folder == true && matrix.os != 'macos-latest'
         shell: bash
         run: |
-          cd target/dist
-          tar -czf "LibreLauncher-app-image-${{ matrix.os }}.tar.gz" "${{ matrix.app-image-dir }}"
+          tar -czf "${{ matrix.artifact-path }}" -C target/dist "${{ matrix.app-image-dir }}"
 
       - name: Compress macOS App Image folder
         if: matrix.is-folder == true && matrix.os == 'macos-latest'
         shell: bash
         run: |
-          cd target/dist
-          ditto -c -k --sequesterRsrc --keepParent "${{ matrix.app-image-dir }}" LibreLauncher-app-image-macos.zip
+          ditto -c -k --sequesterRsrc --keepParent "target/dist/${{ matrix.app-image-dir }}" "${{ matrix.artifact-path }}"
 
       - name: Verify package output
         shell: bash
@@ -205,7 +221,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact-name }}
-          path: ${{ matrix.artifact-path }}
+          path: ${{ matrix.artifact-path || format('target/dist/{0}', matrix.artifact-filename) }}
           if-no-files-found: error
 
   publish-release:
