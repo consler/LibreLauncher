@@ -111,6 +111,9 @@
                         <input>${project.build.directory}/jpackage-input</input>
                         <mainJar>${project.build.finalName}-universal.jar</mainJar>
                         <mainClass>${main.class}</mainClass>
+                        <javaOptions>
+                            <option>--enable-native-access=ALL-UNNAMED</option>
+                        </javaOptions>
                     </configuration>
                 </plugin>
 
