@@ -12,7 +12,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-import static net.consler.librelauncher.util.SystemUtils.isRunningAndClean;
+import static net.consler.librelauncher.util.InstanceUtils.isRunningAndClean;
 
 public class Home
 {

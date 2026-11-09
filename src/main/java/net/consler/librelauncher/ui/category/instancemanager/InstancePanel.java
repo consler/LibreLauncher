@@ -9,6 +9,7 @@ import net.consler.librelauncher.settings.InstancesConfig;
 import net.consler.librelauncher.ui.ErrorDialog;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.RoundCornerPanel;
+import net.consler.librelauncher.util.InstanceUtils;
 import net.consler.librelauncher.util.SystemUtils;
 import net.consler.librelauncherlib.instance.Instance;
 
@@ -19,7 +20,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import static net.consler.librelauncher.util.SystemUtils.isRunningAndClean;
+import static net.consler.librelauncher.util.InstanceUtils.isRunningAndClean;
 
 public class InstancePanel
 {
@@ -116,7 +117,7 @@ public class InstancePanel
             playButton.addActionListener(e ->
             {
                 if(isRunningAndClean(instanceName))
-                    SystemUtils.killInstance(instanceName);
+                    InstanceUtils.killInstance(instanceName);
                 else
                     Launcher.launch(instanceName);
             });
@@ -184,7 +185,7 @@ public class InstancePanel
         {
             JMenuItem launch = new JMenuItem("Stop");
             launch.addActionListener(ev ->
-                SystemUtils.killInstance(instanceName));
+                InstanceUtils.killInstance(instanceName));
             contextMenu.add(launch);
         }
         else
@@ -232,7 +233,7 @@ public class InstancePanel
         JMenuItem delete = new JMenuItem("Delete");
         delete.addActionListener(ev ->
         {
-            SystemUtils.killInstance(instanceName);
+            InstanceUtils.killInstance(instanceName);
             instancesConfig.deleteInstance(instanceName);
             populate();
         });
