@@ -25,11 +25,6 @@ public class InstanceEditor
 
     private JPanel categoryPanel;
     public final List<JButton> categoryButtons = new ArrayList<>();
-    public JButton settingsButton;
-    public JButton logsButton;
-    public JButton modsButton;
-    public JButton resourcePacksButton;
-    public JButton worldsButton;
 
     public InstancesConfig instancesConfig;
     private final Map<String, Supplier<JPanel>> categoryPages = new HashMap<>();
@@ -51,16 +46,17 @@ public class InstanceEditor
         categoryPages.clear();
         loadedPages.clear();
 
-        settingsButton = new JButton("Settings");
-        modsButton = new JButton("Mods");
-        resourcePacksButton = new JButton("Resource Packs");
-        worldsButton = new JButton("Worlds");
-        logsButton = new JButton("Logs");
+        JButton settingsButton = new JButton("Settings");
+        JButton modsButton = new JButton("Mods");
+        JButton resourcePacksButton = new JButton("Resource Packs");
+        JButton worldsButton = new JButton("Worlds");
+        JButton logsButton = new JButton("Logs");
 
         addCategory(settingsButton, () -> new InstanceSettings(main, instancesConfig).createPanel(instance));
         addCategory(modsButton, () -> new InstanceMods(main).createPanel(instance));
         addCategory(resourcePacksButton, () -> new InstanceResourcePacks(main).createPanel(instance));
         addCategory(worldsButton, () -> new InstanceWorlds(main).createPanel(instance));
+        addCategory(logsButton, () -> new InstanceLogs(main).createPanel(instance));
 
         selectCategory(settingsButton);
         categoryPanel.revalidate();

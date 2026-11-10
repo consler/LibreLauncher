@@ -57,6 +57,20 @@ public class AppearanceSettings
         });
         panel.add(showSidebar);
 
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        JCheckBox wrapLogLines = new JCheckBox("Wrap Lines of Logs");
+        wrapLogLines.setSelected(Boolean.parseBoolean(settingsSaver.get("wrap_logs_lines", "false")));
+        wrapLogLines.addActionListener(e ->
+        {
+            settingsSaver.set("wrap_logs_lines", String.valueOf(wrapLogLines.isSelected()));
+            settingsSaver.save();
+            InstanceManager instanceManager = InstanceManager.getInstance();
+            if (instanceManager != null)
+                instanceManager.updateSidePanelVisibility(wrapLogLines.isSelected());
+        });
+        panel.add(wrapLogLines);
+
         return panel;
     }
 }
