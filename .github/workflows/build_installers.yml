@@ -111,7 +111,7 @@ jobs:
           - os: windows-latest
             profile: app-image
             artifact-name: LibreLauncher-Windows-Portable
-            artifact-path: target/dist/LibreLauncher-Windows-Portable.tar.gz
+            artifact-path: target/dist/LibreLauncher-Windows-Portable.zip
             is-folder: true
             app-image-dir: LibreLauncher
 
@@ -200,10 +200,16 @@ jobs:
           mv "${package_files[0]}" "target/dist/${{ matrix.artifact-filename }}"
 
       - name: Compress App Image folder
-        if: matrix.is-folder == true && matrix.os != 'macos-latest'
+        if: matrix.is-folder == true && matrix.os == 'ubuntu-latest'
         shell: bash
         run: |
           tar -czf "${{ matrix.artifact-path }}" -C target/dist "${{ matrix.app-image-dir }}"
+
+      - name: Compress Windows App Image folder
+        if: matrix.is-folder == true && matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Compress-Archive -Path "target/dist/${{ matrix.app-image-dir }}" -DestinationPath "${{ matrix.artifact-path }}"
 
       - name: Compress macOS App Image folder
         if: matrix.is-folder == true && matrix.os == 'macos-latest'
