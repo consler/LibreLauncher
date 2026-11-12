@@ -9,7 +9,7 @@ import java.util.Optional;
 public class InstanceUtils
 {
 
-    public static boolean isRunningAndClean(String instanceId)
+    public static synchronized boolean isRunningAndClean(String instanceId)
     {
         InstancesConfig instancesConfig = new InstancesConfig();
         String pid = instancesConfig.getProperty(instanceId, "pid");
@@ -24,7 +24,13 @@ public class InstanceUtils
         return true;
     }
 
-    public static void killInstance(String instanceId)
+    public static synchronized boolean isAuthenticating(String instanceId)
+    {
+        InstancesConfig instancesConfig = new InstancesConfig();
+        return Boolean.parseBoolean(instancesConfig.getProperty(instanceId, "authenticating", "false"));
+    }
+
+    public static synchronized void killInstance(String instanceId)
     {
         InstancesConfig instancesConfig = new InstancesConfig();
         String pid = instancesConfig.getProperty(instanceId, "pid");

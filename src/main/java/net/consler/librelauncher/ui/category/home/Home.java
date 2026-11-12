@@ -10,8 +10,9 @@ import net.consler.librelauncher.ui.category.RoundCornerPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ItemEvent;
 
+import static net.consler.librelauncher.util.InstanceUtils.isAuthenticating;
 import static net.consler.librelauncher.util.InstanceUtils.isRunningAndClean;
 
 public class Home
@@ -51,19 +52,15 @@ public class Home
         playButton.setForeground(UIManager.getColor("Button.foreground"));
         playButton.setFocusable(false);
         playButton.setFont(main.themeManager.comfortaaBold.deriveFont(18f));
-        playButton.addMouseListener(new MouseAdapter()
+        playButton.addActionListener(e ->
         {
-            @Override
-            public void mouseClicked(MouseEvent e)
+            try
             {
-                try
-                {
-                    Launcher.launch((String) instances.getSelectedItem());
-                }
-                catch (Exception ex)
-                {
-                    new ErrorDialog(main.client, ex, "launching");
-                }
+                Launcher.launch((String) instances.getSelectedItem());
+            }
+            catch (Exception ex)
+            {
+                new ErrorDialog(main.client, ex, "launching");
             }
         });
 
@@ -135,6 +132,8 @@ public class Home
         if (playButton == null || instances == null) return;
 
         Object selected = instances.getSelectedItem();
-        playButton.setEnabled(selected != null && !isRunningAndClean(selected.toString()));
+        playButton.setEnabled(selected != null
+                && !isRunningAndClean(selected.toString())
+                && !isAuthenticating(selected.toString()));
     }
 }

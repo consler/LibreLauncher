@@ -133,14 +133,15 @@ public class AuthManager
             throw new RuntimeException("Failed to save accounts.json", e);
         }
     }
-    public CompletableFuture<Account> getActiveAccount()
+    public CompletableFuture<Account> getActiveAccount() throws IllegalStateException
     {
         Account account = accounts.stream().filter(Account::isActive).findFirst().orElse(null);
         if (account == null)
             return CompletableFuture.failedFuture(new IllegalStateException("No active account"));
 
         AuthProfile profile = account.getAuthProfile();
-        if (profile.isOffline()) return CompletableFuture.completedFuture(account);
+        if (profile.isOffline())
+            return CompletableFuture.completedFuture(account);
 
         return authenticator.refreshIfNeeded(profile)
                 .thenApply(fresh ->

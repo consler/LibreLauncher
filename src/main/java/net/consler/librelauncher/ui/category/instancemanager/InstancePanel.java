@@ -20,6 +20,7 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import static net.consler.librelauncher.util.InstanceUtils.isAuthenticating;
 import static net.consler.librelauncher.util.InstanceUtils.isRunningAndClean;
 
 public class InstancePanel
@@ -78,6 +79,10 @@ public class InstancePanel
         FlatSVGIcon.ColorFilter filter2 = new FlatSVGIcon.ColorFilter(color -> new Color(255, 50, 50, 100));
         stopIcon.setColorFilter(filter2);
 
+        FlatSVGIcon authIcon = new FlatSVGIcon(Main.class.getResource("icon/user-shield.svg")).derive(16, 16);
+        FlatSVGIcon.ColorFilter filter5 = new FlatSVGIcon.ColorFilter(color -> new Color(216, 177, 67, 166));
+        authIcon.setColorFilter(filter5);
+
         FlatSVGIcon folderIcon = new FlatSVGIcon(Main.class.getResource("icon/folder.svg")).derive(16, 16);
         FlatSVGIcon.ColorFilter filter3 = new FlatSVGIcon.ColorFilter(color -> new Color(100, 100, 100));
         folderIcon.setColorFilter(filter3);
@@ -113,10 +118,24 @@ public class InstancePanel
             });
 
             JButton playButton = createButton();
-            playButton.setIcon(isRunningAndClean(instanceName) ? stopIcon : playIcon);
+            if (isRunningAndClean(instanceName))
+            {
+                playButton.setIcon(stopIcon);
+            }
+            else if (isAuthenticating(instanceName))
+            {
+                playButton.setIcon(authIcon);
+            }
+            else
+            {
+                playButton.setIcon(playIcon);
+            }
+            playButton.setEnabled(!isAuthenticating(instanceName));
             playButton.addActionListener(e ->
             {
-                if(isRunningAndClean(instanceName))
+                if (isAuthenticating(instanceName)) return;
+
+                if (isRunningAndClean(instanceName))
                     InstanceUtils.killInstance(instanceName);
                 else
                     Launcher.launch(instanceName);
@@ -181,11 +200,11 @@ public class InstancePanel
     {
         JPopupMenu contextMenu = new JPopupMenu();
 
-        if(isRunningAndClean(instanceName))
+        if (isRunningAndClean(instanceName))
         {
             JMenuItem launch = new JMenuItem("Stop");
             launch.addActionListener(ev ->
-                InstanceUtils.killInstance(instanceName));
+                    InstanceUtils.killInstance(instanceName));
             contextMenu.add(launch);
         }
         else
@@ -256,7 +275,7 @@ public class InstancePanel
             try
             {
                 Path gameDir = Importer.doImport(InstancesConfig.instancesDir.toFile());
-                if(gameDir == null) return;
+                if (gameDir == null) return;
 
                 Instance instance = new Instance(gameDir);
                 InstancesConfig instancesConfig = new InstancesConfig();

@@ -7,15 +7,15 @@ import dev.dirs.BaseDirectories;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.ui.ErrorDialog;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.Writer;
 import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
 
 public class InstancesConfig
@@ -24,55 +24,73 @@ public class InstancesConfig
     public static final Path instancesDir = Path.of(BaseDirectories.get().dataLocalDir).resolve("LibreLauncher");
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    private static final Type MAP_TYPE = new TypeToken<Map<String, Map<String, String>>>(){}.getType();
+    private static final Type MAP_TYPE = new TypeToken<Map<String, Map<String, String>>>()
+    {
+    }.getType();
+    private static final Object FILE_LOCK = new Object();
     public final Map<String, Map<String, String>> instanceCache = new HashMap<>();
+    private final Map<String, Map<String, String>> pendingProperties = new HashMap<>();
+    private final Set<String> removedInstances = new HashSet<>();
 
     public InstancesConfig()
     {
         File parentDir = instancesConfigFile.getParentFile();
         if (parentDir != null && !parentDir.exists()) parentDir.mkdirs();
 
-        if (!instancesConfigFile.exists())
+        synchronized (FILE_LOCK)
         {
-            try
+            if (!instancesConfigFile.exists())
             {
-                instancesConfigFile.createNewFile();
-                save();
-            }
-            catch (IOException e)
-            {
-                throw new RuntimeException("Failed to create instances.json", e);
-            }
-        }
-
-        if (instancesConfigFile.isFile())
-        {
-            try (FileReader reader = new FileReader(instancesConfigFile))
-            {
-                Map<String, Map<String, String>> loadedCache = GSON.fromJson(reader, MAP_TYPE);
-                if (loadedCache != null)
+                try
                 {
-                    instanceCache.putAll(loadedCache);
+                    instancesConfigFile.createNewFile();
+                    save();
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException("Failed to create instances.json", e);
                 }
             }
-            catch (IOException e)
+
+            if (instancesConfigFile.isFile())
             {
-                throw new RuntimeException("Failed to load instances.json", e);
+                try (FileReader reader = new FileReader(instancesConfigFile))
+                {
+                    Map<String, Map<String, String>> loadedCache = GSON.fromJson(reader, MAP_TYPE);
+                    if (loadedCache != null)
+                    {
+                        instanceCache.putAll(loadedCache);
+                    }
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException("Failed to load instances.json", e);
+                }
             }
         }
     }
 
-    public void saveProperty(String instanceId, String key, String value)
+    public synchronized void saveProperty(String instanceId, String key, String value)
     {
-        instanceCache.computeIfAbsent(instanceId, k -> new HashMap<>()).put(key, value);
+        if (value == null)
+        {
+            Map<String, String> properties = instanceCache.get(instanceId);
+            if (properties != null) properties.remove(key);
+        }
+        else
+        {
+            instanceCache.computeIfAbsent(instanceId, k -> new HashMap<>()).put(key, value);
+        }
+        pendingProperties.computeIfAbsent(instanceId, k -> new HashMap<>()).put(key, value);
+        removedInstances.remove(instanceId);
     }
 
-    public String getProperty(String instanceId, String key)
+    public synchronized String getProperty(String instanceId, String key)
     {
         return getProperty(instanceId, key, null);
     }
 
-    public String getProperty(String instanceId, String key, String defaultValue)
+    public synchronized String getProperty(String instanceId, String key, String defaultValue)
     {
         Map<String, String> instanceProps = instanceCache.get(instanceId);
 
@@ -82,29 +100,67 @@ public class InstancesConfig
         return value != null && !value.isEmpty() ? value : defaultValue;
     }
 
-    public void save()
+    public synchronized void save()
     {
-        Path target = instancesConfigFile.toPath();
-        Path tmp = target.resolveSibling(target.getFileName() + ".tmp");
-        try (Writer writer = Files.newBufferedWriter(tmp))
+        synchronized (FILE_LOCK)
         {
-            GSON.toJson(instanceCache, MAP_TYPE, writer);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to save instances.json", e);
-        }
-        try
-        {
-            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-        }
-        catch (IOException e)
-        {
-            throw new RuntimeException("Failed to save instances.json", e);
+            Map<String, Map<String, String>> mergedCache = new HashMap<>();
+            if (instancesConfigFile.isFile())
+            {
+                try (FileReader reader = new FileReader(instancesConfigFile))
+                {
+                    Map<String, Map<String, String>> loadedCache = GSON.fromJson(reader, MAP_TYPE);
+                    if (loadedCache != null)
+                    {
+                        loadedCache.forEach((instanceId, properties) ->
+                                mergedCache.put(instanceId, new HashMap<>(properties)));
+                    }
+                }
+                catch (IOException e)
+                {
+                    throw new RuntimeException("Failed to load instances.json", e);
+                }
+            }
+
+            removedInstances.forEach(mergedCache::remove);
+            pendingProperties.forEach((instanceId, properties) ->
+            {
+                Map<String, String> mergedProperties = mergedCache.computeIfAbsent(instanceId, k -> new HashMap<>());
+                properties.forEach((key, value) ->
+                {
+                    if (value == null) mergedProperties.remove(key);
+                    else mergedProperties.put(key, value);
+                });
+            });
+
+            Path target = instancesConfigFile.toPath();
+            Path tmp = target.resolveSibling(target.getFileName() + ".tmp");
+            try (Writer writer = Files.newBufferedWriter(tmp))
+            {
+                GSON.toJson(mergedCache, MAP_TYPE, writer);
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException("Failed to save instances.json", e);
+            }
+            try
+            {
+                Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            }
+            catch (IOException e)
+            {
+                throw new RuntimeException("Failed to save instances.json", e);
+            }
+
+            instanceCache.clear();
+            mergedCache.forEach((instanceId, properties) ->
+                    instanceCache.put(instanceId, new HashMap<>(properties)));
+            pendingProperties.clear();
+            removedInstances.clear();
         }
     }
 
-    public ArrayList<String> getInstanceList()
+    public synchronized ArrayList<String> getInstanceList()
     {
         return new ArrayList<>(instanceCache.keySet());
     }
@@ -123,7 +179,8 @@ public class InstancesConfig
                             try
                             {
                                 Files.delete(path);
-                            } catch (IOException e)
+                            }
+                            catch (IOException e)
                             {
                                 new ErrorDialog(Main.getInstance().client, e, "deleting instance");
                                 throw new RuntimeException(e);
@@ -137,7 +194,12 @@ public class InstancesConfig
             }
         }
 
-        instanceCache.remove(instanceName);
+        synchronized (this)
+        {
+            instanceCache.remove(instanceName);
+            pendingProperties.remove(instanceName);
+            removedInstances.add(instanceName);
+        }
         save();
     }
 }
