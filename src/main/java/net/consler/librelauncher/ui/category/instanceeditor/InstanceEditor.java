@@ -51,12 +51,14 @@ public class InstanceEditor
         JButton resourcePacksButton = new JButton("Resource Packs");
         JButton worldsButton = new JButton("Worlds");
         JButton logsButton = new JButton("Logs");
+        JButton screenshotsButton = new JButton("Screenshots");
 
         addCategory(settingsButton, () -> new InstanceSettings(main, instancesConfig).createPanel(instance));
         addCategory(modsButton, () -> new InstanceMods(main).createPanel(instance));
         addCategory(resourcePacksButton, () -> new InstanceResourcePacks(main).createPanel(instance));
         addCategory(worldsButton, () -> new InstanceWorlds(main).createPanel(instance));
         addCategory(logsButton, () -> new InstanceLogs(main).createPanel(instance));
+        addCategory(screenshotsButton, () -> new InstanceScreenshots(main).createPanel(instance));
 
         selectCategory(settingsButton);
         categoryPanel.revalidate();

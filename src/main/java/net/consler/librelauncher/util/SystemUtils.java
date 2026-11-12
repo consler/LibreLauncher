@@ -15,6 +15,18 @@ public class SystemUtils
         Desktop.getDesktop().open(file);
     }
 
+    public static void openFile(File file) throws IOException, UnsupportedOperationException
+    {
+        if (!Desktop.isDesktopSupported())
+            throw new UnsupportedOperationException("Desktop integration isn't available");
+
+        Desktop desktop = Desktop.getDesktop();
+        if (!desktop.isSupported(Desktop.Action.OPEN))
+            throw new UnsupportedOperationException("Opening files isn't supported");
+
+        desktop.open(file);
+    }
+
     public static File importFile(File directory, String extension)
     {
         JFileChooser fileChooser = new JFileChooser(directory);
