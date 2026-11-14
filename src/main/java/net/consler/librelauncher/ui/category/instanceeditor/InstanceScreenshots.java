@@ -46,7 +46,7 @@ public class InstanceScreenshots extends InstanceItems
 
     protected InstanceScreenshots(Main main)
     {
-        super(main, "Screenshots", "screenshots");
+        super(main, "Screenshots", "Screenshot");
     }
 
     @Override

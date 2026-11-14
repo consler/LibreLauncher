@@ -37,33 +37,44 @@ public class SidePanel
 
         panel.add(Box.createVerticalStrut(5));
 
-        if(type.equals("Mod"))
+        switch (type)
         {
-            JButton addModButton = createButton("Add mods");
-            addModButton.addActionListener(e -> new ModDownloadDialog(main, instance).open());
-            panel.add(addModButton);
+            case "Mod" ->
+            {
+                JButton addModButton = createButton("Add mods");
+                addModButton.addActionListener(e -> new ModDownloadDialog(main, instance).open());
+                panel.add(addModButton);
 
-            panel.add(Box.createVerticalStrut(5));
+                panel.add(Box.createVerticalStrut(5));
 
-            JButton addModpackButton = createButton("Add modpack");
-            addModpackButton.addActionListener(e -> new ModpackDownloadDialog(main, instance).open());
-            panel.add(addModpackButton);
+                JButton addModpackButton = createButton("Add modpack");
+                addModpackButton.addActionListener(e -> new ModpackDownloadDialog(main, instance).open());
+                panel.add(addModpackButton);
 
-            panel.add(Box.createVerticalStrut(5));
+                panel.add(Box.createVerticalStrut(5));
 
-            JButton updateButton = createButton("Update mods");
-            updateButton.addActionListener(e -> new ModrinthUpdater(main, instance, InstanceMods.getInstance().mods).open());
-            panel.add(updateButton);
+                JButton updateButton = createButton("Update mods");
+                updateButton.addActionListener(e -> new ModrinthUpdater(main, instance, InstanceMods.getInstance().mods).open());
+                panel.add(updateButton);
 
-            panel.add(Box.createVerticalStrut(5));
-        }
-        else if (type.equals("Resource Pack"))
-        {
-            JButton addPacksButton = createButton("Add packs");
-            addPacksButton.addActionListener(e -> new ResourcePackDownloadDialog(main, instance).open());
-            panel.add(addPacksButton);
+                panel.add(Box.createVerticalStrut(5));
+            }
+            case "Resource Pack" ->
+            {
+                JButton addPacksButton = createButton("Add packs");
+                addPacksButton.addActionListener(e -> new ResourcePackDownloadDialog(main, instance).open());
+                panel.add(addPacksButton);
 
-            panel.add(Box.createVerticalStrut(5));
+                panel.add(Box.createVerticalStrut(5));
+            }
+            case "Jar Mod" ->
+            {
+                JButton addJarModButton = createButton("Add jar mod");
+                addJarModButton.addActionListener(e -> InstanceJarMods.importJarMod(main, instance));
+                panel.add(addJarModButton);
+
+                panel.add(Box.createVerticalStrut(5));
+            }
         }
 
         JButton folderButton = createButton("Open folder");
@@ -75,6 +86,7 @@ public class SidePanel
                 switch (type)
                 {
                     case "Mod" -> dir = instance.getModsFolder().toFile();
+                    case "Jar Mod" -> dir = instance.getJarModsFolder().toFile();
                     case "Resource Pack" -> dir = instance.getResourcePackFolder().toFile();
                     case "World" -> dir = instance.getSavesFolder().toFile();
                     default -> throw new IllegalArgumentException("Unknown type: " + type);

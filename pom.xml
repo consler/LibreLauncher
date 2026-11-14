@@ -83,7 +83,7 @@
         <dependency>
             <groupId>net.consler</groupId>
             <artifactId>librelauncherlib</artifactId>
-            <version>c657651185</version>
+            <version>30ed781678</version>
         </dependency>
     </dependencies>
 

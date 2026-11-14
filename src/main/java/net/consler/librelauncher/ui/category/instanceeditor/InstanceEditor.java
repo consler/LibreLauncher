@@ -52,6 +52,7 @@ public class InstanceEditor
         JButton worldsButton = new JButton("Worlds");
         JButton logsButton = new JButton("Logs");
         JButton screenshotsButton = new JButton("Screenshots");
+        JButton jarModsButton = new JButton("Jar Mods");
 
         addCategory(settingsButton, () -> new InstanceSettings(main, instancesConfig).createPanel(instance));
         addCategory(modsButton, () -> new InstanceMods(main).createPanel(instance));
@@ -59,6 +60,7 @@ public class InstanceEditor
         addCategory(worldsButton, () -> new InstanceWorlds(main).createPanel(instance));
         addCategory(logsButton, () -> new InstanceLogs(main).createPanel(instance));
         addCategory(screenshotsButton, () -> new InstanceScreenshots(main).createPanel(instance));
+        addCategory(jarModsButton, () -> new InstanceJarMods(main).createPanel(instance));
 
         selectCategory(settingsButton);
         categoryPanel.revalidate();
