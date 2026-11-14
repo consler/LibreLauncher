@@ -38,10 +38,9 @@ public class InstanceUtils
         Optional<ProcessHandle> process = ProcessHandle.of(Long.parseLong(pid));
         if (process.isPresent() && process.get().isAlive())
         {
-            process.get().destroy();
             process.get().onExit().thenAccept(action ->
-                    SwingUtilities.invokeLater(() ->
-                            Main.getInstance().refreshInstanceViews()));
+                    SwingUtilities.invokeLater(() -> Main.getInstance().refreshInstanceViews()));
+            process.get().destroyForcibly();
         }
     }
 }
