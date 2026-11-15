@@ -12,10 +12,8 @@ Free and Open-Source Minecraft Launcher
 * Import/export instances
 
 ### Features to be added:
-* OptiFine support
 * World editor(with NBT editing)
 * Instance import from other launchers
-* Customizable UI
 * Browser-based Microsoft log-in
 * Smart crash reports
 * Safety features for sharing logs

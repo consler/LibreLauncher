@@ -1,5 +1,6 @@
 package net.consler.librelauncher;
 
+import net.consler.librelauncher.settings.SettingsSaver;
 import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.instanceeditor.InstanceEditor;
 import net.consler.librelauncher.ui.category.home.Home;
@@ -28,6 +29,7 @@ public class Main
     public InstanceManager instanceManager;
     public Settings settings;
     public InstanceEditor instanceEditor;
+    private boolean roundWindowCorners = true;
 
     static void main(String[] args)
     {
@@ -37,6 +39,7 @@ public class Main
 
     private void start()
     {
+        roundWindowCorners = Boolean.parseBoolean(new SettingsSaver().get("round_window_corners", "true"));
         themeManager = new ThemeManager(this);
         themeManager.init();
         SwingUtilities.invokeLater(() ->
@@ -49,15 +52,15 @@ public class Main
             client.setLayout(new BorderLayout());
             client.setUndecorated(true);
 
-            client.setShape(new RoundRectangle2D.Double(0, 0, 800, 500, 20, 20));
             client.addComponentListener(new ComponentAdapter()
             {
                 @Override
                 public void componentResized(ComponentEvent e)
                 {
-                    client.setShape(new RoundRectangle2D.Double(0, 0, client.getWidth(), client.getHeight(), 20, 20));
+                    refreshWindowShape();
                 }
             });
+            refreshWindowShape();
 
             reloadThemeUI(false);
 
@@ -115,5 +118,21 @@ public class Main
     {
         if (instanceManager.instancePanel != null) instanceManager.instancePanel.populate();
         else home.populate();
+    }
+
+    public void setRoundWindowCorners(boolean rounded)
+    {
+        roundWindowCorners = rounded;
+        refreshWindowShape();
+    }
+
+    private void refreshWindowShape()
+    {
+        if (client == null) return;
+
+        if (roundWindowCorners)
+            client.setShape(new RoundRectangle2D.Double(0, 0, client.getWidth(), client.getHeight(), 20, 20));
+        else
+            client.setShape(null);
     }
 }

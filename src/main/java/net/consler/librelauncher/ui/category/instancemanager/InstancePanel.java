@@ -1,6 +1,7 @@
 package net.consler.librelauncher.ui.category.instancemanager;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import com.formdev.flatlaf.ui.FlatLineBorder;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.instance.Exporter;
 import net.consler.librelauncher.instance.Importer;
@@ -101,6 +102,13 @@ public class InstancePanel
             rowPanel.setOpaque(false);
             rowPanel.putClientProperty("FlatLaf.style", "arc:25;");
             rowPanel.setBackground(ThemeManager.surfaceColor(ThemeManager.panelBackground()));
+            if (main.themeManager.isHighContrastTheme())
+            {
+                Color outline = UIManager.getColor("Component.foreground");
+                if (outline == null) outline = ThemeManager.readableForeground(ThemeManager.panelBackground());
+                rowPanel.setOpaque(true);
+                rowPanel.setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), outline, 1f, 25));
+            }
             rowPanel.setComponentPopupMenu(createInstancePopup(instanceName));
             rowPanel.addMouseListener(new MouseAdapter()
             {

@@ -3,6 +3,7 @@ package net.consler.librelauncher.ui;
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.formdev.flatlaf.intellijthemes.FlatAllIJThemes;
 import com.formdev.flatlaf.themes.FlatMacDarkLaf;
 import com.formdev.flatlaf.themes.FlatMacLightLaf;
 import net.consler.librelauncher.Main;
@@ -12,6 +13,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -21,70 +23,13 @@ import java.util.function.Consumer;
 
 public class ThemeManager
 {
-
-    public enum Theme
-    {
-        DARK("Dark", true, false),
-        LIGHT("Light", false, false),
-        DARK_MAC("Dark (mac)", true, true),
-        LIGHT_MAC("Light (mac)", false, true);
-
-        public final String label;
-        public final boolean dark;
-        public final boolean mac;
-
-        Theme(String label, boolean dark, boolean mac)
-        {
-            this.label = label;
-            this.dark = dark;
-            this.mac = mac;
-        }
-
-        public Theme counterpart()
-        {
-            for (Theme t : values())
-                if (t.dark == !dark && t.mac == mac) return t;
-            throw new IllegalStateException("No counterpart for " + this);
-        }
-
-        public static Theme fromLabel(String label)
-        {
-            for (Theme t : values())
-                if (t.label.equalsIgnoreCase(label)) return t;
-            return DARK;
-        }
-
-
-        LookAndFeel create()
-        {
-            return switch (this)
-            {
-                case DARK -> new FlatDarkLaf()
-                {
-                    @Override public void provideErrorFeedback(Component c) {}
-                };
-                case LIGHT -> new FlatLightLaf()
-                {
-                    @Override public void provideErrorFeedback(Component c) {}
-                };
-                case DARK_MAC -> new FlatMacDarkLaf()
-                {
-                    @Override public void provideErrorFeedback(Component c) {}
-                };
-                case LIGHT_MAC -> new FlatMacLightLaf()
-                {
-                    @Override public void provideErrorFeedback(Component c) {}
-                };
-            };
-        }
-    }
-
     private static final String SETTING_KEY = "theme";
+    private static final String DEFAULT_THEME_LABEL = "FlatLaf Dark";
+    private static final String ROUNDED_CORNERS_SETTING = "rounded_corners";
+    private static final String HIGH_CONTRAST_THEME_LABEL = "High Contrast";
     private static final String FONT_RESOURCE = "font/comfortaa-bold.ttf";
     private static final float FONT_SIZE = 12f;
-
-    private static final String FILL = "lighten($Panel.background,6%)";
-
+    private static final String TEXT_FIELD_FILL = "lighten($Panel.background,6%)";
     private static final Map<String, String> EXTRA_DEFAULTS = Map.ofEntries(
             Map.entry("Component.arc", "12"),
             Map.entry("TextComponent.arc", "12"),
@@ -92,30 +37,140 @@ public class ThemeManager
             Map.entry("Component.borderWidth", "0"),
             Map.entry("Component.focusWidth", "0"),
             Map.entry("Button.default.borderWidth", "0"),
-
-            Map.entry("TextField.background", FILL),
-            Map.entry("PasswordField.background", FILL),
-            Map.entry("FormattedTextField.background", FILL),
-            Map.entry("TextArea.background", FILL),
-            Map.entry("ComboBox.background", FILL),
-            Map.entry("ComboBox.buttonBackground", FILL),
-            Map.entry("ComboBox.buttonEditableBackground", FILL),
-            Map.entry("ComboBox.buttonSeparatorColor", FILL),
-
+            Map.entry("TextField.background", TEXT_FIELD_FILL),
+            Map.entry("PasswordField.background", TEXT_FIELD_FILL),
+            Map.entry("FormattedTextField.background", TEXT_FIELD_FILL),
+            Map.entry("TextArea.background", TEXT_FIELD_FILL),
+            Map.entry("ComboBox.background", TEXT_FIELD_FILL),
+            Map.entry("ComboBox.buttonBackground", TEXT_FIELD_FILL),
+            Map.entry("ComboBox.buttonEditableBackground", TEXT_FIELD_FILL),
+            Map.entry("ComboBox.buttonSeparatorColor", TEXT_FIELD_FILL),
             Map.entry("TextField.margin", "6,12,6,12"),
             Map.entry("ComboBox.padding", "6,10,6,10"),
-
             Map.entry("ProgressBar.arc", "999"),
             Map.entry("ScrollBar.thumbArc", "999"),
             Map.entry("ScrollBar.thumbInsets", "2,2,2,2")
     );
+
+    public static final class Theme
+    {
+        private static final Theme[] VALUES = createValues();
+
+        public final String label;
+        public final boolean dark;
+        public final boolean mac;
+        private final String lookAndFeelClassName;
+
+        private Theme(String label, boolean dark, boolean mac, String lookAndFeelClassName)
+        {
+            this.label = label;
+            this.dark = dark;
+            this.mac = mac;
+            this.lookAndFeelClassName = lookAndFeelClassName;
+        }
+
+        private static Theme[] createValues()
+        {
+            installBuiltInThemes();
+            List<UIManager.LookAndFeelInfo> infos = getFlatLafInfos();
+
+            Theme[] themes = new Theme[infos.size()];
+            for (int i = 0; i < infos.size(); i++)
+            {
+                UIManager.LookAndFeelInfo info = infos.get(i);
+                themes[i] = new Theme(
+                        info.getName(),
+                        isDarkLookAndFeel(info.getClassName()),
+                        info.getClassName().contains("FlatMac"),
+                        info.getClassName());
+            }
+            return themes;
+        }
+
+        private static void installBuiltInThemes()
+        {
+            FlatDarkLaf.installLafInfo();
+            FlatLightLaf.installLafInfo();
+            FlatMacDarkLaf.installLafInfo();
+            FlatMacLightLaf.installLafInfo();
+        }
+
+        private static List<UIManager.LookAndFeelInfo> getFlatLafInfos()
+        {
+            List<UIManager.LookAndFeelInfo> infos = new ArrayList<>();
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
+            {
+                if (info.getClassName().startsWith("com.formdev.flatlaf."))
+                    infos.add(info);
+            }
+            infos.addAll(Arrays.asList(FlatAllIJThemes.INFOS));
+            return infos;
+        }
+
+        private static boolean isDarkLookAndFeel(String className)
+        {
+            try
+            {
+                Class<? extends FlatLaf> lookAndFeelClass = Class.forName(className).asSubclass(FlatLaf.class);
+                return lookAndFeelClass.getDeclaredConstructor().newInstance().isDark();
+            }
+            catch (ReflectiveOperationException e)
+            {
+                throw new IllegalStateException("Could not inspect look and feel " + className, e);
+            }
+        }
+
+        public static Theme[] values()
+        {
+            return VALUES.clone();
+        }
+
+        public Theme counterpart()
+        {
+            for (Theme t : VALUES)
+                if (t.dark == !dark && t.mac == mac) return t;
+            throw new IllegalStateException("No counterpart for " + this);
+        }
+
+        public static Theme fromLabel(String label)
+        {
+            for (Theme t : VALUES)
+                if (t.label.equalsIgnoreCase(label)) return t;
+            return VALUES[0];
+        }
+    }
+
+    private static final class SilentLookAndFeel extends FlatLaf
+    {
+        private final LookAndFeel laf;
+
+        private SilentLookAndFeel(LookAndFeel laf)
+        {
+            this.laf = laf;
+        }
+
+        @Override public String getName() { return laf.getName(); }
+        @Override public String getID() { return laf.getID(); }
+        @Override public String getDescription() { return laf.getDescription(); }
+        @Override public boolean isDark() { return ((FlatLaf) laf).isDark(); }
+        @Override public boolean isNativeLookAndFeel() { return laf.isNativeLookAndFeel(); }
+        @Override public boolean isSupportedLookAndFeel() { return laf.isSupportedLookAndFeel(); }
+        @Override public boolean getSupportsWindowDecorations() { return laf.getSupportsWindowDecorations(); }
+        @Override public LayoutStyle getLayoutStyle() { return laf.getLayoutStyle(); }
+        @Override public Icon getDisabledIcon(JComponent component, Icon icon) { return laf.getDisabledIcon(component, icon); }
+        @Override public Icon getDisabledSelectedIcon(JComponent component, Icon icon) { return laf.getDisabledSelectedIcon(component, icon); }
+        @Override public UIDefaults getDefaults() { return laf.getDefaults(); }
+        @Override public void initialize() { laf.initialize(); }
+        @Override public void uninitialize() { laf.uninitialize(); }
+        @Override public void provideErrorFeedback(Component component) {}
+    }
 
     private final Main main;
     private final List<Consumer<Theme>> listeners = new CopyOnWriteArrayList<>();
 
     public Font comfortaaBold;
 
-    private Theme current = Theme.DARK;
+    private Theme current = Theme.fromLabel(DEFAULT_THEME_LABEL);
     private boolean initialized;
 
     public ThemeManager(Main main)
@@ -133,7 +188,6 @@ public class ThemeManager
 
         loadFonts();
         FlatLaf.setGlobalExtraDefaults(EXTRA_DEFAULTS);
-
         apply(loadSavedTheme());
     }
 
@@ -169,6 +223,11 @@ public class ThemeManager
         return current.dark;
     }
 
+    public boolean isHighContrastTheme()
+    {
+        return current.label.equalsIgnoreCase(HIGH_CONTRAST_THEME_LABEL);
+    }
+
     public static String[] themeLabels()
     {
         return Arrays.stream(Theme.values()).map(t -> t.label).toArray(String[]::new);
@@ -186,29 +245,42 @@ public class ThemeManager
 
     private Theme loadSavedTheme()
     {
-        return Theme.fromLabel(new SettingsSaver().get(SETTING_KEY, Theme.DARK.label));
+        return Theme.fromLabel(new SettingsSaver().get(SETTING_KEY, DEFAULT_THEME_LABEL));
     }
 
     private void apply(Theme theme)
     {
-        if (comfortaaBold != null) UIManager.put("defaultFont", comfortaaBold);
-
+        boolean roundedCorners = Boolean.parseBoolean(new SettingsSaver().get(ROUNDED_CORNERS_SETTING, "true"));
         try
         {
-            UIManager.setLookAndFeel(theme.create());
+            Class<? extends LookAndFeel> lookAndFeelClass = Class.forName(theme.lookAndFeelClassName).asSubclass(LookAndFeel.class);
+            LookAndFeel lookAndFeel = lookAndFeelClass.getDeclaredConstructor().newInstance();
+            UIManager.setLookAndFeel(new SilentLookAndFeel(lookAndFeel));
         }
-        catch (UnsupportedLookAndFeelException e)
+        catch (ReflectiveOperationException | UnsupportedLookAndFeelException e)
         {
             new ErrorDialog(main.client, e, "setting theme");
             return;
         }
 
+        applyCornerDefaults(roundedCorners);
         current = theme;
 
         FlatLaf.updateUI();
         if (main.client != null) main.reloadThemeUI();
 
         listeners.forEach(l -> l.accept(theme));
+    }
+
+    private static void applyCornerDefaults(boolean rounded)
+    {
+        int arc = rounded ? 12 : 0;
+        UIManager.put("LibreLauncher.roundedCorners", rounded);
+        UIManager.put("Component.arc", arc);
+        UIManager.put("TextComponent.arc", arc);
+        UIManager.put("Button.arc", rounded ? 25 : 0);
+        UIManager.put("ProgressBar.arc", rounded ? 999 : 0);
+        UIManager.put("ScrollBar.thumbArc", rounded ? 999 : 0);
     }
 
     private static void runOnEdt(Runnable task)

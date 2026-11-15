@@ -21,12 +21,18 @@ public class RoundCornerPanel extends JPanel
 
         g2.setColor(background);
 
-        int radius = 20;
-
-        g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius * 2, radius * 2);
-        g2.fillRect(radius, 0, getWidth() - radius, radius);
-        g2.fillRect(0, radius, radius, getHeight() - radius);
-        g2.fillRect(radius, radius, getWidth() - radius, getHeight() - radius);
+        if (UIManager.getBoolean("LibreLauncher.roundedCorners"))
+        {
+            int radius = 20;
+            g2.fillRoundRect(0, 0, getWidth(), getHeight(), radius * 2, radius * 2);
+            g2.fillRect(radius, 0, getWidth() - radius, radius);
+            g2.fillRect(0, radius, radius, getHeight() - radius);
+            g2.fillRect(radius, radius, getWidth() - radius, getHeight() - radius);
+        }
+        else
+        {
+            g2.fillRect(0, 0, getWidth(), getHeight());
+        }
 
         g2.dispose();
     }

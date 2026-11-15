@@ -3,6 +3,7 @@ import javax.swing.*;
 import java.awt.*;
 import net.consler.librelauncher.Main;
 import net.consler.librelauncher.settings.SettingsSaver;
+import net.consler.librelauncher.ui.ThemeManager;
 import net.consler.librelauncher.ui.category.instancemanager.InstanceManager;
 
 public class AppearanceSettings
@@ -31,10 +32,10 @@ public class AppearanceSettings
 
         panel.add(Box.createRigidArea(new Dimension(0, 5)));
 
-        JComboBox<String> themeBox = new JComboBox<>(new String[]{"Dark", "Light", "Dark (mac)", "Light (mac)"});
+        JComboBox<String> themeBox = new JComboBox<>(ThemeManager.themeLabels());
         themeBox.setMaximumSize(new Dimension(250, 32));
         themeBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-        themeBox.setSelectedItem(settingsSaver.get("theme", "Dark"));
+        themeBox.setSelectedItem(main.themeManager.getTheme().label);
         themeBox.addActionListener(e ->
         {
             settingsSaver.set("theme", (String) themeBox.getSelectedItem());
@@ -42,6 +43,30 @@ public class AppearanceSettings
             main.themeManager.setTheme();
         });
         panel.add(themeBox);
+
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        JCheckBox roundWindowCorners = new JCheckBox("Round Window Corners");
+        roundWindowCorners.setSelected(Boolean.parseBoolean(settingsSaver.get("round_window_corners", "true")));
+        roundWindowCorners.addActionListener(e ->
+        {
+            settingsSaver.set("round_window_corners", String.valueOf(roundWindowCorners.isSelected()));
+            settingsSaver.save();
+            main.setRoundWindowCorners(roundWindowCorners.isSelected());
+        });
+        panel.add(roundWindowCorners);
+
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+
+        JCheckBox roundedCorners = new JCheckBox("Round UI Corners");
+        roundedCorners.setSelected(Boolean.parseBoolean(settingsSaver.get("rounded_corners", "true")));
+        roundedCorners.addActionListener(e ->
+        {
+            settingsSaver.set("rounded_corners", String.valueOf(roundedCorners.isSelected()));
+            settingsSaver.save();
+            main.themeManager.setTheme();
+        });
+        panel.add(roundedCorners);
 
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
 
