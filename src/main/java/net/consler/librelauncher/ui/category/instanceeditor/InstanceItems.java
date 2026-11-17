@@ -38,6 +38,7 @@ public abstract class InstanceItems
         panel = new JPanel(new BorderLayout());
         panel.setOpaque(false);
         panel.add(Settings.createHeader(title), BorderLayout.NORTH);
+        panel.setComponentPopupMenu(createPopup(instance));
 
         searchField = new JTextField();
         searchField.setSize(new Dimension(Integer.MAX_VALUE, 50));
@@ -52,14 +53,11 @@ public abstract class InstanceItems
         JScrollPane scrollPane = new JScrollPane(listPanel);
         scrollPane.setOpaque(false);
         scrollPane.getViewport().setOpaque(false);
+        scrollPane.setInheritsPopupMenu(true);
         scrollPane.getVerticalScrollBar().setUnitIncrement(16);
         scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
         panel.add(scrollPane, BorderLayout.CENTER);
-
-        JPopupMenu popupMenu = createPopup(instance);
-        panel.setComponentPopupMenu(popupMenu);
-        scrollPane.setComponentPopupMenu(popupMenu);
 
         if (Boolean.parseBoolean(new SettingsSaver().get("show_side_panel", "false")))
             panel.add(new SidePanel(main, type, instance).show(), BorderLayout.EAST);

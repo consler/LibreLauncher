@@ -12,6 +12,8 @@ Free and Open-Source Minecraft Launcher
 * Import/export instances
 
 ### Features to be added:
+* Server management
+* Shader management
 * World editor(with NBT editing)
 * Instance import from other launchers
 * Browser-based Microsoft log-in

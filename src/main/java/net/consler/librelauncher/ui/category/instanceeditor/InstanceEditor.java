@@ -54,13 +54,48 @@ public class InstanceEditor
         JButton screenshotsButton = new JButton("Screenshots");
         JButton jarModsButton = new JButton("Jar Mods");
 
-        addCategory(settingsButton, () -> new InstanceSettings(main, instancesConfig).createPanel(instance));
-        addCategory(modsButton, () -> new InstanceMods(main).createPanel(instance));
-        addCategory(resourcePacksButton, () -> new InstanceResourcePacks(main).createPanel(instance));
-        addCategory(worldsButton, () -> new InstanceWorlds(main).createPanel(instance));
-        addCategory(logsButton, () -> new InstanceLogs(main).createPanel(instance));
-        addCategory(screenshotsButton, () -> new InstanceScreenshots(main).createPanel(instance));
-        addCategory(jarModsButton, () -> new InstanceJarMods(main).createPanel(instance));
+        addCategory(settingsButton, () ->
+        {
+            JPanel editorPanel = new InstanceSettings(main, instancesConfig).createPanel(instance);
+            panel.setComponentPopupMenu(editorPanel.getComponentPopupMenu());
+            return editorPanel;
+        });
+        addCategory(modsButton, () ->
+        {
+            JPanel editorPanel = new InstanceMods(main).createPanel(instance);
+            panel.setComponentPopupMenu(editorPanel.getComponentPopupMenu());
+            return editorPanel;
+        });
+        addCategory(resourcePacksButton, () ->
+        {
+            JPanel editorPanel = new InstanceResourcePacks(main).createPanel(instance);
+            panel.setComponentPopupMenu(editorPanel.getComponentPopupMenu());
+            return editorPanel;
+        });
+        addCategory(worldsButton, () ->
+        {
+            JPanel editorPanel = new InstanceWorlds(main).createPanel(instance);
+            panel.setComponentPopupMenu(editorPanel.getComponentPopupMenu());
+            return editorPanel;
+        });
+        addCategory(logsButton, () ->
+        {
+            JPanel editorPanel = new InstanceLogs(main).createPanel(instance);
+            panel.setComponentPopupMenu(editorPanel.getComponentPopupMenu());
+            return editorPanel;
+        });
+        addCategory(screenshotsButton, () ->
+        {
+            JPanel editorPanel = new InstanceScreenshots(main).createPanel(instance);
+            panel.setComponentPopupMenu(editorPanel.getComponentPopupMenu());
+            return editorPanel;
+        });
+        addCategory(jarModsButton, () ->
+        {
+            JPanel editorPanel = new InstanceJarMods(main).createPanel(instance);
+            panel.setComponentPopupMenu(editorPanel.getComponentPopupMenu());
+            return editorPanel;
+        });
 
         selectCategory(settingsButton);
         categoryPanel.revalidate();
