@@ -212,14 +212,20 @@ public class InstancePanel
         {
             JMenuItem launch = new JMenuItem("Stop");
             launch.addActionListener(ev ->
-                    InstanceUtils.killInstance(instanceName));
+            {
+                if(isRunningAndClean(instanceName))
+                    InstanceUtils.killInstance(instanceName);
+            });
             contextMenu.add(launch);
         }
-        else
+        else if (!isAuthenticating(instanceName))
         {
             JMenuItem launch = new JMenuItem("Launch");
             launch.addActionListener(ev ->
-                    Launcher.launch(instanceName));
+            {
+                if(!isAuthenticating(instanceName))
+                    Launcher.launch(instanceName);
+            });
             contextMenu.add(launch);
         }
 
