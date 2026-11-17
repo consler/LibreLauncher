@@ -19,7 +19,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -34,8 +33,10 @@ public class Importer
     public static Path doImport(File directoryToImportTo) throws IOException
     {
         String downloadsDir = UserDirectories.get().downloadDir;
+        if(downloadsDir == null) downloadsDir = System.getProperty("user.home");
 
-        File zipFile = SystemUtils.importFile(new File(downloadsDir), ".zip");
+        File downloadDirectory = new File(downloadsDir);
+        File zipFile = SystemUtils.importFile(downloadDirectory, ".zip");
         if (zipFile == null) return null;
 
         unzip(zipFile.toPath(), directoryToImportTo.toPath());
@@ -76,8 +77,7 @@ public class Importer
                 outPaths.add(outPath);
             }
 
-            ExecutorService pool = Executors.newFixedThreadPool(THREADS);
-            try
+            try (ExecutorService pool = Executors.newFixedThreadPool(THREADS))
             {
                 List<Future<?>> futures = new ArrayList<>(files.size());
                 for (int i = 0; i < files.size(); i++)
@@ -108,12 +108,6 @@ public class Importer
                         throw new IOException("Import interrupted", e);
                     }
                 }
-            }
-            finally
-            {
-                pool.shutdownNow();
-                try { pool.awaitTermination(30, TimeUnit.SECONDS); }
-                catch (InterruptedException e) { Thread.currentThread().interrupt(); }
             }
         }
     }

@@ -7,8 +7,10 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Set;
 import java.util.stream.Stream;
 import java.util.zip.Deflater;
@@ -25,45 +27,54 @@ public class Exporter
             "ogg", "mp3", "mp4", "mkv", "webm", "flac"
     );
 
-    /**
-     * Asks for a destination first, then zips straight into it (no temp copy).
-     * Call this off the UI thread if you want a responsive UI; for that, call
-     * SystemUtils.chooseSaveFile on the UI thread and zipDirectory in the background.
-     */
     public static void export(File directoryToZip) throws IOException
     {
+        String downloadsDir = UserDirectories.get().downloadDir;
+        File downloadDirectory = downloadsDir == null ? null : new File(downloadsDir);
         File destination = SystemUtils.chooseSaveFile(
-                new File(UserDirectories.get().downloadDir),
+                downloadDirectory,
                 directoryToZip.getName() + ".zip",
                 ".zip");
         if (destination == null) return;
 
         Path zipPath = destination.toPath().toAbsolutePath().normalize();
+        Path temporaryZip = Files.createTempFile(zipPath.getParent(), ".librelauncher-export-", ".tmp");
 
         try
         {
-            zipDirectory(directoryToZip.toPath(), zipPath);
+            zipDirectory(directoryToZip.toPath(), zipPath, temporaryZip);
+            try
+            {
+                Files.move(temporaryZip, zipPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+            }
+            catch (AtomicMoveNotSupportedException e)
+            {
+                throw new IOException("The destination filesystem does not support atomic export", e);
+            }
         }
-        catch (IOException | RuntimeException e)
+        finally
         {
-            Files.deleteIfExists(zipPath);
-            throw e;
+            Files.deleteIfExists(temporaryZip);
         }
     }
 
-    private static void zipDirectory(Path sourceDir, Path zipPath) throws IOException
+    private static void zipDirectory(Path sourceDir, Path zipPath, Path temporaryZip) throws IOException
     {
         byte[] buffer = new byte[BUFFER_SIZE];
+        Path normalizedZipPath = zipPath.toAbsolutePath().normalize();
+        Path normalizedTemporaryZip = temporaryZip.toAbsolutePath().normalize();
 
         try (ZipOutputStream zos = new ZipOutputStream(
-                new BufferedOutputStream(Files.newOutputStream(zipPath), BUFFER_SIZE));
+                new BufferedOutputStream(Files.newOutputStream(temporaryZip), BUFFER_SIZE));
              Stream<Path> paths = Files.walk(sourceDir))
         {
             String rootName = sourceDir.getFileName().toString();
 
             for (Path path : (Iterable<Path>) paths::iterator)
             {
-                if (path.equals(sourceDir) || path.toAbsolutePath().normalize().equals(zipPath)) continue;
+                Path normalizedPath = path.toAbsolutePath().normalize();
+                if (path.equals(sourceDir) || normalizedPath.equals(normalizedZipPath)
+                        || normalizedPath.equals(normalizedTemporaryZip)) continue;
 
                 String entryName = rootName + "/" + sourceDir.relativize(path).toString().replace(File.separatorChar, '/');
 
