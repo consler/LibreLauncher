@@ -260,6 +260,9 @@ public class InstancePanel
         JMenuItem delete = new JMenuItem("Delete");
         delete.addActionListener(ev ->
         {
+            int result = JOptionPane.showConfirmDialog(main.client, "This action can't be undone. Are you sure you want to delete instance "  + instanceName + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION);
+            if (result != JOptionPane.YES_OPTION) return;
+
             InstanceUtils.killInstance(instanceName);
             instancesConfig.deleteInstance(instanceName);
             populate();
