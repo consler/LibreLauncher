@@ -94,20 +94,40 @@ public class InstancePanel
 
         for (String instanceName : instancesConfig.instanceCache.keySet())
         {
-            JPanel rowPanel = new JPanel();
+            JPanel rowPanel = new JPanel()
+            {
+                @Override
+                protected void paintComponent(Graphics g)
+                {
+                    super.paintComponent(g);
+
+                    Graphics2D g2 = (Graphics2D) g.create();
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    g2.setColor(getBackground());
+                    if (UIManager.getBoolean("LibreLauncher.roundedCorners"))
+                        g2.fillRoundRect(0, 0, getWidth(), getHeight(), 25, 25);
+                    else
+                        g2.fillRect(0, 0, getWidth(), getHeight());
+                    g2.dispose();
+                }
+            };
             rowPanel.setLayout(new BoxLayout(rowPanel, BoxLayout.X_AXIS));
             rowPanel.setPreferredSize(new Dimension(0, 30));
             rowPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
             rowPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
             rowPanel.setOpaque(false);
-            rowPanel.putClientProperty("FlatLaf.style", "arc:25;");
             rowPanel.setBackground(ThemeManager.surfaceColor(ThemeManager.panelBackground()));
+            if(UIManager.getBoolean("LibreLauncher.roundedCorners"))
+                rowPanel.putClientProperty("FlatLaf.style", "arc:25;");
             if (main.themeManager.isHighContrastTheme())
             {
                 Color outline = UIManager.getColor("Component.foreground");
                 if (outline == null) outline = ThemeManager.readableForeground(ThemeManager.panelBackground());
-                rowPanel.setOpaque(true);
-                rowPanel.setBorder(new FlatLineBorder(new Insets(1, 1, 1, 1), outline, 1f, 25));
+                rowPanel.setBorder(new FlatLineBorder(
+                        new Insets(1, 1, 1, 1),
+                        outline,
+                        1f,
+                        UIManager.getBoolean("LibreLauncher.roundedCorners") ? 25 : 0));
             }
             rowPanel.setComponentPopupMenu(createInstancePopup(instanceName));
             rowPanel.addMouseListener(new MouseAdapter()
