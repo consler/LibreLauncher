@@ -64,7 +64,7 @@ public class InstanceJarMods extends InstanceItems
         {
             try
             {
-                Files.delete(path);
+                instance.removeJarMod(path);
                 populate(instance, search);
             }
             catch (IOException e)
